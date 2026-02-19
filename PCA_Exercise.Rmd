@@ -1,0 +1,720 @@
+---
+title: "Exercise: Principal Component Analysis"
+output:
+    html_document: default
+    word_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+**Course Instructor**: Dr. Suborna Ahmed
+
+**Student Name**:
+
+**Total Points**: 10
+
+**Due**: check course Canvas page
+
+**Submission**:
+
+1.  Write your code and answers in this RMD file
+2.  Knit your completed RMD file to WORD document
+3.  Check and upload your WORD document to Exercise 4 on Canvas
+
+------------------------------------------------------------------------
+
+1.  To become familiar with Principal Components Analysis (PCA) to
+    transform the data (one set of variables) into new variables (the
+    principal components) that can be used for further analyses.
+
+2.  To select a subset of x-variables based on the PCA results to use in
+    further analysis.
+
+3.  Alternatively, to select a subset of these principal components for
+    further analysis. These selected principal components may have
+    meaning with regards to combinations of the x-variables.
+
+### General Description
+
+We have data on body measures for 32 individuals at different ages (the
+X matrix) along with a measure of body fat (`fat`). The X variables are:
+length at ages 9 and 18 (`lg9` and `lg18`); weight at ages 2, 9 and 18
+(`wt2`, `wt9`, `wt18`); strength at ages 9 and 18 (`st9`, `st18`), and
+height at ages 2, 9, and 18 (`ht2`, `ht9`, `ht18`).
+
+The overall objective is to predict the y-variable `fat` from the
+x-variables. However, there are 10 x-variables, and these x-variables
+are strongly correlated.
+
+You will use the PCA results in **two different ways**:
+
+1.  In the **first approach**, you will use PCA results to reduce the
+    number of X variables and then run a regression with `fat` as the
+    y-variable on the reduced set of X variables.
+
+2.  In the **second approach**, you will use the PCA results to select a
+    number of principal components, you will try to label these PC’s,
+    and then use them to predict `fat`.
+
+### Process
+
+1.  For this analysis, the data have been provided as `pca.txt` along
+    with R code within this Rmd file.
+
+2.  You will need to run the R code by clicking on the Knit button in
+    RStudio to run the entire file or run each individual code chunk and
+    get the outputs. You can find the `.html` and word `.docx` rendering
+    of this Rmd file in the same working directory if you use Knit.
+
+3.  The outputs will include:
+
+    -   The PCA on variables other than `fat`;
+    -   A regression analysis of `fat` versus a reduced set of the X
+        variables (first approach); and
+    -   A regression of `fat` versus a reduced set of principal
+        components (second approach).
+
+4.  You will be answering **10 questions**. As you answer the questions,
+    paste in the relevant R outputs to support your answers. Question
+    1 - 5 (Part I: First Approach) will appear first, question 6 - 9
+    (Part II: Second Approach) and question 10 (Part III: Overall
+    Summary) will appear at the bottom of this file. There will be some
+    *questions to think about* to help guide you through the code
+    outputs, and you do not need to answer them, but try to give them
+    some thoughts.
+
+------------------------------------------------------------------------
+
+### R CODES
+
+**NOTE:** *PCA.R: Uses data for Exercise 2 from an outside text file
+comma delimited (.csv) file converted from a EXCEL file OR using a tab
+or space delimited .txt file. (See Exercise 2 PCA.docx for a description
+of the data). `fat` is not used in the PCA. However, the PCA is used to
+select variables to predict `fat` in a subsequent regression analysis,
+also included in this R code.*
+
+#### PART 1: Set up
+
+```{r}
+rm(list=ls(all=TRUE)) # remove any objects from old R sessions
+
+# set the directory for the data (and any files saved)
+#setwd("C:\\Data\\FRST531\\yFRST531 2020-21\\Module 4 Principal Components Analysis\\Exercise 2 PCA")
+#dir()
+```
+
+#### PART 2: Read the data and put it in the object `fatdat`
+
+```{r}
+fatdat<- read.table("pca.txt", header=T)
+#fatdat<-read.csv("pca.csv", header=T) # would read a comma delimited file this way instead.
+```
+
+#### PART 3: Print out some aspects of the data to just check it out
+
+```{r}
+str(fatdat)   # what is in this file?  Uses $ before each item in the file
+names(fatdat)  # print out the column (i.e., variable) names
+dim(fatdat)    # number of rows and columns
+```
+
+#### PART 4: Take a look at parts of the data via indexing and other ways
+
+```{r}
+head(fatdat)  # print out the first few lines of data
+fatdat[1,]    # print out the first line of data
+fatdat[,1]    # print out the first column of data
+fatdat$wt2    # print out the wt2 values
+fatdat[1:3,1:2]  # print out lines 1 to 3 and columns 1 and 2
+```
+
+#### PART 5: Get basic stats including min, max, mean, std.dev.
+
+Do this by using a function from the package `pastecs`. To do this you
+need to load `pastecs` first!
+
+```{r}
+library(pastecs) # won't work if you have not installed the package first!!
+options(digits=2) # set the number of decimals to be 2
+stat.desc(fatdat) # get some basic stats.
+```
+
+#### PART 6: Select the x-variables from `fatdat`.
+
+**NOTE:** Three different ways are shown here, they all do the same
+thing!
+
+Option 1:
+
+```{r}
+xdata<-fatdat[,1:10] # save the x variables (columns 1 to 10)
+```
+
+Option 2:
+
+```         
+xdata <- subset(fatdat, select=-fat) # -fat means don't include it.
+```
+
+Option 3:
+
+```         
+xdata <- subset(fatdat, select=c(wt2,ht2,wt9,ht9,lg9,st9,wt18,ht18,
+lg18,st18))
+```
+
+Verify that we extract the correct columns:
+
+```{r}
+names(xdata)
+```
+
+#### PART 7: Scatterplot matrix for pairs of x variables, and correlations amongst x-variables
+
+```{r}
+pairs(xdata, pch = 1,col="blue")  # huge graph as there are 10 x-variables.
+
+round(( cor(xdata)),3) # round( ) is used to round to the nearest 3 decimal places.
+```
+
+#### PART 8: Get the PCA using the correlation matrix via `cor=TRUE`
+
+```{r}
+xdata.pca <- princomp(xdata, cor=TRUE,scores=TRUE)
+
+class(xdata.pca) # confirm that this gave us a princomp object.
+str(xdata.pca) # what is in this list object?  Lots of stuff
+
+methods(class=princomp)  # show the information we can ask for from the princomp object
+```
+
+We can get `biplot.princomp*` `plot.princomp*` `predict.princomp*`
+`print.princomp*`\
+`summary.princomp*` from the `princomp` object.
+
+### PART 9: Interpret the PCA. What do we want?
+
+1.  The eigenvalues (and cumulative percentages) along with the
+    eigenvectors
+
+2.  Get a Scree plot of the the eigenvalues
+
+3.  Get the correlations between the new Principal Components and the
+    x-variables
+
+4.  You will also need the Principal Component scores to answer the
+    questions in the exercise.
+
+**NOTES:** This R package reports the square root of them, so the
+standard deviations of each Component rather than the variance of each
+component. Also, the "Loadings" here are the eigenvectors (the
+multipliers to get the Principal Component Scores. They are not
+correlations between the new principal components and the x-variables.
+Finally, we need to force it to display all values otherwise some
+eigenvector elements will not be displayed.
+
+```{r}
+summary(xdata.pca, loadings=TRUE,cutoff=0.0)  # cutoff insures all are displayed
+```
+
+Want a nicer table? Calculate the variances, percent variances, and
+cumulative percent variances and put these together using column bind.
+`round()` these using `d=2` (i.e., two decimal places)
+
+```{r}
+table<-round(cbind("Variance"=xdata.pca$sdev^2,
+ "%"=100*xdata.pca$sdev^2/sum(xdata.pca$sdev^2),
+  "Cumulative %"=100*cumsum(xdata.pca$sdev^2)/sum(xdata.pca$sdev^2)),
+   d=2)
+```
+
+```{r, percent-var}
+knitr::kable(table) # display the table inside the html file, not important.
+```
+
+Do a bit of checking on the eigenvalues -- they sum to the number of
+x-variables since the correlation matrix was used (same as using
+standardized x's).
+
+```{r}
+covPC1<-round((cov(xdata.pca$scores)),3) # Show the covariance matrix for the Components
+covPC1 # variances on the diagonal, and then all covariances are 0.
+Lambda<-as.matrix(covPC1)
+class(Lambda)
+sum(diag(Lambda)) # The sum of the variances of the Components = 10 since p=10.
+```
+
+**QUESTION 1: Determine the proportion of sample variance explained by
+the first three principal components. Is this enough? Too many? You may
+find the scree plot useful here also. Provide the evidence from the R
+analysis and use the evidence to support your answer.**
+
+```{r}
+# provide your R codes here (if possible)
+eig<-xdata.pca$sdev^2 #eigenvalues
+eig[1:3] #selecting the first three eigenvalues
+sum(eig[1:3]) #Summing the first 3 eigen values
+
+plot(xdata.pca$sdev^2, type="b", pch=16, xlab="Component number", #screeplot
+ylab="Eigenvalue", main="Scree plot for x-variables of fat data")
+
+```
+
+**Your answer: The first three PC has a combine proportion of 83% of the
+total sample variance. This is enough, however, the first two component
+have combine proportion of 70% which is also a fairly good threshold for
+PCA purpose.**
+
+The first three principal components explain **82.7% of the total sample
+variance** (8.266 / 10). Although this represents a large proportion of
+the variability in the data, it may not be sufficient if a threshold of
+90% variance explained is desired. The scree plot would likely show a
+noticeable decline after the third component, and according to the
+Kaiser criterion (eigenvalues \> 1), only the first three components
+should be retained. Therefore, while three components are statistically
+supported, whether they are sufficient depends on the desired level of
+variance explanation.
+
+Two different scree plots here. Chose the one you like better.
+
+```{r}
+screeplot(xdata.pca) # NOTE that this does show the PC variances.
+```
+
+Get a different screeplot by controlling what it looks like. We need to
+use sdev\^2 (that is the variance) of each component. This is in the
+`xdata.pca` object as `sdev`.
+
+```{r}
+plot(xdata.pca$sdev^2, type="b", pch=16, xlab="Component number", 
+ylab="Eigenvalue", main="Scree plot for x-variables of fat data")
+```
+
+**QUESTION 2: Using the *Jackson (1993)* article and the broken stick
+method described in that article, determine how many principal
+components to retain. Does this support using the first three principal
+components or not? Explain your answer also.**
+
+```{r}
+# provide your R codes here (if possible)
+eig <- xdata.pca$sdev^2
+p <- length(eig)
+
+# broken stick expected proportions for p components
+bs_prop <- sapply(1:p, function(k) sum(1/(k:p)) / p)
+
+# convert to expected eigenvalues on the same scale as eig
+bs_eig <- bs_prop * sum(eig)
+
+# which PCs to retain by broken stick rule
+retain <- which(eig > bs_eig)
+retain #shows a value of 1
+length(retain)
+
+# quick check table
+cbind(PC = 1:p, eig = eig, broken_stick = bs_eig, keep = eig > bs_eig)
+
+# plot observed vs broken stick
+plot(eig, type = "b", xlab = "Component", ylab = "Eigenvalue")
+
+keep <- eig > bs_eig
+keep #True/False table showing which componetns to drop 
+which(keep)
+sum(keep)
+
+keep
+
+bs_prop
+
+out <- data.frame(
+PC = 1:p,
+eigenvalue = eig,
+broken_stick = bs_eig,
+keep = eig > bs_eig
+)
+out #creates a data table 
+```
+
+**Your answer:**
+
+When using the broken stick method, only the first principal component
+(5.239) exceeded its broken stick expectation (2.93). The second (1.93)
+and third (1.43) components were both smaller than their respective
+broken stick expectations. Therefore, according to the broken stick
+method, only one principal component should be retained (the first one).
+This does not support retaining the first three components. The broken
+stick method suggests that most of the meaningful structure in the data
+is captured by the first component alone.
+
+**Hint for For #3**: Get the correlations beween the scaled x variables
+(since the correlation matrix of X was used for the PCA) and the new
+principal components.
+
+**Questions to think about:**
+
+A. Which x-variables are related to the Principal Components that you
+will keep? In what way - or +?
+
+B. What "cutoff" correlation did you use (e.g., \|r\|\>0.5 ?) and why?
+
+C. Finally, can the Principal Components be labeled given which x's they
+relate to and also in what way they relate?
+
+**QUESTION 3: What X variables are related to the first three
+components. Show the evidence in the R outputs and indicate what
+“cutoff” value you are using to decide which x-variables are related to
+each component.**
+
+```{r}
+loadings <- as.matrix(xdata.pca$loadings[, 1:3]) #extract the PCA loadings from the larger dataframe
+
+sdev <- xdata.pca$sdev[1:3] #extract the component standard deviations
+
+cor_x_pc <- sweep(loadings, 2, sdev, FUN = "*") #compute correlations; Multiply each column of loadings by the corresponding component standard deviation values
+
+cor_x_pc
+
+cutoff <- 0.4 
+
+apply(cor_x_pc, 2, function(x) names(x)[abs(x) >= cutoff])
+
+cor_table <- data.frame(
+variable = rownames(cor_x_pc),
+PC1_cor = cor_x_pc[,1],
+PC2_cor = cor_x_pc[,2],
+PC3_cor = cor_x_pc[,3],
+PC1_related = abs(cor_x_pc[,1]) >= cutoff,
+PC2_related = abs(cor_x_pc[,2]) >= cutoff,
+PC3_related = abs(cor_x_pc[,3]) >= cutoff
+) #regression table
+
+#ways of representing and visualizing results: 
+
+cor_table
+
+biplot(xdata.pca, choices = c(1, 2), scale = 0)
+
+biplot(xdata.pca, choices = c(1, 3), scale = 0)
+
+loadings <- as.matrix(xdata.pca$loadings[, 1:3])
+
+loadings
+
+```
+
+**Your answer:**
+
+A cutoff of \|r\| \> 0.4 was used to decide which variables are strongly
+related to each component. We thought a cutoff of 0.4 was a good
+threshold here, which would represent a reasonably meaningful
+association. The correlation results seem to justify this, since PC1
+correlations hover between 0.6 - 0.9. A 0.4 cutoff thus cleanly
+separates out strong associations.
+
+For PC1, all variables (wt2, ht2, wt9, ht9, lg9, st9, wt18, ht18, lg18,
+and st18) have correlations greater than 0.5 and are positive. This
+shows that PC1 is related to all body size measurements and represents
+overall growth or general size.
+
+For PC2, st9, ht18, st18 (r = 0.57, 0.41, 0.46) is positively related
+and lg9, wt18, and lg18 (r= -0.47, -0.44, -0.59 respectively ) is
+neparticularly at older ages.
+
+For PC3, wt2 (0.54), ht2 (0.53), wt9 (0.45), ht9 (0.40), lg9 (0.41), st9
+(−0.53), and st18 (−0.41) are related to the component. This indicates
+that PC3 contrasts early body size with later stature measurements.
+
+These variable indicate moderate to strong relationships.
+
+Correlations between scaled x's and components
+
+```{r}
+# Get the standardized xdata first
+Xscaled<-scale(xdata, center = TRUE, scale = TRUE)
+round(cor(xdata.pca$scores, Xscaled,),3)
+```
+
+Graphs of correlations might be easier to interpret than the tables of
+correlations. Graph the correlations for components 1 and 2 over the
+Principal Scores to see which x's relate to each component.
+
+```{r}
+biplot(xdata.pca)
+```
+
+# PCA Scores and Loadings
+
+This biplot shows both the individual observations (as gray dots) and
+the original variables (as blue arrows) on the first two principal
+components. The direction and length of arrows indicate how much a
+variable contributes to the PCs. Arrows pointing in the same direction
+indicate positively correlated variables, while those at right angles
+indicate uncorrelated variables.
+
+```{r}
+# Extract PCA scores and loadings
+scores <- xdata.pca$scores[, 1:2]      # PC1 and PC2 scores
+loadings <- xdata.pca$loadings[, 1:2]  # Loadings for PC1 and PC2
+
+# Scale loadings for better display
+loadings_scaled <- loadings * sqrt(xdata.pca$sdev[1:2]) * 2
+
+# Create empty plot with appropriate limits
+plot(scores,
+     xlab = "PC1", ylab = "PC2",
+     main = "Biplot of Principal Components",
+     pch = 19, col = "gray40", cex = 0.8)
+abline(h = 0, v = 0, col = "gray")
+
+# Add arrows for variables
+arrows(0, 0, loadings_scaled[,1], loadings_scaled[,2],
+       length = 0.1, col = "blue", lwd = 2)
+
+# Add variable names
+text(loadings_scaled[,1], loadings_scaled[,2],
+     labels = rownames(loadings_scaled),
+     col = "blue", cex = 0.9, pos = 4)
+
+```
+
+```{r}
+xdata.pca$scores
+```
+
+**QUESTION 4: Repeat #3 using the first two principal components
+instead.**
+
+```{r}
+# provide your R codes here (if possible)
+
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+#### PART 10: Use the PCA results and then develop a model to predict fat
+
+**MODEL 1**: USE a **subset** of x variables Here, only `ht9`, `wt9` and
+`lg9` are included. Right ones? You will be deciding in this exercise.
+
+```{r}
+lm.M1<-lm(fat~ht9+wt9+lg9,data=fatdat) #fit the model
+lm.M1  # get the estimated coefficients for the model
+anova(lm.M1)   # get the Anova table for the model, including the F test
+summary(lm.M1) # get t-tests and some fit statistics for the model
+sum1<-summary(lm.M1)  # save the summary statistics to use later. 
+```
+
+Add the M1 fitted and residual values to `fatdat`
+
+```{r}
+fatdat$yhat.M1<-fitted(lm.M1)  # add the estimated y values to fatdat
+fatdat$resid.M1<-resid(lm.M1)  # add the residuals to fatdat
+fatdat$std.resid.M1<-resid(lm.M1)/sum1$sigma # standarize the residuals.
+names(fatdat)
+head(fatdat)
+```
+
+Get diagnostic plots
+
+```{r}
+# run from here...
+par(mfrow=c(2,2),mai=c(0.6,0.6,0.6,0.6),cex=0.7)
+plot(fatdat$yhat.M1,fatdat$resid.M1, main="Model 1, Residual Plot",
+  xlab="yhat", ylab="residual")
+abline(0,0)
+
+minfat<-min(fatdat$fat)
+maxfat<-max(fatdat$fat)
+
+plot(fatdat$fat,fatdat$yhat.M1, main="Model 1, Fitted line plot",
+  ylab="yhat", xlab="fat",ylim=c(minfat,maxfat),xlim=c(minfat,maxfat))
+abline(0,1)
+
+qqnorm(fatdat$std.resid.M1, main="Model 1, Normality plot")
+abline(0,1)
+
+hist(fatdat$resid.M1, breaks =8 , density=10,col="green", border="black",
+main="Model 1, Error Distribution") 
+#par(mfrow=c(1,1),mai=c(1.0,1.0,1.0,1.0),cex=1.0)
+
+# to here....
+```
+
+**QUESTION 5. Based on your answers to Questions #3 and #4, and the
+first regression analysis using `fat` versus the reduced set of X
+variables:**
+
+**a. Would you agree with the choice of the reduced set of X variables
+that are used in the regression for `fat`? Why or why not? If you do not
+agree, indicate what x-variables you would have selected and why you
+would have selected these, but continue with interpreting the regression
+outputs using the R code provided.**
+
+**b. What was the** $R^2$ value for this regression with the reduced set
+of variables? What does this mean? Is this a good model? NOTE: $R^2$ is
+the proportion of variance of `fat` explained by the x-variables.
+
+**c. Look at the fitted line plot. Is the relationship between the
+predicted and measured `fat` a “good” relationship? NOTE: A good
+relationship would show a linear trend between the predicted versus
+measured `fat` (not a curve!) and low variability around this line.**
+
+*NOTE*: Since the X’s are correlated, you cannot interpret the
+coefficients of the resulting fitted model.
+
+```{r}
+# provide your R codes here (if possible)
+
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**MODEL 2**: USE a **subset** of PC scores. Use `PC1`, `PC2` and `PC3`.
+
+Make a dataframe of x-variables, first three PC scores and y variables.
+
+```{r}
+regdata2<-cbind(fatdat,xdata.pca$scores[,1:3])
+head(regdata2)
+
+lm.M2<-lm(fat~Comp.1+Comp.2+Comp.3,data=regdata2) #fit the model
+lm.M2  # get the estimated coefficients for the model
+anova(lm.M2)   # get the Anova table for the model, including the F test
+summary(lm.M2) # get t-tests and some fit statistics for the model
+sum2<-summary(lm.M2) # save summary statistics to use later on.
+
+regdata2$yhat.M2<-fitted(lm.M2)  # add the estimated y values to regdata1
+regdata2$resid.M2<-resid(lm.M2)  # add the residuals to regdata1
+regdata2$std.resid.M2<-resid(lm.M2)/sum2$sigma # standarize the residuals.
+names(regdata2)
+head(regdata2)
+```
+
+Get diagnostic plots
+
+```{r}
+# run from here...
+par(mfrow=c(2,2),mai=c(0.6,0.6,0.6,0.6),cex=0.7)
+plot(regdata2$yhat.M2,regdata2$resid.M2, main="Model 2, Residual Plot",
+  xlab="yhat", ylab="residual")
+abline(0,0)
+
+minfat<-min(regdata2$fat)
+maxfat<-max(regdata2$fat)
+
+plot(regdata2$fat,regdata2$yhat.M2, main="Model 2, Fitted line plot",
+  ylab="yhat", xlab="fat",ylim=c(minfat,maxfat),xlim=c(minfat,maxfat))
+abline(0,1)
+
+qqnorm(regdata2$std.resid.M2, main="Model 2, Normality plot")
+abline(0,1)
+
+hist(regdata2$resid.M2, breaks =8 , density=10,col="green", border="black",
+main="Model 2, Error Distribution") 
+#par(mfrow=c(1,1),mai=c(1.0,1.0,1.0,1.0),cex=1.0)
+
+# .... to here together.  
+```
+
+------------------------------------------------------------------------
+
+#### Part I: First Approach
+
+**Answer QUESTION 1 - 5 above.**
+
+------------------------------------------------------------------------
+
+#### Part II: Second Approach
+
+**Answer QUESTION 6 - 9 below**
+
+**QUESTION 6: Using the first three principal components and the
+correlations between these and the original X variables, choose a name
+for each of these principal components (i.e. a label that describes each
+component). Briefly describe your choice for labels.**
+
+```{r}
+# provide your R codes here (if possible)
+
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**QUESTION 7: Using EXCEL or R code, calculate the principal component
+scores for all observations for principal component 1 only.\
+Show how you did the calculations in your report and give the answers.
+Careful!! The default is to use the correlation matrix for the PCA using
+`princomp()` in R. As a result, you will need to normalize the X
+variables (subtract the mean and then divide by the standard deviation)
+before using them to calculate the principal component scores!!**
+
+```{r}
+# provide your R codes here (if possible)
+
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**QUESTION 8: How do your answers in QUESTION 7 compare to the values
+calculated by R? Show the comparison results in your report and use that
+in answering this question.**
+
+```{r}
+# provide your R codes here (if possible)
+
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+**QUESTION 9: Using the regression of `fat` versus the first three
+principal components:**
+
+**a. What is the R2 value for this regression with the reduced set of
+variables? What does this mean? Is this a good model?**
+
+**b. Look at the fitted line plot, showing the predicted `fat` (from the
+regression equation) vs. the measured `fat`. Is this a good
+relationship?**
+
+**c. Since the PC’s are uncorrelated and you have given a label for each
+PC, you can interpret the regression coefficients. What happens to `fat`
+when the first principal component scored increases (CAREFUL!! There may
+be some negative and/or positive correlations between the x-variables
+and the principal components? What does this mean based on the labels
+you chose for the first principal component?**
+
+**d. Repeat #9c using the second and then the third principal
+component.**
+
+```{r}
+# provide your R codes here (if possible)
+
+```
+
+**Your answer:**
+
+------------------------------------------------------------------------
+
+#### Part III: Overall Summary
+
+**Answer QUESTION 10 below**
+
+**QUESTION 10: Which approach did you like better for predicting `fat`
+using PCA as a first step before the regression analysis? Why? Would you
+have continued with three principal components or not? Give a brief
+report (half a page to 1 page) explaining your preferences with evidence
+to support these.**
+
+**Your answer:**
