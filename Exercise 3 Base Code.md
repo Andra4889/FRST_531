@@ -1129,44 +1129,172 @@ Overall, the equamax rotation reveals essentially the same ecological structure 
 **TODO Question 1:** In all analyses, **two factors were selected**. Using a number of ways to determine how many factors to retain (as you did using PCA in Exercise 2), is this number
 of factors justified for these data? 
 
-_Type your answer here:_
-
+Let's look at the eigenvalues and make a scree plot: 
 ```{r}
 # your codes here (if applicable)
+
+#Take a look a the eigenvalues again 
+
+# Eigenvalues from PCA on correlation matrix
+eig <- veg.pca$sdev^2
+eig
+
+# Variance explained table
+round(cbind(
+  Eigenvalue = eig,
+  PropVar = eig / sum(eig),
+  CumPropVar = cumsum(eig) / sum(eig)
+), 3)
+
+# Scree plot with Kaiser line at 1
+plot(eig, type = "b", pch = 16,
+     xlab = "Component number", ylab = "Eigenvalue",
+     main = "Scree plot (PCA eigenvalues)")
+abline(h = 1, lty = 2)
+
 ```
+The scree plot shows that 4 PC's are above the eigenvalue = 1 line. 
+
+Let's look at the variances more closely: 
+```{r}
+# Extract eigenvalues
+eigenvalues <- veg.pca$sdev^2
+
+# Build table
+pca_variance_table <- data.frame(
+  PC = paste0("PC", 1:length(eigenvalues)),
+  Eigenvalue = round(eigenvalues, 3),
+  Variance_Proportion = round(eigenvalues / sum(eigenvalues), 3),
+  Cumulative_Variance = round(cumsum(eigenvalues) / sum(eigenvalues), 3)
+)
+
+pca_variance_table
+```
+Finally, let's also apply the broken stick method. 
+```{r}
+# Number of variables
+p <- ncol(xdata)
+
+# PCA eigenvalues
+eig <- veg.pca$sdev^2
+
+# Observed variance proportions
+obs_var <- eig / sum(eig)
+
+# Broken stick expected proportions
+broken_stick <- sapply(1:p, function(k) {
+  sum(1/(k:p)) / p
+})
+
+# Combine into a table
+broken_table <- data.frame(
+  PC = paste0("PC", 1:p),
+  Observed = round(obs_var, 3),
+  BrokenStick = round(broken_stick, 3)
+)
+
+broken_table
+
+plot(obs_var, type = "b", pch = 16,
+     xlab = "Principal Component",
+     ylab = "Variance Proportion",
+     main = "Broken Stick Comparison")
+
+lines(broken_stick, type = "b", pch = 1, col = "red")
+legend("topright",
+       legend = c("Observed PCA variance", "Broken stick expectation"),
+       col = c("black", "red"),
+       lty = 1)
+
+
+```
+In this exercise, only the first two factors were retained, which together explain approximately 55.4% of the total variance in the original dataset. This value is noticeably lower than the ~70% cumulative variance threshold we used in Exercise 2. Retaining only two factors therefore suggests that nearly 45% of the total variation is not represented, which may indicate that the downstream analyses are somewhat simplified relative to the full structure of the data.
+
+For this dataset, we applied a few stats tests and plots to suggest that more than two factors could reasonably be retained. First, the scree plot shows a clear "elbow" drop between PC1 and PC2, indicating a dominant primary "power" exhibited by PC1. However, the decline in eigenvalues after PC2 remains relatively gradual rather than leveling off sharply (which was not the case in Exercise 2). This pattern suggests that additional components may still contain meaningful variation.
+
+The Kaiser criterion (retaining components with eigenvalues greater than 1) provides stronger evidence for retaining more components. In this dataset, the first four principal components all have eigenvalues greater than 1 (4.33, 1.77, 1.31, and 1.09). According to this rule, four components should therefore be retained. --> not sure if this needs to be here, as I can't remember if we talked about the Kaiser criterion (need to look at class notes)
+
+A similar conclusion arises when considering cumulative variance thresholds. If a 70% cumulative variance threshold is applied, the first four components together explain 77.2% of the variance, exceeding this guideline. In contrast, an 80% threshold would require five components, which together explain 84.9% of the variance.
+
+Finally, the broken stick method provides another comparison by evaluating whether observed variance exceeds what would be expected under a random distribution of variance among components. In this dataset, only the first component clearly exceeds the broken stick expectation, while the second and third components fall slightly below their expected values. This result indicates that the dataset is dominated by a single strong gradient, although additional components may still capture secondary ecological patterns.
+
+Taken together, these criteria suggest that retaining only two factors is somewhat conservative. While two factors capture the dominant vegetation gradient and may improve interpretability for the purposes of the factor analysis exercise, several statistical criteria (particularly the Kaiser rule and cumulative variance thresholds) indicate that three or four components could also be reasonably justified for representing the structure of the data.
+
 
 **End of Question 1**
 
-**TODO Question 2:** For the unrotated factor pattern `veg.fac1`, what is the loading value for Factor
-1 with `mayvgcov`? What is the structure value for this also? Explain what these
+**TODO Question 2:** For the unrotated factor pattern `veg.fac1`, what is the loading value for Factor 1 with `mayvgcov`? What is the structure value for this also? Explain what these
 values mean.
 
-_Type your answer here:_
+For the unrotated factor pattern (veg.fac1), the loading value for Factor 1 with mayvgcov is approximately 0.81. The structure value for this variable is also approximately 0.81.
+
+The loading represents the correlation between the original variable and the latent factor. In this case, a loading of 0.81 indicates a strong positive relationship between May vegetation cover (mayvgcov) and Factor 1. This means that sites with higher scores on Factor 1 tend to have higher vegetation cover in May.
+
+The structure value represents the correlation between the observed variable and the factor scores. Because the factors in this analysis are orthogonal (uncorrelated), the structure matrix is identical to the loading matrix, resulting in the same value. Therefore, both the loading and structure values indicate that mayvgcov contributes strongly to the first factor and is an important component of the underlying vegetation gradient represented by Factor 1.
 
 ```{r}
-# your codes here (if applicable)
+# extract the mayvgcov loading 
+veg.fac1$loadings["mayvgcov", 1]
+
+# extract the structure variable
+veg.fac1$Structure["mayvgcov", 1]
+
+#demonstrate they are equal, as 0 value indicates orthogonal
+veg.fac1$loadings["mayvgcov", 1] - veg.fac1$Structure["mayvgcov", 1]
+
 ```
 
 **End of Question 2**
 
-**TODO Question 3:** Using orthogonal rotations only (`veg.fac1`, `veg.fac2`, `veg.fac3`, `veg.fac4`), what
-orthogonal rotation (including no rotation) gave the best results?
+**TODO Question 3:** Using orthogonal rotations only (`veg.fac1`, `veg.fac2`, `veg.fac3`, `veg.fac4`), what orthogonal rotation (including no rotation) gave the best results?
 
-a. Justify your choice as to why you believe these results are best for
-achieving a simple and interpretable structure. Also indicate why others
-were not chosen.
+**a. Justify your choice as to why you believe these results are best for achieving a simple and interpretable structure. Also indicate why others were not chosen.**
 
-b. Use the factor structure (correlations between original variables and
-Factors) to decide which variables relate to each factor. Remember to
-state __what correlation cutoff__ you are using (e.g., |r|>= 0.5 or |r|>= 0.8);
-and  __why__ you made this choice.
+Among the orthogonal rotations tested (veg.fac1 no rotation, veg.fac2 varimax, veg.fac3 varimin, and veg.fac4 equamax), the varimax rotation (veg.fac2) produced the most interpretable and simplest factor structure.
 
-c. Add a possible label for each factor (e.g., vegetation structure might be
-one factor). Use your answers from part b, but also consider whether
-the correlations are positive or negative between a factor and the
-original variables correlated with it.
+The varimax rotation maximizes the variance of squared loadings within each factor, which tends to push loadings toward values close to 0 or ±1. This produces a clearer separation of variables among factors, making interpretation easier. In the varimax solution, the first rotated component (RC1) is strongly associated with the vegetation structure variables, including May vegetation cover, May vegetation height, June vegetation cover, and June vegetation height. The second component (RC2) clearly captures variation in ground cover composition, with strong loadings for grass and bare ground in opposite directions. This separation creates two ecologically interpretable gradients: one representing overall vegetation density and productivity, and the other representing ground cover composition.
 
-_Type your answer here:_
+In contrast, the unrotated solution (veg.fac1) produced factors that were harder to interpret because several variables loaded moderately on both factors. Unrotated factors maximize variance explained rather than interpretability, which often leads to factors that combine multiple ecological gradients.
+
+The varimin rotation (veg.fac3) minimized the variance of loadings, resulting in one dominant factor that captured much of the overall variance while the second factor contained weaker and more diffuse loadings. This produced a less balanced and less interpretable structure.
+
+The equamax rotation (veg.fac4) attempted to balance the goals of varimax and quartimax rotations but still produced several moderate cross-loadings among variables. While interpretable, the resulting structure was less clearly separated than in the varimax solution.
+
+**b. Use the factor structure (correlations between original variables and Factors) to decide which variables relate to each factor. Remember to state __what correlation cutoff__ you are using (e.g., |r|>= 0.5 or |r|>= 0.8); and  __why__ you made this choice.**
+
+A cutoff of |r| ≥ 0.5 was used to identify meaningful relationships between variables and factors. This threshold was selected because correlations above approximately 0.5 represent moderately strong relationships and are commonly used in exploratory factor analysis to identify variables that clearly load on a factor.
+
+In this dataset, several variables show strong loadings near or above this level, particularly the vegetation structure variables (e.g., May and June vegetation cover and height) and ground cover variables such as grass and bare ground. Using a threshold of |r| ≥ 0.5 allows these dominant relationships to be clearly identified while excluding weaker associations that could obscure interpretation of the factor structure.
+
+A stricter cutoff such as |r| ≥ 0.8 would exclude variables that still meaningfully contribute to the ecological gradients represented by the factors, particularly those with moderate but interpretable loadings. Conversely, a lower threshold such as |r| ≥ 0.3 would include many weak correlations and reduce the clarity of the factor interpretation. Therefore, |r| ≥ 0.5 provides a reasonable balance between capturing meaningful relationships and maintaining a simple, interpretable factor structure.
+
+Using the varimax rotation (veg.fac2), the following variables met the |r| ≥ 0.5 threshold.
+
+Factor 1 (RC1)
+Variables strongly associated with Factor 1 include:
+
+- May vegetation cover (mayvgcov)
+- May vegetation height (mayvght)
+- June vegetation cover (junvgcov)
+- June vegetation height (junvght)
+
+These variables all load strongly and positively on the first factor, indicating that Factor 1 represents a gradient of overall vegetation density and structure across the growing season.
+
+Factor 2 (RC2)
+Variables strongly associated with Factor 2 include:
+- Grass (grass)
+- Bare ground (baregrnd)
+- Shrubs (shrubs)
+
+Grass loads strongly and positively on this factor, while bare ground and shrubs load negatively, indicating that Factor 2 represents variation in ground cover composition, distinguishing grass-dominated sites from areas with more exposed soil or shrub cover. Several variables, including bryophytes, forbs, rocks, and trees, do not exceed the |r| ≥ 0.5 threshold for either factor. This suggests that these variables contribute less strongly to the two-factor structure and may represent more localized or independent variation in vegetation composition.
+
+**c. Add a possible label for each factor (e.g., vegetation structure might be one factor). Use your answers from part b, but also consider whether the correlations are positive or negative between a factor and the original variables correlated with it.**
+
+Factor 1 is strongly and positively correlated with May vegetation cover (mayvgcov), May vegetation height (mayvght), June vegetation cover (junvgcov), and June vegetation height (junvght). These variables all describe the amount and vertical structure of vegetation at a site. Because these correlations are positive, higher scores on Factor 1 correspond to sites with greater vegetation cover and taller vegetation throughout the growing season. Lower scores on this factor would correspond to sites with less vegetation structure and more open ground. Therefore, Factor 1 can reasonably be labeled “Vegetation Structure” or “Vegetation Density.”
+
+Factor 2 is strongly associated with grass, which loads positively, and bare ground and shrubs, which load negatively. This indicates that the factor represents a contrast between grass-dominated sites and sites characterized by exposed soil or shrub cover. High scores on this factor correspond to areas with greater grass cover, while low scores correspond to areas with more bare ground or woody vegetation. For this reason, Factor 2 can be labeled “Ground Cover Composition.”
+
+
 
 ```{r}
 # your codes here (if applicable)
@@ -1176,26 +1304,108 @@ _Type your answer here:_
 
 **TODO Question 4:** Based on the two factors retained and using your selected orthogonal rotation:
 
-a. How much of the variability of each of the original X variables is
-accounted for (communality):
+a. How much of the variability of each of the original X variables is accounted for (communality):
 * by each factor
 * for both factors combined?
-
-b. How much of the variability of each of the original X variables is NOT
-accounted for (unique variance): 
-* by each factor
-* for both factors combined?
-
-c. For all X variables combined, what are the communality and unique
-variances:
-* by each factor
-* for both factors combined?
-
-_Type your answer here:_
 
 ```{r}
-# your codes here (if applicable)
+# Using varamax orthogonal rotation
+L <- as.matrix(veg.fac2$loadings)  # 11 x 2 matrix of loadings (RC1, RC2)
+
+# Communality contributions
+comm_by_factor <- L^2
+colnames(comm_by_factor) <- c("RC1_h2", "RC2_h2")
+
+# Total communality
+h2_total <- rowSums(comm_by_factor)
+
+# Put into one table
+comm_table <- data.frame(
+  Variable = rownames(L),
+  RC1_h2 = round(comm_by_factor[,1], 3),
+  RC2_h2 = round(comm_by_factor[,2], 3),
+  h2_total = round(h2_total, 3)
+)
+
+comm_table
+
+
+
 ```
+
+Note: each squared loading represents the proportion of variance in that variable explained by that factor, and the total communality (h²) is the combined variance explained by both retained factors.
+
+Factor 1 explains most of the variance in the vegetation structure variables. For example, mayvgcov (0.650), mayvght (0.634), junvgcov (0.790), and junvght (0.706) all have large contributions from Factor 1. In each case, the majority of their variance is captured by this factor, indicating that Factor 1 strongly represents overall vegetation structure across the two months.
+
+Factor 2 explains most of the variance in ground surface variables. grass (0.865) and baregrnd (0.738) are especially strongly explained by Factor 2. These variables have very small contributions from Factor 1 but large contributions from Factor 2, indicating that this factor captures variation in ground cover conditions.
+
+Some variables show weaker representation by the two factor solution. For example, bryopht (0.132) and forbs (0.122) have very low communalities, meaning that most of their variance is not explained by the retained factors. Similarly, rocks (0.299) and shrubs (0.415) have only moderate communalities, suggesting they are not strongly associated with either factor.
+
+Overall, the results show that the two-factor solution captures a large portion of variance for the main vegetation structure variables and ground cover variables, but explains relatively little variation for bryophytes and forbs.
+
+
+b. How much of the variability of each of the original X variables is NOT accounted for (unique variance): 
+* by each factor
+* for both factors combined?
+
+```{r}
+# starting from the communality table above
+unique_table <- data.frame(
+  Variable = comm_table$Variable,
+  Unique_after_RC1 = round(1 - comm_table$RC1_h2, 3),
+  Unique_after_RC2 = round(1 - comm_table$RC2_h2, 3),
+  Unique_after_both = round(1 - comm_table$h2_total, 3)
+)
+
+unique_table
+```
+
+Looking at the combined unique variance for both factors, several variables are well explained by the model. For example, grass (0.134), junvgcov (0.127), and baregrnd (0.204) have relatively low unexplained variance, meaning most of their variability is captured by the two-factor solution. Similarly, mayvgcov (0.214) and mayvght (0.226) also show relatively small amounts of unexplained variation.
+
+In contrast, some variables retain large amounts of unique variance. bryopht (0.868) and forbs (0.878) have very high unexplained variability, indicating that the retained factors do not capture the main patterns associated with these vegetation types. Rocks (0.701) and shrubs (0.585) also show moderate to high unexplained variance, suggesting weaker relationships with the main factor structure.
+
+
+c. For all X variables combined, what are the communality and unique variances:
+* by each factor
+* for both factors combined?
+
+```{r}
+
+# Eigenvalues from the correlation matrix of numeric X variables
+eigcom <- eigen(cor(xdata, use = "pairwise.complete.obs"))$values
+
+# Communality explained by each retained factor (first two eigenvalues)
+comm_F1 <- eigcom[1]
+comm_F2 <- eigcom[2]
+comm_total <- comm_F1 + comm_F2
+
+comm_F1
+comm_F2
+comm_total
+
+# Proportion of variance explained (total variance = number of variables)
+nvar <- ncol(xdata)
+
+prop_F1 <- comm_F1 / nvar
+prop_F2 <- comm_F2 / nvar
+prop_total <- comm_total / nvar
+
+prop_F1
+prop_F2
+prop_total
+
+# Variance remaining (unique / unexplained by the two-factor solution)
+unique_total <- nvar - comm_total
+unique_prop <- unique_total / nvar
+
+unique_total
+unique_prop
+
+
+```
+
+From this, Factor 1 explains 39.33% of total variance, while Factor 2 explains 16.08%. Together this means that 55.40% of total variance is explained, leaving 44.60% unexplained.
+
 
 **End of Question 4**
 
