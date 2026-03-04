@@ -1,0 +1,1137 @@
+---
+title: "Exercise 3: Factor Analysis to Find Underlying Factors"
+output:
+    html_document: default
+    word_document: default
+    pdf_document: default 
+---
+
+**Course Instructor**: Dr. Suborna Ahmed
+
+**Student Name**:
+
+**Total Points**: 10
+
+**Due**: check Canvas page for due date
+
+**Submission**:
+
+1. Write your code and answers in this RMD file
+2. Knit your completed RMD file to WORD document
+3. Check and upload your WORD document to Exercise 2 on Canvas
+
+---------------------------------------------------------------
+
+### Objectives
+
+1. To become familiar with Factor Analysis as a tool used to uncover underlying
+relationships in a set of x-variables.
+
+2. To learn how to use different rotations as a means of achieving the simple
+structure needed in order to be able to interpret the factors (and the factor
+scores) and assign meaningful names to each of them.
+
+### General Description
+
+Information was gathered by Tracy Hooper on bird abundancies, along with
+vegetation and other variables in a grassland area (a subset of her data is used in
+FRST 531 with her approval). Using factor analysis, the underlying relationships
+among __11 of the vegetation variables__ was analyzed. The 11 variables are:
+
+* `mayvgcov` and `mayvght` (% cover and height of vegetation in May) 
+* `junvgcov and `junvght` (% cover and height of vegetation in June); 
+
+* and horizontal cover variables, specifically: `baregrnd`, `bryopht`, `forbs`, `grass`, `rocks`, `shrubs`, and `trees` 
+all as __percents__.
+
+The overall objective is to use factor analysis to 
+**obtain a few indices to represent underlying factors, and to be able to give these underlying factors names**. 
+These factors could give insights into the data (e.g., which plots gave high scores on Factor
+1 versus low scores, and what does this mean ecologically?). Also, these factors
+could be used in a subsequent analysis to replace these 11 variables.
+
+However, for the factors to have meaning and to be able to name the factors, a
+simple structure is needed. For example, if Factor 1 has high positive correlations
+with `mayvgcov` and `junvgcov` perhaps this factor is “summer vegetation cover”.
+However, if Factor 1 also has a moderately high positive correlation with `rocks`,
+what does this mean? Instead another rotation may provide a more interpretable
+and simple structure.
+
+For this, you will use first do the PCA. Then, you will use factor analysis first with no
+rotation. Then, you will use orthogonal and oblique rotations to get a simple
+solution. Remember that oblique rotations are much harder to interpret since the
+factors are correlated (unless the correlation is very low?). Our preference is to
+find a simple structure using orthogonal rotations if possible.
+
+### Process
+
+1. For this analysis, the data have been provided as `TRABREV2.txt` along with R
+codes and questions as in this Rmd file.
+
+2. You will need to run the R code and get the outputs from running the code.
+There are two things you will need to change:
+
++ Change the working directory to the location of the data on
+your computer, if you have not done so already.
+
++ Add in code for the 4th factor analysis run (object will be called `veg.fac4`)
+by cutting and pasting code for the other factor analysis runs and then
+modifying this for an equamax rotation. There are three other factor
+analysis runs before this one (i.e., `veg.fac1` to `veg.fac3`) and one after
+(i.e., `veg.fac5`) that are already in the code and there is a location
+where to put the 4th run for `veg.fac4`.
+
+3. The outputs will include:
++ The PCA on the 11 variables;
++ The unrotated factor solution, using two factors (`veg.fac1`)
++ Several rotated factor solutions (`veg.fac2`, `veg.fac3`, `veg.fac4` (you will
+put the code in), and `veg.fac5` (the only oblique rotation).
+
+4. You will be answering a **8 questions** to guide you through the outputs
+and interpret the results. The questions are marked with **TODO** to help you quickly 
+locate them using the search tool, since this Rmd file is quite long. As you answer 
+the questions, paste in the relevant R outputs (and/or graphs) to support your answers.
+
+----------------------------------------------------------------------------------
+### R CODES
+
+#### Introduction 
+Data from an outside text file from birds in grasslands study by Tracy Hooper 
+(subset of her data used by permission) is brought in to R from an outside 
+space-delimited text file. Alternatively, you could bring the text file into 
+EXCEL and save it as a `.csv` file. Using only a subset of the variables, the goal 
+is to get a simple structure on a few factors in order to label and interpret these factors.
+These factors would then commonly be passed to another analysis. We would prefer to
+obtain a simple structure using orthogonal rotations, but sometimes this is not
+possible. The R code starts with PCA first to indicate the contribution of
+each principal component. Factor analysis (FA) then starts with two
+factors and no rotation, which is like the PCA solution as presented in the
+Factor analysis notes. Then, further rotations are used to try to get the
+simple structure, starting with orthogonal and then oblique rotations.  
+
+#### PART 1: Clean out all R objects before starting. 
+Then set the directory for the data (and any files saved) and read the data. 
+We assign it to an R object called `vegdat`. Do a few checks on the data. 
+
+```{r}
+rm(list = ls(all = TRUE))
+```
+
+Read the data from `TRABREV3.txt` into `vegdat`, set `header=T` to include the original column 
+(header) names
+
+```{r}
+vegdat <- read.table("TRABREV3.txt", header = T)
+```
+
+We will check the dimension of the table. We should get _145_ rows and _27_ columns.
+
+```{r}
+dim(vegdat) # 145 plots (one per row) and 27 variables.
+```
+
+Here we are just exploring a bit more about this data object
+
+```{r}
+# class(vegdat) # what type of object is it?
+# str(vegdat)  # what is in the object?
+names(vegdat)  # print out the column (i.e., variable) names
+
+head(vegdat, 5)  # print out the first few lines of data
+```
+
+
+#### PART 2: Subset the variables for the FA into a different object
+Variables that will make up `xdata` are: `mayvgcov`,`mayvght`,
+`junvgcov`,`junvght`,`baregrnd`,`bryopht`,`forbs`, `grass`, 
+`rocks`, `shrubs`, and `trees`.
+
+```{r}
+xdata <- subset(vegdat,select = c(mayvgcov, mayvght, junvgcov, junvght,
+     baregrnd, bryopht, forbs, grass,
+     rocks, shrubs, trees))
+```
+
+Some simple checking of  `xdata`. We should still get _145_ rows, but this time only _11_ columns.
+
+```{r}
+names(xdata)
+class(xdata)
+dim(xdata) # 145 rows and 11 columns
+```
+
+
+#### PART 3:  Basic stats and corelation matrix for the xdata
+
+We will get basic stats using `stat.desc()` from the package `pastecs.`
+Make sure that you have downloaded the package. You can install it 
+with `install.packages("pastecs")`. Uncomment the chunk below and run to see
+the summary of key statistics.
+
+```{r}
+# library(pastecs) # won't work if you have not installed the package first!!
+# round(stat.desc(xdata), 2) # get some basic descriptive stats.
+# summary(xdata) 
+```
+
+Here is the correlation matrix rounded to the 2nd decimal place.
+
+```{r}
+round(cor(xdata), 2) # correlation matrix with elements rounded to 2 decimals
+```
+
+
+#### PART 4: Perform PCA using `princomp()` 
+
+First, we do PCA to look at how many factors to keep to explain the majority
+of the variances of X variables.  This is not strictly needed for Factor Analysis since
+you may set the number of factors based on what might be possible to interpret 
+but still useful to justify the number of factors to be used. 
+
+**NOTE:** `cor` and `covar` in princomp( ) are not the same as `principal()` or `fa()` !!!
+
+Here, `cor=TRUE` means using the correlation matrix (aka standardized X variables).
+
+```{r}
+veg.pca <- princomp(xdata, cor = TRUE)
+```
+
+Let's get a summary with `summary()`
+
+```{r}
+summary(veg.pca, loadings = TRUE, cutoff = 0.0)
+```
+
+Interpretation of the `summary()` outputs:
+
+* The first part shows the standard deviation (eigenvalues), how much each individual
+PC contribute to the variance, and the cumulative variance when you 
+retain 1, 2, 3, ... principal components
+
+* The second part shows the "loadings". This is in fact the __eigenvectors__. However, when we
+work with factor analysis later on with the function `principal()`, this will not be the case.
+
+Get the correlation matrix for X variables and principal components.
+We do not need to scale the X variables since the correlation matrix already does that.
+Notice that the `loadings` obtain here is very different from the so called "loadings"
+above from `summary(veg.pca, loadings=TRUE,cutoff=0.0)`.
+
+```{r}
+loadings <- round(cor(xdata, veg.pca$scores), 7)
+loadings
+```
+
+Let's calculate the variances, percent variances, and cumulative
+percent variances and put these together using bind.
+round() these using d=2 (i.e., two decimal places)
+
+```{r}
+round(cbind("Variance" = veg.pca$sdev^2,
+ "%" = 100*veg.pca$sdev^2 / sum(veg.pca$sdev^2),
+  "Cumulative %" = 100 * cumsum(veg.pca$sdev^2) / sum(veg.pca$sdev^2)),
+   d = 2)
+```
+
+Check the sum of the variances to make sure they sum up to __11__, which is the
+number of X variables.
+
+```{r}
+sum(veg.pca$sdev^2) # check the sum of variances.
+```
+
+Get a scree plot with `sdev^2` (that is the variance or eigenvalue) of each component.
+
+```{r}
+plot(veg.pca$sdev^2, type = "b", pch = 16, xlab = "Component number",
+ylab = "Eigenvalue", main = "Scree plot for x-variables of veg data")
+```
+
+
+Graph PC 1 and 2 (i.e., dimensions 1 and 2) with a biplot.
+
+```{r}
+biplot(veg.pca)
+```
+
+**OPTIONAL:** These are alternative graphics
+
+```{r, eval=FALSE}
+plot.new() # start a new plot
+plot(loadings[, 1], loadings[, 2], axes = FALSE,
+xlim = c(-1, 1), ylim = c(-1, 1), xlab = "", ylab = "")
+mtext(expression("Comp.2"), 1, las = 0) # put this on axis 1 (x-axis)
+mtext(expression("Comp.1"), 2, las = 0) # put this on axis 2 (y-axis)
+axis(1, at = c(-1, 1), pos = 0) # axes labels at 0, from -1 to 1
+axis(2, at = c(-1, 1), pos = 0) # axes labels at 0, from -1 to 1
+# labels for the x variables to each correlation value, pos=4 is to the right.
+text(loadings[, 1], loadings[, 2], labels = colnames(xdata), pos = 4, cex = 0.7)
+```
+
+#### PART 5: Factor analysis using two factors based on PCA analysis. 
+##### General information:
+The function `factanal()` can be used. 
+Options for `rotation=` parameter  are `"varimax"`, `"promax"`, and `"none"`. 
+
+The function principal() can be used. 
+
+Another alternative is the `psych` package and the function `fa()`.
+There are also options for getting the factor scores. 
+`principal()` is used here from the `psych` package
+factor scores will be calculated using the default "regression" method. 
+
+To use the variety of rotations in `fa()` or in `principal()`, you also need the
+package `GPArotation`
+Rotations options: 
+
+* `"none"`, `"varimax"`, `"quartimax"`, `"bentlerT"`, `"equamax"`, `"varimin"`, 
+`"geominT"` and `"bifactor"` are orthogonal rotations. 
+
+* `"promax"`, `"oblimin"`, `"simplimax"`,`"bentlerQ"`, 
+`"geominQ"` and `"biquartimin"` and `"cluster"` are possible 
+oblique transformations of the solution.
+
+**NOTE:** `cor` and `covar` in `princomp()` are not the same as in
+`principal()` or `fa()`!!!
+
+In `principal()` and in `fa()`, `cor="cor"` means __Pearson's correlations__
+but then `covar=FALSE` means using the correlation matrix!!
+
+For `veg.fac1`, no rotation used. For the following codes to work,
+please make sure you have downloaded the `psych` and `GPArotation` packages
+via `install.packages("GPArotation")` and `install.packages("psych")`.
+
+```{r}
+library(GPArotation)
+library(psych)
+
+veg.fac1 <- principal(xdata, nfactor = 2, rotate = "none",
+      method = "regression", scores = TRUE, covar = FALSE, cor = "cor")
+```
+**NOTE:** `covar=FALSE` meaning using the correlation matrix. `cor="cor"` means
+using __Pearson's correlations__ (there are other options!)
+
+We can explore this object and its components via the functions `class()` and `str()`.
+You can uncomment the codes to explore it by yourself by running this code chunk. We
+will not run it here at the meantime because the outputs are quite lengthy.
+
+```{r}
+# uncomment and run to see ouputs
+
+# class(veg.fac1)   # what type of object is created?
+# str(veg.fac1)     # what do we get?
+```
+
+```{r}
+veg.fac1
+```
+
+##### Let's go over some important components of this object:
+
+```{r}
+veg.fac1$loadings
+```
+`loadings` are simple __correlations between PC scores and x variables__, which is __NOT like using__ `princomp()`!
+**Note:** very low correlations are not given and will appear missing.
+
+```{r}
+veg.fac1$weights
+```
+
+`weights` is the W (multipliers) to calculate factor scores
+
+Next, we explore `communality` and `uniqueness`
+
+```{r}
+veg.fac1$communality # the h2 in the table
+```
+
+```{r}
+veg.fac1$uniqueness  # the u2 in the table
+```
+
+We learned that the variance of each X variable is divided into __common variance (communality)__
+and __unique variance (uniqueness)__
+
+* `communality` is the __common variance__ of the X variables. It is the variance
+_accounted for by the Factors_. In other words, `communality` tells you
+what proportion of the variable's variance is a result of either:
+  + The principal components
+  + The correlations between each variable and individual factors
+
+It is calculated by squaring each factor loading and 
+then adding them up for each X variable (sum of squared factor loadings)
+
+* `uniqueness` is the __unique variance__ of the X variables. It is, as its name implied, 
+the variance _not accounted for by the Factors_, thus are _unique_ to each X variable.
+
+It is *1 - communality* since the correlation matrix was used. In other words, it is 
+a measure of how well the regression estimate the factor scores using the x variables 
+as inputs based on root mean square residuals. A smaller number means a better fit.
+
+**Note:** `fit` is a measure of how well the factors represent the full correlation (or
+covariance matrix) of the X's. A smaller value means a better fit.
+
+```{r}
+veg.fac1$Structure
+```
+
+`Structure` is the Factor Structure matrix, which in this example represents the __simple correlations__
+between each X variable and each Factor. If the factors are __uncorrelated (orthogonal)__
+and __standardized__, or if is is an __orthogonal rotations of the axes__, 
+the Factor Structure matrix and the Factor Pattern matrix is the same.
+
+```{r}
+veg.fac1$complexity
+```
+
+`complexity` is the Hoffman's index of complexity.
+
+**Extra:** it represents the number of latent components needed to account for the observed variables. 
+Whereas a perfect simple structure solution has a complexity of 1 in that each item would only load on 
+one factor, a solution with evenly distributed items has a complexity greater than 1.
+[Link to source](https://easystats.github.io/parameters/reference/model_parameters.principal.html#details)
+
+Here, we calculate the __mean complexity__ of the variables.
+
+```{r}
+mean(veg.fac1$complexity)
+```
+
+#### Correlations between the factors and the X variables
+
+```{r}
+round(cor(xdata, veg.fac1$scores), 2)
+```
+
+This is same as `veg.fac1$loadings`. Smaller correlations are not shown.
+
+##### Correlations between the two factors
+
+```{r}
+round(cor(veg.fac1$scores, veg.fac1$scores), 2)
+```
+
+##### "Hand calculate" the scores using the weights coefficients. 
+
+Get the standardized xdata first
+
+```{r}
+Xscaled <- scale(xdata, center = TRUE, scale = TRUE)
+head(Xscaled)
+```
+
+Check the dimension of the `weights` matrix
+
+```{r}
+dim(veg.fac1$weights)
+```
+
+```{r}
+myscores <- Xscaled %*% veg.fac1$weights
+head(myscores)
+```
+
+```{r}
+head(veg.fac1$scores)
+```
+
+Calculating communality and uniqueness for the PC orthogonal rotation and for
+other orthogonal rotations. Using the correlation matrix, the total variance
+of the X's is 11 (=1 for each X since this is like you are using standardized x's)
+can calculate the variances accounted for by squaring and adding the loadings. 
+
+##### Using just PC1, you get the variance of all X's accounted for by PC1 only.
+
+```{r}
+PC1 <- veg.fac1$loadings[1:11, 1] # column 1
+PC1
+
+sum(PC1^2)
+```
+
+Here, PC1 accounts for 4.32614 of the 11 x-variables variances , which is its `communality`.
+
+##### Using PC2, you get the variance of all X's accounte by PC2 only
+
+```{r}
+PC2 <- veg.fac1$loadings[1:11, 2] # column 2.
+PC2
+
+sum(PC2^2)
+```
+
+Again, PC2 accounts for 1.7683 of the 11 x-variables variances.
+
+If you add PC1 and PC2 as the only two factors retained, you get the 
+total communality, all x's and all factors. Total uniqueness not
+accounted for by these two components is the number of x-variables minus
+total communality. This is because the correlation matrix was used and, the
+sum of correlation is 11 (diagonal entries of correlation matrix)
+
+The total communality is:
+```{r}
+sum(PC1^2) + sum(PC2^2)
+```
+
+Thus, the uniqueness is:
+
+```{r}
+11 - (sum(PC1^2) + sum(PC2^2))
+```
+
+##### Then, how much communality of each X variable versus uniqueness?
+
+```{r}
+commonbyX <- PC1^2 + PC2^2
+commonbyX
+```
+
+You may notice that `commonbyX` is same as `h2` column in the `veg.fac1` summary of outputs.
+`h2` tells you how much each x-variable contribute to the common variance (`communality`).
+It should sum up to 6.0944, which is the total communality calculated with the principal
+components earlier. Let's check:
+
+```{r}
+sum(commonbyX)
+```
+
+It's the same number!
+
+##### How much is unique for each variable?
+
+```{r}
+uniquebyX <- 1 - (PC1^2 + PC2^2)
+uniquebyX
+sum(uniquebyX)
+```
+
+Similarly, you may notice that `uniquebyX` is similar to `u2` from the `veg.fac1`
+summary of outputs. This corresponds to the uniqueness of the x-variables. Again,
+it should sum up to 4.9055, which is the value of uniqueness calculated with 
+the principal components earlier.
+
+And finally, `commonbyX` and `uniquebyX` should sum up to 11, which is the number of
+x variables, similar to the result we have above.
+
+```{r}
+sum(commonbyX) + sum(uniquebyX)
+```
+
+
+#### `Varimax` rotation: A further orthogonal rotation
+
+We will called PCs as RC1 and RC2 now. Remember to install the `psych` package first
+if you have not done so already. In this example we will use the __varimax__ rotation
+by setting the parameter `rotate = "varimax"`
+
+Varimax __maximize variation in squared factor loadings__. Rotate so that the variation
+of the squared factor loadings is maximized. Maximum variation occurs when factor
+loadings are separated into being either close to 0 or close to 1 and -1.
+.
+```{r}
+library(psych)
+veg.fac2 <- principal(xdata, nfactor = 2, rotate = "varimax",
+  method = "regression", scores = TRUE, covar = FALSE, cor = "cor")
+
+veg.fac2
+```
+
+Let's check the components of `veg.fac2`
+
+`communality` or `h2` in the table:
+
+```{r}
+veg.fac2$communality # the h2 in the table
+```
+
+`uniqueness` or `u2` in the table:
+
+```{r}
+veg.fac2$uniqueness  # the u2 in the table
+```
+
+`loadings` are the correlation between the original x variables and RC1 & RC2
+
+```{r}
+veg.fac2$loadings    # RC1 and RC2 values. NOTE: Very low correlations are not given.
+```
+
+`weights` are the multipliers
+
+```{r}
+veg.fac2$weights
+```
+
+`Structure` is the same as the `loadings` from the function `princomp()`,
+which are the correlations of the x variables and the PCs, since is an orthogonal rotation.
+
+```{r}
+veg.fac2$Structure # same as loadings which ARE correlations for princomp()
+```
+
+`complexity` is Hoffman's index of complexity. The mean of complexity is shown in the
+summary as well.
+
+```{r}
+veg.fac2$complexity  
+mean(veg.fac2$complexity)
+```
+
+##### Correlations between the factors and the X variables
+
+Let's find the correlations between the X variables and the factor scores
+This will be the same as the `veg.fac2$loadings`. You may also notice that it is 
+similar to `veg.fac2$Structure` as well, due to the fact that varimax is an 
+__orthogonal rotation__.
+
+
+```{r}
+round(cor(xdata, veg.fac2$scores), 2)
+```
+
+
+##### Correlations between the two factors
+
+The correlations between the two factors should be 0, since they are from an 
+orthogonal rotation and hence are `uncorrelated`. Let's verify that fact:
+
+```{r}
+round(cor(veg.fac2$scores, veg.fac2$scores), 2)
+```
+
+##### "Hand calculate" the scores using the weights coefficients.
+
+First, we get the standardized x variables
+
+```{r}
+Xscaled <- scale(xdata, center = TRUE, scale = TRUE)
+```
+
+Calculate with matrix multiplication. The results are the same
+
+```{r}
+myscores <- Xscaled %*% veg.fac2$weights
+head(myscores)
+head(veg.fac2$scores)
+```
+
+Using just RC1, you get the variance of all X's accounted for by factor1 only.
+
+**NOTE:**  This works again since this is an orthogonal rotation.
+
+##### RC1 and RC2 are independent (at right angles)
+
+```{r}
+RC1 <- veg.fac2$loadings[1:11, 1]
+sum(RC1^2)
+```
+
+We can see that RC1 accounts for 3.275 of the variance.
+
+##### Using RC2, you get the variance of all X's accounte by RC2 onlysum(RC2^2) 
+
+```{r}
+RC2 <- veg.fac2$loadings[1:11, 2]
+sum(RC2^2) # How much does RC2 account for?
+```
+
+Similarly, we can see that RC2 account for 2.819 of the variance
+
+##### Total communality and uniqueness. 
+
+Still 2 factors so the same as the "none" rotation.
+
+```{r}
+sum(RC1^2) + sum(RC2^2) # total communality
+11 - (sum(RC1^2) + sum(RC2^2)) # uniqueness
+```
+
+##### How much communality of each X variable versus uniqueness?
+
+This is same as `h2` in the `veg.fac2` summary of outputs:
+```{r}
+commonbyX <- RC1^2 + RC2^2
+commonbyX
+sum(commonbyX)
+```
+
+##### How much is unique for each variable? What is left of the variance?
+
+And this is the same as `u2`:
+
+```{r}
+uniquebyX <- 1 - (RC1^2 + RC2^2)
+uniquebyX
+sum(uniquebyX)
+```
+
+#### veg.fac3: `Varimin` rotation: A further orthogonal rotation.
+
+`varimin`  minimizes variance of factor loadings across factorized variables.
+
+```{r}
+veg.fac3 <- principal(xdata, nfactor = 2, rotate = "varimin",
+        method = "regression", scores = TRUE, covar = FALSE, cor = "cor")
+veg.fac3
+```
+
+As usual, let's explore the component of `veg.fac3`
+
+`communality` or `h2`:
+
+```{r}
+veg.fac3$communality
+```
+
+`uniqueness` or `u2`:
+
+```{r}
+veg.fac3$uniqueness
+```
+
+`loadings` are the corelation between the RCs and the original x variables
+
+```{r}
+veg.fac3$loadings
+```
+
+`weights` are the multipliers to compute the factor scores:
+
+```{r}
+veg.fac3$weights
+```
+
+`Structure` is the same as `loadings`, which are the correlations: 
+
+```{r}
+veg.fac3$Structure
+```
+
+`complexity` is Hoffman's index of complexity
+
+```{r}
+veg.fac3$complexity
+mean(veg.fac3$complexity)
+```
+
+
+##### Correlations between the factors and the X variables
+
+Still the same as `veg.fac3$loadings ` and `veg.fac3$Structure` since this 
+is still an orthogonal rotation.
+
+```{r}
+round(cor(xdata, veg.fac3$scores), 2)
+```
+
+##### Correlations between the two factors
+
+The two factors should still be uncorrelated
+
+```{r}
+round(cor(veg.fac3$scores, veg.fac3$scores), 2)
+```
+
+##### "Hand calculate" the scores using the weights coefficients. 
+
+Get the standardized xdata first
+
+```{r}
+Xscaled <- scale(xdata, center = TRUE, scale = TRUE)
+```
+
+The factor scores is the result of matrix multiplication between the
+scaled x matrix and the weights matrix. The final matrix should be the
+same as calling `veg.fac3$scores`.
+
+```{r}
+myscores <- Xscaled %*% veg.fac3$weights
+head(myscores)
+head(veg.fac3$scores)
+```
+
+##### Using just RC1, you get the variance of all X's accounted for by RC1 (factor 1) only.
+**Note:**  This works again since this is an orthogonal rotation.
+RC1 and RC2 are independent (at right angles)
+
+```{r}
+RC1 <- veg.fac3$loadings[1:11, 1]
+sum(RC1^2)
+```
+
+##### Using RC2, you get the variance of all X's accounted by RC2 only
+
+```{r}
+RC2 <- veg.fac3$loadings[1:11, 2]
+sum(RC2^2)
+```
+
+##### Total communality and uniqueness. 
+
+Still 2 factors so it is the same as the "none" rotation.
+
+Total communality:
+```{r}
+sum(RC1^2) + sum(RC2^2)
+```
+
+Uniqueness:
+
+```{r}
+11 - (sum(RC1^2) + sum(RC2^2))
+```
+
+##### Then, how much communality of each X variable versus uniqueness?
+
+```{r}
+commonbyX <- RC1^2 + RC2^2
+commonbyX
+sum(commonbyX)
+```
+
+##### How much is unique for each variable? What is left of the variance?
+
+```{r}
+uniquebyX <- 1 - (RC1^2 + RC2^2)
+uniquebyX
+sum(commonbyX)
+```
+
+#####  TODO: veg.fac4: Add in the code for `equamax` orthogonal rotation here (not graded)
+
+Follow the structure of each examples above, add in the codes for `equamax` orthogonal rotation here. Make
+sure you do not miss any calculations. Create additional markdown commentaries and code chunks if you wish!
+This part is not graded, however the outputs will be asked in the upcoming TODO questions.
+
+```{r}
+# your codes here
+```
+
+##### End of TODO
+
+**TODO Question 1:** In all analyses, **two factors were selected**. Using a number of ways to determine
+how many factors to retain (as you did using PCA in Exercise 2), is this number
+of factors justified for these data? 
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 1**
+
+**TODO Question 2:** For the unrotated factor pattern `veg.fac1`, what is the loading value for Factor
+1 with `mayvgcov`? What is the structure value for this also? Explain what these
+values mean.
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 2**
+
+**TODO Question 3:** Using orthogonal rotations only (`veg.fac1`, `veg.fac2`, `veg.fac3`, `veg.fac4`), what
+orthogonal rotation (including no rotation) gave the best results?
+
+a. Justify your choice as to why you believe these results are best for
+achieving a simple and interpretable structure. Also indicate why others
+were not chosen.
+
+b. Use the factor structure (correlations between original variables and
+Factors) to decide which variables relate to each factor. Remember to
+state __what correlation cutoff__ you are using (e.g., |r|>= 0.5 or |r|>= 0.8);
+and  __why__ you made this choice.
+
+c. Add a possible label for each factor (e.g., vegetation structure might be
+one factor). Use your answers from part b, but also consider whether
+the correlations are positive or negative between a factor and the
+original variables correlated with it.
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 3**
+
+**TODO Question 4:** Based on the two factors retained and using your selected orthogonal rotation:
+
+a. How much of the variability of each of the original X variables is
+accounted for (communality):
+* by each factor
+* for both factors combined?
+
+b. How much of the variability of each of the original X variables is NOT
+accounted for (unique variance): 
+* by each factor
+* for both factors combined?
+
+c. For all X variables combined, what are the communality and unique
+variances:
+* by each factor
+* for both factors combined?
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 4**
+
+**TODO Question 5:** Calculate the communality for `mayvgcov` for **Factor 1** using your selected
+orthogonal rotation “by hand”. Confirm that you obtained the same
+communality value as you reported in 4a for this variable and factor.
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 5**
+
+**TODO Question 6:** Calculate the factor score for **Factor 1** for the first observation in the dataset,
+using your selected orthogonal rotation. Confirm that this is the same as the
+score calculated using `princomp()` in R.
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 6**
+
+#### Oblimin rotation: An oblique rotation.
+**Note:** we will call the factors as TC1 and TC2 now
+
+Run the same analysis, but this time with `rotate="oblimin"`.
+`oblimin` allows for the factors to be __correlated (not orthogonal)__.
+
+```{r}
+veg.fac5 <- principal(xdata, nfactor = 2, rotate = "oblimin",
+  method = "regression", scores = TRUE, covar = FALSE, cor = "cor")
+
+veg.fac5
+
+# str(veg.fac5) uncomment this if you want to fully explore the object
+```
+
+`communality` and `uniqueness`:
+```{r}
+veg.fac5$communality
+```
+
+```{r}
+veg.fac5$uniqueness
+```
+
+`weights` still contains the multipliers
+
+```{r}
+veg.fac5$weights # multipliers
+```
+
+Hoffman's index of complexity and mean complexity:
+
+```{r}
+veg.fac5$complexity  # the com in the table, Hoffman's index of complexity
+mean(veg.fac5$complexity) # Hoffman's index of complexity also shown in the veg.fac5 summary
+```
+
+However, `loadings` is no longer the correlations between the TCs (factor scores) and the X variables.
+Since _oblimin_ is an __oblique rotation__, this is now showing the __Factor Pattern__.
+
+```{r}
+veg.fac5$loadings # factor pattern
+```
+
+`Structure` is the correlations between the X variables and the factor scores.
+Since this is an oblique rotation, you can see that Factor Pattern is different from
+Factor Structure.
+
+```{r}
+veg.fac5$Structure
+```
+
+Let's verify that Structure is the simple correlations between the X variables and factor scores
+by manually calculating with `cor()`.
+```{r}
+round(cor(xdata, veg.fac5$scores), 2)
+```
+
+We can can see that they are pretty much identical. And they are completely different from
+`veg,fac5$loadings`, which is now the factor pattern.
+
+
+##### Correlations between the two factors
+
+Let's explore the correlation between the factors
+
+```{r}
+round(cor(veg.fac5$scores, veg.fac5$scores), 2)
+```
+
+We can see that with an oblique rotation like `oblimin`, the factors are
+__correlated__, which means the axes are __not 90 degrees (orthogonal)__ from each other. Thus, 
+we cannot interpret each factor separately.
+
+Since the factors are correlated, the variance accounted for by Factor 1
+overlaps with the variance accounted for by Factor 2.
+We can calculate the two variances, but this will be too big.
+Alternatively, we can calculate just the independent bits, but that will
+be too small. This will be demonstrate later on in this code.
+
+**TODO Question 7:** Using the oblique rotation (`veg.fac5`):
+
+a. What is the correlation between the two factors? Is this “low enough”
+for factors to be considered “nearly independent”?
+b. Repeat what you did in question 3b and 3c.
+
+_Type your answer here:_
+
+```{r}
+# your codes here (if applicable)
+```
+
+**End of Question 7**
+
+##### "Hand calculate" the scores using the weights coefficients. 
+
+Standardize the original X variables
+
+```{r}
+Xscaled <- scale(xdata, center = TRUE, scale = TRUE)
+```
+
+Matrix multiplication
+
+```{r}
+myscores <- Xscaled %*% veg.fac5$weights
+```
+
+Verify that they are indeed similar
+
+```{r}
+head(myscores)
+head(veg.fac5$scores)
+```
+
+We can try to get the variance accounted for by each factor, but notice here that
+they will overlap overlap since the factors are __correlated__ now.
+
+Variance accounted for by TC1. Notice here that we are using `Structure` and not `loadings`
+since `Structure` is the correlations matrix, and it is no longer the case for `loadings`.
+
+```{r}
+TC1 <- veg.fac5$Structure[1:11, 1]
+sum(TC1^2)
+```
+what about TC2? 
+
+```{r}
+TC2 <- veg.fac5$Structure[1:11, 2]
+sum(TC2^2)
+```
+
+```{r}
+sum(TC1^2) + sum(TC2^2) # now greater than the sum of two factors for none or orthogonal
+```
+
+the factors overlap!!! So, there is "double-counting" of some of the variance explained.
+
+##### What about the SS loadings?
+
+```{r}
+TC1 <- veg.fac5$loadings[1:11, 1]
+sum(TC1^2) # How much does TC1 account for?
+```
+
+##### What about TC2? 
+
+```{r}
+TC2 <- veg.fac5$loadings[1:11, 2]
+sum(TC2^2) # How much does TC2 account for?
+```
+
+```{r}
+sum(TC1^2) + sum(TC2^2) # now less than the sum of two factors for none or orthogonal
+```
+
+the factors overlap!!! Using the SS "loadings", the overlapping part is removed.
+
+##### What does `princomp()` report here?  
+
+```{r}
+veg.fac5
+```
+
+So, using `Structure`, we get the double-counting of variances:
+TC1 (3.959523) + TC2 (3.835755) = 6.7953
+
+Using `loadings`, we get the non-overlapping parts of variances:
+TC1 (3.60252) + TC2 (2.36017) = 5.9269
+
+Reported in the `veg.fac5` summary?
+TC1 (3.67) + TC2 (2.43) = 6.1, which is how much is accounted for by 2 factors!!
+
+Still 2 factors so the same as the "none" rotation.
+As noted that is harder to see here... since there is overlap
+of variance accounted for given these non-independent factors.
+
+```{r}
+TC1 <- veg.fac5$Structure[1:11, 1]
+```
+
+##### What about TC2? 
+
+```{r}
+TC2 <- veg.fac5$Structure[1:11, 2]
+```
+
+```{r}
+commonbyX <- TC1^2 + TC2^2 # same as h2 in the veg.fac5 summary of outputs.
+commonbyX # not really correct since factors are not independent!
+sum(commonbyX)
+```
+
+##### How much is unique for each variable? What is left of the variance?
+
+```{r}
+uniquebyX <- 1 - (RC1^2 + RC2^2) #same as u2 in the veg.fac5 summary of outputs. 
+uniquebyX # not really correct since factors are not independent!
+sum(uniquebyX)
+```
+
+```{r}
+sum(commonbyX) + sum(uniquebyX)
+```
+
+#### Which one to choose? 
+We want a simple structure that is easy to interpret and hopefully label. 
+We would like this to be from a orthogonal rotation if possible so factors are indepedent!
+
+**TODO Question 8:** Overall, based on your analysis and interpretation, which rotation would you
+recommend? State your choice and then provide a short paragraph to justify
+your choice and why others were not recommended by you.
+
+_Type your answer here:_
+
+**End of Question 8**
+
+### Congratulation!
+
+
+
+
+
+
+
+
+
+
