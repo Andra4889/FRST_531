@@ -1557,6 +1557,10 @@ c.  For all X variables combined, what are the communality and unique
 -   by each factor
 -   for both factors combined?
 
+#Note from Subhorna: 
+
+
+
 ```{r}
 
 # Eigenvalues from the correlation matrix of numeric X variables
@@ -1596,12 +1600,18 @@ From this, Factor 1 explains 39.33% of total variance, while Factor 2
 explains 16.08%. Together this means that 55.40% of total variance is
 explained, leaving 44.60% unexplained.
 
+#Note: I think we need to choose a factor, and then find the individual uniqueness and commonality. This looks right. 
+
+
+
 **End of Question 4**
 
 **TODO Question 5:** Calculate the communality for `mayvgcov` for
 **Factor 1** using your selected orthogonal rotation “by hand”. Confirm
 that you obtained the same communality value as you reported in 4a for
 this variable and factor.
+
+#Note from Subhorna: similar to 4a. 
 
 A principal components analysis with two components and varimax rotation
 was performed to identify the main underlying patterns in the vegetation
@@ -1645,7 +1655,7 @@ print(veg.fac2)
 **TODO Question 6:** Calculate the factor score for **Factor 1** for the
 first observation in the dataset, using your selected orthogonal
 rotation. Confirm that this is the same as the score calculated using
-`princomp()` in R.
+`princomp()` in R. #Note from Subhorna: 
 
 The first rotated component (RC1) explains 29.8% of the total variance
 in the dataset. RC1 has strong positive loadings for: May vegetation
