@@ -11,11 +11,11 @@ editor_options:
 
 **Course Instructor**: Dr. Suborna Ahmed
 
-**Student Name**:
+**Student Name**: Sandra Inusah, Brandon Weigand
 
 **Total Points**: 10
 
-**Due**: check Canvas page for due date
+**Due**: March 6, 2026
 
 **Submission**:
 
@@ -162,8 +162,8 @@ names(vegdat)  # print out the column (i.e., variable) names
 head(vegdat, 5)  # print out the first few lines of data
 ```
 
-I'm not sure what hola, vesp, or star are in this context (bird
-abundance), but I get the idea.
+Note: I'm not sure what hola, vesp, or star are in this context (bird
+abundance?), but I get the idea.
 
 Remembering that:
 
@@ -196,7 +196,7 @@ class(xdata)
 dim(xdata) # 145 rows and 11 columns
 ```
 
-Yep, 145 rows and 11 columns.
+Note: Yep, 145 rows and 11 columns.
 
 #### PART 3: Basic stats and corelation matrix for the xdata
 
@@ -219,65 +219,15 @@ Here is the correlation matrix rounded to the 2nd decimal place.
 round(cor(xdata), 2) # correlation matrix with elements rounded to 2 decimals
 ```
 
-Initial thoughts on this:
+Notes: 
+- These correlation matrices reveal big patterns with vegetation data in particular. Vegetation cover and May height (0.92) and June height (0.88) are strongly positively correlated. That is, May cover and height (0.92), June cover and height (0.88). 
+- Probably hints at vegetation structure over time, given the other variables like bare ground. Productivity? Some sites seem to do better. 
+- Bare ground, meanwhile, is moderately negatively correlated with vegetation and height (May -0.38, June -0.44), and maybe unsurprisingly negatively correlatd with trees (-0.62). Also supported by the grass and ground (-0.82). Hints that 1) bare ground clearly does not contain much vegetation and 2) sites with higher vegetation have less soil. 
+- In the same vein, rock cover and bare ground (0.45) (indicating some rock cover presence with bare ground sites), and negative correlations with veg cover and height (-0.29). So, sites that are rocky do not have as much vegetation. 
+- Looks like tree cover and vegetation cover have a correlation, but I'm not sure how to interpret this. Sites with trees have underlying ground cover? 
+- Bryophytes, forbs, and shrubs have weak relationships with many variables. Bryophytes have correlations of −0.21 with May vegetation cover, −0.16 with May vegetation height, −0.17 with June vegetation cover, and −0.18 with June vegetation height. Bryophytes also show almost no relationship. 
+- Everything considered, it looks like a spectrum of vegetation types and their associations or presence. 
 
-These correlation matrices reveal big patterns with vegetation data. The
-strongest relationships occur with the variables describing vegetation
-cover and height in May (0.92) and June (0.88). These variables are thus
-all highly positively correlated, indicating that they capture some
-common underlying gradient in vegetation structure. Sites that have
-greater vegetation cover early in the season also tend to have taller
-vegetation and maintain higher cover later in the growing season. This
-suggests that these measurements are all reflecting a similar ecological
-phenomenon related to site productivity and vegetation density.
-
-May vegetation cover, May vegetation height, June vegetation cover, and
-June vegetation height are all strongly positively correlated with each
-other (May cover and May height = 0.92; June cover and June height =
-0.88). These relationships indicate that sites with dense vegetation
-tend to maintain that structure across the growing season. Together,
-these variables likely represent a single dominant gradient of overall
-vegetation productivity or structural density.
-
-Bare ground represents the opposite end of the vegetation gradient. Bare
-ground is moderately to strongly negatively correlated with vegetation
-cover and height (approximately −0.38 to −0.44) and strongly negatively
-correlated with trees (−0.62). This indicates that sites with greater
-vegetation structure tend to have less exposed soil, suggesting a
-tradeoff between vegetation density and open ground.
-
-Grass shows one of the strongest relationships in the matrix with bare
-ground (−0.82). This suggests that where grass cover is high, exposed
-soil is minimal. Grass also shows moderate positive correlations with
-vegetation cover variables, indicating that grass contributes to overall
-vegetation cover at many sites.
-
-Rock cover is positively correlated with bare ground (0.45) and
-negatively correlated with vegetation cover and height (roughly −0.29 to
-−0.36). This pattern suggests that rocky sites tend to support less
-vegetation and more exposed substrate.
-
-Tree cover shows moderate positive correlations with vegetation cover
-and height (about 0.23–0.32) and a strong negative correlation with bare
-ground (−0.62). This suggests that sites with more trees tend to support
-greater vegetation structure and less exposed ground.
-
-Bryophytes, forbs, and shrubs show weak relationships with other
-variables, typically falling between about −0.20 and 0.20. For example,
-bryophytes have correlations of −0.21 with May vegetation cover, −0.16
-with May vegetation height, −0.17 with June vegetation cover, and −0.18
-with June vegetation height. Bryophytes also show almost no relationship
-with forbs (0.00) and only a very weak relationship with rocks (−0.03).
-The largest correlation involving bryophytes is with trees (−0.28),
-which is still only modest compared with the stronger relationships
-observed among the main vegetation structure variables.
-
-Overall, the correlation matrix suggests that the dominant pattern in
-the dataset reflects a gradient from densely vegetated sites
-characterized by greater plant cover, height, and tree presence to more
-open sites characterized by bare ground and rocky substrate. Other
-vegetation types appear to contribute smaller, more localized sources of
-variation within this broader structural gradient.
 
 #### PART 4: Perform PCA using `princomp()`
 
@@ -315,52 +265,16 @@ Interpretation of the `summary()` outputs:
 
 #### 
 
-**General interpretation:**
-
-The first section are the SDs and variance, while the second are the
-loadings (eigenvectors), or the direction of each principal component in
-relation to the original variables.
-
-The first principal component (Comp.1) has a standard deviation of 2.08
-and explains approximately 39.3 percent of the total variance, making it
-the dominant axis of variation in the dataset. The second component
-(Comp.2) explains 16.1 percent, and the third component (Comp.3)
-explains 11.9 percent of the variance. Together, the first three
-components account for about 67.3 percent of the total variance,
-suggesting that most of the structure in the data can be summarized by
-these three axes. Adding the fourth component increases the cumulative
-variance explained to about 77.2 percent, and the first six components
-together account for roughly 91 percent of the total variance.
-
-For Comp.1, the largest positive loadings occur for the vegetation
-structure variables: May vegetation cover (0.411), May vegetation height
-(0.409), June vegetation cover (0.417), and June vegetation height
-(0.367). Grass (0.291) and trees (0.234) also load positively, while
-bare ground (−0.354) and rocks (−0.251) load negatively. This indicates
-that the first component represents a gradient from densely vegetated
-sites with greater plant cover and height to more open sites
-characterized by exposed ground and rocky substrate. This interpretation
-aligns closely with the patterns observed in the correlation matrix.
-
-The second component (Comp.2) reflects a somewhat different pattern.
-Bare ground (0.379) and shrubs (0.484) load positively, while grass
-loads strongly negatively (−0.531). Vegetation cover and height
-variables show smaller positive loadings. This component may represent
-variation in ground cover composition, distinguishing areas dominated by
-shrubs and exposed soil from those dominated by grasses.
-
-The third component (Comp.3) appears to capture variation associated
-with certain vegetation types. Bryophytes load strongly positively
-(0.554), while trees load strongly negatively (−0.594) and forbs
-moderately negatively (−0.346). This suggests that this component may
-represent a composition gradient involving bryophytes versus woody
-vegetation or other plant groups, reflecting differences in site
-conditions or microhabitats.
-
-Overall, the PCA results suggest that most of the variation in the
-dataset is structured along a dominant gradient of vegetation density
-and openness, with additional components capturing differences in ground
-cover composition and specific plant groups.
+Notes: 
+- The first section are the SDs and variance, and the second are the loadings (eigenvectors), or the direction of each principal component in relation to the original variables. 
+- PC1 has a SD of 2.08 and explains 39.8% of total variance. 
+- PC2 explains 16.1%. 
+- PC3 explains 11.9%.
+- PC1 - 3 explains 67.3%.
+- PC1 loadings connect with May veg cover (0.411), May veg height (0.409), June cover (0.417), and June height (0.367). Grass and trees have smaller loadings. Bare ground and rocks load negatively (-0.354 and -0.251 respectively). 
+- PC1 looks to reinforce the cover spectrum idea, going from high vegetation to bare ground and rocks.  
+- PC2 looks more complicated. Bare ground and shrubs load positively, yet grass loads moderately negative (-0.531). Not sure how to interpret this. Lower vegetation near the ground? 
+- PC3 has moderate positive loadings with bryophytes (0.554). Negative loadings with trees and forbs. So this seems to be a moss-based component, though moss and trees can coexist.   
 
 ##### 
 
@@ -376,54 +290,6 @@ loadings
 ```
 
 ##------
-
-## Quick interpretation:
-
-This output shows the correlations between the original vegetation
-variables (X variables) and the principal components. Because PCA was
-based on the correlation matrix, the variables are already standardized,
-so no additional scaling is necessary. The values in the table represent
-how strongly each original variable is correlated with each principal
-component. These correlations are often used to interpret what
-ecological gradient each component represents.
-
-It is important to note that these correlations differ from the
-“loadings” shown earlier by summary(veg.pca, loadings = TRUE). In the
-summary output, the values reported are the eigenvectors, which describe
-the mathematical direction of each principal component. In contrast, the
-table shown here contains the correlations between variables and
-components, which are often more intuitive for ecological
-interpretation.
-
-Looking at the results, Comp.1 shows the strongest relationships with
-the main vegetation structure variables. May vegetation cover (0.85),
-May vegetation height (0.85), June vegetation cover (0.87), and June
-vegetation height (0.76) all correlate strongly and positively with this
-component. Grass (0.61) and trees (0.49) also show positive
-correlations, while bare ground (−0.74) and rocks (−0.52) show strong
-negative correlations. This indicates that the first principal component
-represents a gradient from densely vegetated sites with tall plant cover
-to open sites characterized by bare ground and rocky substrate.
-
-The second component (Comp.2) reflects differences in ground cover
-composition. Bare ground (0.50) and shrubs (0.64) correlate positively
-with this component, while grass shows a strong negative correlation
-(−0.71). This suggests that Comp.2 distinguishes areas dominated by
-shrubs and exposed soil from areas dominated by grasses.
-
-The third component (Comp.3) highlights variation among specific plant
-groups. Bryophytes correlate strongly positively (0.63), while trees
-correlate strongly negatively (−0.68) and forbs moderately negatively
-(−0.40). This suggests that Comp.3 may represent a vegetation
-composition gradient involving bryophytes versus woody vegetation or
-other plant types.
-
-Overall, these correlations reinforce the interpretation that the first
-principal component captures the dominant vegetation density gradient in
-the dataset, while the second and third components describe additional
-variation related to vegetation composition and ground cover types.
-
-##-----
 
 Let's calculate the variances, percent variances, and cumulative percent
 variances and put these together using bind. round() these using d=2
@@ -451,28 +317,12 @@ plot(veg.pca$sdev^2, type = "b", pch = 16, xlab = "Component number",
 ylab = "Eigenvalue", main = "Scree plot for x-variables of veg data")
 ```
 
-#Interpretation so far -----
-
-The results show that the first principal component explains the largest
-portion of the variation, with a variance of 4.33, accounting for 39.33%
-of the total variance. The second component explains 16.08%, and the
-third explains 11.91%. Together, the first three components account for
-67.31% of the total variation, indicating that much of the structure in
-the vegetation data can be summarized with just a few axes. Including
-the fourth component increases the cumulative variance explained to
-77.24%, and the first six components together explain about 91.18% of
-the total variance. After this point, each additional component
-contributes only a very small amount of additional variation.
-
-The scree plot visualizes this pattern by plotting the eigenvalues of
-each component. The plot shows a steep drop between the first and second
-components, followed by a gradual flattening of the curve. This pattern
-indicates that the first component captures a major underlying gradient
-in the data, while later components represent progressively smaller
-sources of variation. The curve begins to level off around components
-three or four, suggesting that only the first few components capture
-meaningful structure in the dataset, while the remaining components
-mostly reflect minor variation or noise.
+Notes: 
+- PC1 has a variance of 4.33 and accounts for 39.33% of total variance. 
+- PC2 explains 16.08%.
+- PC3 explains 11.91%. 
+- PC1 - 3 accounts for 67.31 of variation. 
+- The scree plot shows a steep "elbow" drop between the first and second components, followed by a gradual decline. Clearly the first component captures most of the variance. 
 
 ## ------
 
@@ -498,24 +348,7 @@ text(loadings[, 1], loadings[, 2], labels = colnames(xdata), pos = 4, cex = 0.7)
 
 ##----
 
-##Interpretation so far:
-
-In the biplot, the direction and length of each arrow show how strongly
-each variable influences the position of sites in the ordination space.
-Sites located in the direction of a particular arrow tend to have higher
-values for that variable. For example, sites positioned toward the right
-side of the plot tend to have higher vegetation cover, height, and grass
-or tree presence, while sites toward the left side tend to have more
-bare ground and rock cover.
-
-In the second plot, along Component 1, the vegetation structure
-variables (May vegetation cover, May vegetation height, June vegetation
-cover, and June vegetation height) cluster strongly on the right side.
-Grass and trees also fall on this side. In contrast, bare ground and
-rocks lie on the left side, indicating that these variables are
-negatively associated with the vegetation structure variables. This
-confirms that Component 1 represents a gradient from densely vegetated
-sites to open sites characterized by exposed soil and rocky substrate.
+Notes: biplots visualize via arrow direction and length how strongly each variable influences the positions of sites in the study. Those on the right tended to have higher veg cover, height, and grass. Left arrows indicate the sites had less veg cover and more bare ground and/or rocks. This plot is messy but the second one shows that may and june veg cover, trees and grass load to the right and bare ground and rocks load to the left. I suppose this could be interpreted to mean that vegetation structure (presence?) is less loaded with ground and rocks and bryophytes. So from right to left, a gradient of densely vegetated sites to less vegetated ones. 
 
 ##----
 
@@ -684,26 +517,13 @@ round(cor(veg.fac1$scores, veg.fac1$scores), 2)
 
 ##------
 
-#Summary and interpretation so far Here, you moved from PCA into a two
-factor solution using the psych package, motivated by the scree plot and
-the dominance of the first two components. Using principal(xdata,
-nfactors = 2, rotate = "none", covar = FALSE, cor = "cor", scores =
-TRUE), you fit two orthogonal factors based on the Pearson correlation
-matrix and computed regression factor scores. The factor loadings show
-Factor 1 capturing the vegetation structure gradient, with strong
-positive loadings for May and June cover and height and strong negative
-loadings for bare ground and rocks. Factor 2 captures the secondary
-composition contrast, with shrubs and bare ground loading positively and
-grass loading strongly negatively. You then examined communalities and
-uniquenesses to see which variables are well explained by the two factor
-model. Vegetation structure variables, grass, and bare ground have high
-communalities, meaning the two factors explain much of their variance,
-while bryophytes and forbs have very high uniqueness, meaning they are
-poorly captured by this two factor structure and likely reflect more
-localized or independent variation. This sets you up to decide whether
-rotation would make interpretation cleaner, and whether two factors are
-adequate for your goals versus adding a third factor to better represent
-those weaker, more independent plant groups.
+Notes: 
+
+- Factor 1 represents a vegetation structure gradient, with strong positive loadings for May and June vegetation cover and height, and strong negative loadings for bare ground and rocks.
+- Factor 2 represents a secondary vegetation composition contrast, with shrubs and bare ground loading positively and grass loading strongly negatively.
+- Communalities and uniqueness values were examined to assess how well variables were explained by the two factor model.
+- Vegetation structure variables, grass, and bare ground show high communalities, indicating the two factors explain a large portion of their variance.
+- Bryophytes and forbs show high uniqueness, suggesting they are poorly captured by the two factor structure and likely represent more localized or independent variation.
 
 ##-----
 
@@ -816,40 +636,6 @@ the number of x variables, similar to the result we have above.
 ```{r}
 sum(commonbyX) + sum(uniquebyX)
 ```
-
-##Summary and interpretation so far ------
-
-First, you standardized the X variables with scale(). That matters
-because your factor model is based on the correlation matrix, which
-treats each variable as having variance 1. You then confirmed the
-weights matrix is 11 by 2, meaning there is one regression weight per
-variable per factor. Multiplying the standardized data by these weights
-(Xscaled %\*%
-veg.fac1$weights) reproduced the factor scores exactly, matching veg.fac1$scores.
-That is the key takeaway: the scores are not mysterious outputs, they
-are a weighted combination of standardized variables.
-
-Next, you hand computed how much variance the retained factors explain.
-Squaring and summing the loadings for PC1 gave 4.326, and for PC2 gave
-1.768. Those are the eigenvalue like sums of squared loadings for each
-factor, and they tell you how much of the total standardized variance
-each factor accounts for. Since total variance is 11, the two factor
-solution explains 6.094 out of 11, leaving 4.906 as residual or unique
-variance not explained by the two factors.
-
-Finally, you broke that down by variable. For each X variable, the
-communality is PC1 squared plus PC2 squared, which matches the h2 column
-in the output. High communalities mean the two factor model captures
-most of that variable’s variance. In your results, the vegetation
-structure variables and bare ground and grass are well captured, with
-communalities around 0.74 to 0.87. In contrast, bryophytes and forbs
-have very low communalities, about 0.13 and 0.12, meaning most of their
-variance is uniqueness and not represented well by just two factors.
-That is the warning flag before rotations: the two factor solution is
-doing a good job summarizing the main vegetation structure gradient, but
-it is not doing much for bryophytes and forbs, which may require a
-different factor structure or an additional factor if you want those
-groups represented.
 
 ##------
 
@@ -1005,18 +791,12 @@ uniquebyX
 sum(uniquebyX)
 ```
 
-#Summary and intepretation so far:
-
-This section applies a varimax rotation, which is an orthogonal rotation
-used to make factor structures easier to interpret. Varimax works by
-maximizing the variation in squared factor loadings so that variables
-tend to load either strongly or weakly on a factor rather than
-moderately on several factors. In practice, this pushes loadings closer
-to 0 or ±1, producing a clearer separation of variables among factors.
-After rotation, the two factors are referred to as RC1 and RC2, but they
-still represent the same total variance as the unrotated solution
-because orthogonal rotations only redistribute variance between factors
-rather than changing the total explained variance.
+Notes:
+Further orthogonal rotations can be done with a specific goal for the simple structure, but
+again using orthogonal rotations only. The factors will remain uncorrelated as with the
+PCA, and the pattern=structure=simple correlations. Varimax maximizes variation in squared factor loadings. Rotate so that the variation of the squared factor loadings is maximized. Maximum variation occurs when factor
+loadings are separated into being either close to 0 or close to 1 and -1. In practice, this pushes loadings closer to 0 or ±1, producing a clearer separation of variables among factors. After rotation, the two factors are referred to as RC1 and RC2, but they still represent the same total variance as the unrotated solution
+because orthogonal rotations only redistribute variance between factors rather than changing the total explained variance. 
 
 Key numerical results
 
@@ -1038,7 +818,7 @@ the unrotated solution since rotation redistributes loadings but does
 not change how much total variance each variable shares with the factor
 model.
 
-Interpretation of the rotated factors
+Interpretation of the rotated factors:
 
 The first rotated factor (RC1) primarily represents overall vegetation
 structure and seasonal vegetation growth. Several vegetation cover and
@@ -1088,7 +868,7 @@ trees: h² = 0.29
 
 These variables remain largely unique or independent of the dominant
 vegetation gradients, suggesting they either vary independently of the
-main vegetation structure or would require additional factors to be well
+main vegetation structure or would require additional factors to be better
 represented.
 
 Overall interpretation
@@ -1097,9 +877,9 @@ The varimax rotation clarifies the ecological meaning of the factors.
 The analysis suggests two main underlying gradients in the vegetation
 dataset:
 
-Vegetation growth and canopy structure represented by RC1
+Vegetation growth and canopy structure are represented by RC1
 
-Ground cover composition (grass versus bare or woody surfaces)
+Ground cover composition (grass versus bare or woody surfaces) are
 represented by RC2
 
 Together, these two factors explain just over half of the total variance
@@ -1244,57 +1024,22 @@ uniquebyX
 sum(commonbyX)
 ```
 
-## Summary and interpretation so far -----
+Notes: 
 
-This section applies a varimin rotation, which is another orthogonal
-rotation of the same two factor solution. Unlike varimax, which tries to
-push loadings toward extreme values near 0 or ±1, varimin minimizes the
-variance of the factor loadings across variables. In effect, it spreads
-loadings more evenly across factors rather than concentrating them.
-Importantly, because this is still an orthogonal rotation, the two
-factors remain uncorrelated, and the total amount of variance explained
-by the model does not change. The model still explains 6.094 of the 11
-total units of standardized variance (55.4%), leaving 4.906 as
-uniqueness or unexplained variance.
+- Varamin rotation is still an orthogonal rotation. Unlike varimax, which pushes loadings toward extreme values (near 0 or ±1), varimin minimizes the variance of loadings, spreading them more evenly across factors.
+- The model explains 6.094 of 11 standardized variance units (55.4%), leaving 4.906 units as uniqueness or unexplained variance.
+- The rotation redistributes variance between factors:
 
-Numerically, the rotation redistributes variance between the two
-factors. Under the varimin solution, RC1 explains 4.161 units of
-variance (37.8%), while RC2 explains 1.933 units (17.6%). This contrasts
-with the previous varimax solution, where variance was more evenly split
-between the factors. Here, the rotation concentrates more explanatory
-power into RC1, making it a stronger general factor while RC2 becomes
-more secondary.
+RC1: 4.161 units of variance (37.8%)
 
-Looking at the loadings helps clarify what these factors represent. RC1
-now captures a broad vegetation and ground structure gradient. Several
-vegetation structure variables load strongly on it, including May and
-June vegetation cover and height (0.64 to 0.77). Grass also loads
-strongly and positively (0.77), while bare ground (−0.84) and rocks
-(−0.55) load negatively. This suggests RC1 reflects a general gradient
-from vegetated surfaces to exposed substrate. Sites with high RC1 scores
-tend to have dense vegetation and grass cover, while low RC1 scores
-correspond to bare ground or rocky surfaces.
+RC2: 1.933 units of variance (17.6%)
 
-The second factor (RC2) now represents a weaker secondary gradient. It
-captures variation related to vertical vegetation structure, with shrubs
-loading strongly (0.62) and June vegetation height and cover also
-showing moderate loadings (0.56 and 0.58). Grass loads negatively on
-this factor (−0.53), suggesting RC2 contrasts shrub or taller vegetation
-structure with grass dominated ground cover.
+- Compared with the varimax solution, varimin concentrates more variance into RC1, making it a stronger general factor while RC2 becomes more secondary.
 
-As in earlier analyses, some variables remain poorly represented by the
-two factor model. Bryophytes (h² ≈ 0.13), forbs (h² ≈ 0.12), and rocks
-(h² ≈ 0.30) have low communalities, meaning most of their variance is
-unique and not captured by the dominant vegetation gradients. This
-indicates that these vegetation types vary somewhat independently of the
-main structural patterns in the dataset.
+- RC1 represents a broad vegetation and ground structure gradient. Strong positive loadings on RC1 include May and June vegetation cover and height (0.64–0.77) and grass (0.77).
 
-Overall, the varimin rotation shows the same underlying dimensional
-structure as the earlier solutions but distributes the loadings
-differently. Instead of separating variables cleanly into distinct
-factors, it produces a solution where one dominant factor summarizes the
-general vegetation versus exposed ground gradient, while the second
-factor captures a weaker structural contrast among vegetation types.
+- Bare ground (−0.84) and rocks (−0.55) load negatively on RC1, indicating a gradient from dense vegetation to exposed substrate. Sites with high RC1 scores tend to have dense vegetation and grass cover, while low RC1 scores correspond to bare or rocky surfaces. Shrubs load strongly (0.62) on RC2, while June vegetation height and cover load moderately (0.56 and 0.58). Grass loads negatively on RC2 (−0.53), suggesting a contrast between shrub or taller vegetation and grass dominated ground cover. Some variables remain poorly represented by the two factor model, including bryophytes (h² ≈ 0.13), forbs (h² ≈ 0.12), and rocks (h² ≈ 0.30). These low communalities indicate that much of their variance is unique and not captured by the dominant vegetation gradients.
+
 
 ##### TODO: veg.fac4: Add in the code for `equamax` orthogonal rotation here (not graded)
 
@@ -1410,55 +1155,32 @@ sum(uniquebyX)   # should equal total_uniqueness
 sum(commonbyX) + sum(uniquebyX)
 ```
 
-###Summary and Interpretation:
+Notes: 
+- Equamax attempts to simplify the structure across both variables and factors, rather than concentrating loadings in one factor or spreading them evenly. Because the rotation is orthogonal, the two factors remain uncorrelated, and the total variance explained by the model remains unchanged.
+- The model explains 6.094 of the 11 standardized variance units (55.4%), leaving 4.906 units as uniqueness or unexplained variance.
+- Factor 1 represents a vegetation structure gradient, with strong positive loadings for May and June vegetation cover and height (0.85–0.92). Bare ground, rocks, and bryophytes load negatively on Factor 1, indicating that lower scores correspond to exposed substrate or sparse vegetation.
+- Factor 2 represents a ground cover composition contrast, with grass loading strongly and positively (0.92) and bare ground loading strongly negatively (−0.81).
+- Shrubs and rocks also load negatively on Factor 2, suggesting a contrast between grass dominated surfaces and areas with bare ground, shrubs, or rocky substrate.
+- Communalities and uniqueness values were examined to assess how well variables were explained by the two factor model.
+- Vegetation structure variables, grass, and bare ground show high communalities, indicating the two factors explain a large portion of their variance.
+- Bryophytes, forbs, and rocks show low communalities, meaning much of their variance is unique and not captured by the dominant gradients.
+- Overall, the equamax rotation highlights two main ecological gradients:
+Vegetation density and seasonal growth (Factor 1)
+Ground cover composition, especially grass versus bare or shrub dominated surfaces (Factor 2).
 
-This section applies an equamax rotation, which is another orthogonal
-rotation of the same two factor model. Equamax is designed as a
-compromise between varimax and quartimax style rotations. Rather than
-strongly concentrating loadings into a single factor or evenly spreading
-them across factors, it attempts to simplify the structure both across
-variables and across factors. Because this is still an orthogonal
-rotation, the two factors remain uncorrelated, and the total variance
-explained by the two factor model does not change. As in the previous
-solutions, the model explains 6.094 of the 11 total standardized
-variance units (55.4%), leaving 4.906 as uniqueness or unexplained
-variance.
+Summary of all three rotations: 
 
-Looking at the loadings, the first rotated component (RC1) clearly
-represents a vegetation structure gradient. Several vegetation variables
-load strongly and positively on RC1, including May vegetation cover
-(0.86), May vegetation height (0.85), June vegetation cover (0.92), and
-June vegetation height (0.86). These strong positive loadings indicate
-that RC1 reflects sites with dense and tall vegetation across the
-growing season. Negative loadings for bare ground (−0.38), rocks
-(−0.37), and bryophytes (−0.34) suggest that lower RC1 values correspond
-to sites dominated by exposed substrate or sparse vegetation.
+- In every solution, the model explains 6.094 of the 11 standardized variance units (55.4%), leaving 4.906 units as uniqueness or unexplained variance.
+- Factor 1 consistently represents a vegetation structure/presence gradient.
+- High positive loadings for May and June vegetation cover and height indicate sites with dense and tall vegetation.
+- Bare ground and rocks load negatively, indicating that lower factor scores correspond to exposed substrate or sparse vegetation.
+- Factor 2 consistently represents a ground cover composition contrast.
+- Grass loads strongly and positively, while bare ground and shrubs load negatively, distinguishing grass dominated surfaces from bare or shrub dominated areas.
 
-The second rotated component (RC2) captures a different gradient related
-primarily to ground cover composition. Grass loads very strongly and
-positively on RC2 (0.92), while bare ground loads strongly in the
-opposite direction (−0.81). Shrubs (−0.56) and rocks (−0.40) also
-contribute to the negative side of this axis. This indicates that RC2
-distinguishes grass dominated surfaces from areas characterized by bare
-ground, shrubs, or rocky substrate.
+- Under varimax, variance seemed balanced between the two factors (RC1 = 3.275, RC2 = 2.819). 
+- Under varamin, more variance was loaded into the first factor (RC1 = 4.161; RC2 = 1.933), suggesting a strong dominant vegetation gradient with a weaker secondary factor.
+- Under equamax, factors remained similar to the varimax solution but with slightly different loading distributions. 
 
-The communality values show how well the two factor solution explains
-each variable. Vegetation structure variables are well represented, with
-communalities around 0.74 to 0.87, meaning most of their variance is
-captured by the factors. Grass and bare ground are also strongly
-represented. In contrast, bryophytes (h² ≈ 0.13), forbs (h² ≈ 0.12), and
-rocks (h² ≈ 0.30) have low communalities, indicating that much of their
-variance remains unique and is not well explained by the two dominant
-gradients.
-
-Overall, the equamax rotation reveals essentially the same ecological
-structure observed in the previous rotations but with a slightly clearer
-separation of the major gradients. The first factor summarizes overall
-vegetation density and seasonal growth, while the second factor captures
-ground cover composition, particularly the contrast between grass and
-bare or shrub dominated surfaces. Together these two factors describe
-the primary structural patterns in the vegetation dataset while leaving
-several minor vegetation types only weakly represented.
 
 ####-------
 
@@ -1553,54 +1275,15 @@ legend("topright",
 
 
 ```
+For this assignment, only the first two factors were kept, which together explained 55.4% of total variance in the original dataset. In Exercise 2, we used higher variance thresholds (70 and 80%). Though Exercise 2 focused on PCA alone, PCA was the foundation for factor analysis here. So, when comparing things, retaining only two factors seems to exclude a fair bit more of variance that may have otherwise been better explained by adding more factors. In keeping only the first 2 factors, nearly 45% of total variation is not explained, which indicates a much more simplified structure overall. Despite this, the consistently strong factor loadings for certain variables (vegetation variables in particular) suggest that the two retained factors still capture strong gradient patterns in the dataset. However, the relatively large proportion of unexplained variance suggests that additional factors could potentially provide a more holsitic representation of variable spread among sites.
 
-In this exercise, only the first two factors were retained, which
-together explain approximately 55.4% of the total variance in the
-original dataset. This value is noticeably lower than the \~70%
-cumulative variance threshold we used in Exercise 2. Retaining only two
-factors therefore suggests that nearly 45% of the total variation is not
-represented, which may indicate that the downstream analyses are
-somewhat simplified relative to the full structure of the data.
+For this dataset, we applied a few stats tests and plots to suggest that more than two factors could reasonably be retained. In the PCA section, the scree plot shows a clear "elbow" drop between PC1 and PC2, indicating that PC1 explained a large proportion of variance. However, the decline in eigenvalues here after PC2 is more gradual and does not drop off sharply when compared with the dataset in Exercise 2. This pattern suggests that additional components may still contain meaningful variation or represent more subtle patterns in vegetation.
 
-For this dataset, we applied a few stats tests and plots to suggest that
-more than two factors could reasonably be retained. First, the scree
-plot shows a clear "elbow" drop between PC1 and PC2, indicating a
-dominant primary "power" exhibited by PC1. However, the decline in
-eigenvalues after PC2 remains relatively gradual rather than leveling
-off sharply (which was not the case in Exercise 2). This pattern
-suggests that additional components may still contain meaningful
-variation.
+We also considered the cumulative variance thresholds here as a guide for determining the number of retained factors. If a 70% cumulative variance threshold is applied, the first four components together explain 77.2% of the variance, exceeding this guideline. In contrast, an 80% threshold would require five components, which together explain 84.9% of the variance. Though PCA components and factors are not the same, these thresholds still provide a benchmark for evaluating how much of the variation could be represented by additional dimensions. 
 
-The Kaiser criterion (retaining components with eigenvalues greater than
-1) provides stronger evidence for retaining more components. In this
-dataset, the first four principal components all have eigenvalues
-greater than 1 (4.33, 1.77, 1.31, and 1.09). According to this rule,
-four components should therefore be retained. --\> not sure if this
-needs to be here, as I can't remember if we talked about the Kaiser
-criterion (need to look at class notes)
+We also applied the broken stick method. In this dataset, only the first component clearly exceeds the broken stick expectation, while the second and third components fall slightly below their expected values. Interestingly, this would suggest that only 1 component should be retained. While this indicates that the dataset is dominated by a single strong gradient, additional components may still capture secondary ecological patterns that were otherwise excluded. 
 
-A similar conclusion arises when considering cumulative variance
-thresholds. If a 70% cumulative variance threshold is applied, the first
-four components together explain 77.2% of the variance, exceeding this
-guideline. In contrast, an 80% threshold would require five components,
-which together explain 84.9% of the variance.
-
-Finally, the broken stick method provides another comparison by
-evaluating whether observed variance exceeds what would be expected
-under a random distribution of variance among components. In this
-dataset, only the first component clearly exceeds the broken stick
-expectation, while the second and third components fall slightly below
-their expected values. This result indicates that the dataset is
-dominated by a single strong gradient, although additional components
-may still capture secondary ecological patterns.
-
-Taken together, these criteria suggest that retaining only two factors
-is somewhat conservative. While two factors capture the dominant
-vegetation gradient and may improve interpretability for the purposes of
-the factor analysis exercise, several statistical criteria (particularly
-the Kaiser rule and cumulative variance thresholds) indicate that three
-or four components could also be reasonably justified for representing
-the structure of the data.
+Taken together, these criteria suggest that retaining only two factors is somewhat conservative. While two factors capture vegetation patterns, the diagnostic tests indicate that three or four components could also be reasonably justified for representing the structure of the data, even if they capture weaker patterns. 
 
 **End of Question 1**
 
@@ -1608,23 +1291,10 @@ the structure of the data.
 is the loading value for Factor 1 with `mayvgcov`? What is the structure
 value for this also? Explain what these values mean.
 
-For the unrotated factor pattern (veg.fac1), the loading value for
-Factor 1 with mayvgcov is approximately 0.81. The structure value for
-this variable is also approximately 0.81.
+The loading value for Factor 1 with mayvgcov (May vegetation cover) in the unrotated factor pattern (veg.fac1) is 0.81, and the structure value is also 0.81. The loading shows the correlation between the variable and the factor, so a value of 0.81 indicates a strong positive relationship between May vegetation cover and Factor 1. This means that sites with higher scores on Factor 1 tend to have higher vegetation cover in May.
 
-The loading represents the correlation between the original variable and
-the latent factor. In this case, a loading of 0.81 indicates a strong
-positive relationship between May vegetation cover (mayvgcov) and
-Factor 1. This means that sites with higher scores on Factor 1 tend to
-have higher vegetation cover in May.
+The structure value represents the correlation between the variable and the factor scores. Because the factors in this analysis are orthogonal via rotation, the structure and loading values are the same. Together, these values show that May vegetation cover is strongly related to Factor 1 and helps underscore the vegetation pattern represented by that factor.
 
-The structure value represents the correlation between the observed
-variable and the factor scores. Because the factors in this analysis are
-orthogonal (uncorrelated), the structure matrix is identical to the
-loading matrix, resulting in the same value. Therefore, both the loading
-and structure values indicate that mayvgcov contributes strongly to the
-first factor and is an important component of the underlying vegetation
-gradient represented by Factor 1.
 
 ```{r}
 # extract the mayvgcov loading 
