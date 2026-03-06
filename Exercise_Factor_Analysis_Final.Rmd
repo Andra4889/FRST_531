@@ -1323,30 +1323,11 @@ varimax, veg.fac3 varimin, and veg.fac4 equamax), the varimax rotation
 (veg.fac2) produced the most interpretable and simplest factor
 structure.
 
-The varimax rotation maximizes the variance of squared loadings within
-each factor, which tends to push loadings toward values close to 0 or
-±1. This produces a clearer separation of variables among factors,
-making interpretation easier. In the varimax solution, the first rotated
-component (RC1) is strongly associated with the vegetation structure
-variables, including May vegetation cover, May vegetation height, June
-vegetation cover, and June vegetation height. The second component (RC2)
-clearly captures variation in ground cover composition, with strong
-loadings for grass and bare ground in opposite directions. This
-separation creates two ecologically interpretable gradients: one
-representing overall vegetation density and productivity, and the other
-representing ground cover composition.
+Technically, all three rotations aim to simplify interpretability, but they do things differently, and our choice of varimax was based on how it simplified this particular dataset. In general, varimax rotations maximize the variance of squared loadings within each factor, which tends to push loadings toward values close to 0 or ±1. In practice, this produces a clearer separation of variables among factors, making interpretation more straightforward. In the varimax solution, the first rotated component (RC1) is strongly associated with the vegetation structure variables, including May vegetation cover, May vegetation height, June vegetation cover, and June vegetation height. The second component (RC2) clearly captures variation in ground cover composition, with strong loadings for grass and bare ground in opposite directions. This separation creates two ecologically interpretable gradients: one representing overall vegetation density and productivity, and the other representing ground cover composition.
 
-In contrast, the unrotated solution (veg.fac1) produced factors that
-were harder to interpret because several variables loaded moderately on
-both factors. Unrotated factors maximize variance explained rather than
-interpretability, which often leads to factors that combine multiple
-ecological gradients.
+In the plots we created below, the varimin plot, many variables point toward RC1, meaning most variables load moderately or strongly on the same factor. The second factor receives relatively few strong loadings. This creates a dominant factor and weaker secondary factor, which is harder to interpret because the variables are not clearly separated into two groups. In contrast, the varimin rotation places many variables on the same factor, resulting in a dominant first factor and weaker separation among variables. Although equamax produced a similar pattern as varimax in terms of interpretability, several variables showed moderate loadings on both factors, resulting in a slightly less distinct separation of variables among factors. 
 
-The varimin rotation (veg.fac3) minimized the variance of loadings,
-resulting in one dominant factor that captured much of the overall
-variance while the second factor contained weaker and more diffuse
-loadings. This produced a less balanced and less interpretable
-structure.
+The varimin rotation (veg.fac3) minimized the variance of loadings, resulting in one dominant factor that captured much of the overall variance while the second factor contained weaker and more diffuse loadings. This produced a less balanced and less interpretable structure.
 
 The equamax rotation (veg.fac4) attempted to balance the goals of
 varimax and quartimax rotations but still produced several moderate
@@ -1432,7 +1413,45 @@ correspond to areas with more bare ground or woody vegetation. For this
 reason, Factor 2 can be labeled “Ground Cover Composition.”
 
 ```{r}
-# your codes here (if applicable)
+
+#visualization plots
+par(mfrow = c(2,2))
+
+fa.diagram(veg.fac1, main = "No Rotation")
+fa.diagram(veg.fac2, main = "Varimax")
+fa.diagram(veg.fac3, main = "Varimin")
+fa.diagram(veg.fac4, main = "Equamax")
+
+par(mfrow = c(1,1))
+
+plot_loadings <- function(fa_object, title){
+
+  L <- as.matrix(fa_object$loadings)
+
+  plot(L[,1], L[,2],
+       xlim = c(-1,1),
+       ylim = c(-1,1),
+       xlab = "Factor 1",
+       ylab = "Factor 2",
+       main = title,
+       pch = 19)
+
+  abline(h=0, v=0, lty=2)
+
+  text(L[,1], L[,2],
+       labels = rownames(L),
+       pos = 3,
+       cex = 0.8)
+}
+
+par(mfrow=c(2,2))
+
+plot_loadings(veg.fac1, "No Rotation")
+plot_loadings(veg.fac2, "Varimax")
+plot_loadings(veg.fac3, "Varimin")
+plot_loadings(veg.fac4, "Equamax")
+
+par(mfrow=c(1,1))
 ```
 
 **End of Question 3**
