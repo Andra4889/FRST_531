@@ -207,7 +207,8 @@ the summary of key statistics.
 
 ```{r}
 #install.packages("pastecs")
-
+#install.packages("psych")
+#library(psych)
 #library(pastecs) # won't work if you have not installed the package first!!
 #round(stat.desc(xdata), 2) # get some basic descriptive stats.
 summary(xdata) 
@@ -1323,94 +1324,52 @@ varimax, veg.fac3 varimin, and veg.fac4 equamax), the varimax rotation
 (veg.fac2) produced the most interpretable and simplest factor
 structure.
 
-Technically, all three rotations aim to simplify interpretability, but they do things differently, and our choice of varimax was based on how it simplified this particular dataset. In general, varimax rotations maximize the variance of squared loadings within each factor, which tends to push loadings toward values close to 0 or ±1. In practice, this produces a clearer separation of variables among factors, making interpretation more straightforward. In the varimax solution, the first rotated component (RC1) is strongly associated with the vegetation structure variables, including May vegetation cover, May vegetation height, June vegetation cover, and June vegetation height. The second component (RC2) clearly captures variation in ground cover composition, with strong loadings for grass and bare ground in opposite directions. This separation creates two ecologically interpretable gradients: one representing overall vegetation density and productivity, and the other representing ground cover composition.
+Technically, all three rotations aim to improve interpretability, but they do things differently, and our choice of varimax was based on how it simplified this particular dataset. We chose varimax, which maximizes the variance of squared loadings within each factor, and pushes loading values closer to 0 or +/-1. This produces a clearer separation of variables among factors, making interpretation more straightforward. In the varimax solution, the first rotated component (RC1) is strongly associated with the vegetation variables, including May vegetation cover, May vegetation height, June vegetation cover, and June vegetation height. The second component (RC2) clearly captures variation in ground cover composition, with strong loadings for grass and bare ground in opposite directions. This separation creates two ecologically interpretable gradients: one representing overall vegetation density and productivity, and the other representing ground cover composition.
 
 In the plots we created below, the varimin plot, many variables point toward RC1, meaning most variables load moderately or strongly on the same factor. The second factor receives relatively few strong loadings. This creates a dominant factor and weaker secondary factor, which is harder to interpret because the variables are not clearly separated into two groups. In contrast, the varimin rotation places many variables on the same factor, resulting in a dominant first factor and weaker separation among variables. Although equamax produced a similar pattern as varimax in terms of interpretability, several variables showed moderate loadings on both factors, resulting in a slightly less distinct separation of variables among factors. 
 
-The varimin rotation (veg.fac3) minimized the variance of loadings, resulting in one dominant factor that captured much of the overall variance while the second factor contained weaker and more diffuse loadings. This produced a less balanced and less interpretable structure.
+The varimin rotation (veg.fac3) minimized the variance of loadings, resulting in one dominant factor that captured much of the overall variance while the second factor contained weaker and more spread out loadings. This produced a less balanced and less interpretable result.
 
-The equamax rotation (veg.fac4) attempted to balance the goals of
-varimax and quartimax rotations but still produced several moderate
-cross-loadings among variables. While interpretable, the resulting
-structure was less clearly separated than in the varimax solution.
+The equamax rotation (veg.fac4) produced several moderate cross-loadings among variables. While somewhat interpretable, the resulting structure was less clearly separated than in the varimax solution.
 
 **b. Use the factor structure (correlations between original variables
 and Factors) to decide which variables relate to each factor. Remember
 to state what correlation cutoff** you are using (e.g., \|r\|\>= 0.5 or
 \|r\|\>= 0.8); and **why** you made this choice.
 
-A cutoff of \|r\| ≥ 0.5 was used to identify meaningful relationships
-between variables and factors. This threshold was selected because
-correlations above approximately 0.5 represent moderately strong
-relationships and are commonly used in exploratory factor analysis to
-identify variables that clearly load on a factor.
+```{r}
+veg.fac2$Structure
+```
 
-In this dataset, several variables show strong loadings near or above
-this level, particularly the vegetation structure variables (e.g., May
-and June vegetation cover and height) and ground cover variables such as
-grass and bare ground. Using a threshold of \|r\| ≥ 0.5 allows these
-dominant relationships to be clearly identified while excluding weaker
-associations that could obscure interpretation of the factor structure.
+In looking at the factor structure and correlations, and knowing that we're trying to understand patterns in the data, we opted for a \|r\| ≥ 0.5 cutoff. Several variable correlations exceed 0.8, but most do not, and excluding them would thus remove variables that contribute to a deeper understanding of patterns. For instance, may vegetation height (0.797 on RC1) would not be included if we opted for the \|r\| ≥ 0.8 cutoff. A \|r\| ≥ 0.5 allows for more variables to be considered in interpreting patterns. In this dataset, several variables show strong loadings near or above this level, particularly the vegetation structure variables (May and June vegetation cover and height) and ground cover variables such as grass and bare ground.
 
-A stricter cutoff such as \|r\| ≥ 0.8 would exclude variables that still
-meaningfully contribute to the ecological gradients represented by the
-factors, particularly those with moderate but interpretable loadings.
-Conversely, a lower threshold such as \|r\| ≥ 0.3 would include many
-weak correlations and reduce the clarity of the factor interpretation.
-Therefore, \|r\| ≥ 0.5 provides a reasonable balance between capturing
-meaningful relationships and maintaining a simple, interpretable factor
-structure.
+In fact, given these correlations, we might even be tempted to suggest a \|r\| ≥ 0.4 threshold. While 0.5 is useful to identify the strongest variables, this factor structure reveals correlations that come close to this value, but do not exceed it for either factor, including bryophytes, forbs, rocks, and trees. In particular, shrubs (-0.497 on RC2) and trees (0.492 on RC2) fall just below the 0.5 threshold but appear to contribute to the same ground cover pattern captured by Factor 2. A 0.4 threshold therefore provides a reasonable compromise, capturing both strong and moderate relationships while maintaining a clear interpretation of the underlying ecological patterns. (But that's just our opinion!)
 
-Using the varimax rotation (veg.fac2), the following variables met the
-\|r\| ≥ 0.5 threshold.
+Using the varimax rotation (veg.fac2), the following variables met the \|r\| ≥ 0.5 threshold.
 
-Factor 1 (RC1) Variables strongly associated with Factor 1 include:
+Variables strongly associated with Factor 1 include:
 
--   May vegetation cover (mayvgcov)
--   May vegetation height (mayvght)
--   June vegetation cover (junvgcov)
--   June vegetation height (junvght)
+- May vegetation cover (mayvgcov, r = 0.807)
+- May vegetation height (mayvght, r = 0.797)
+- June vegetation cover (junvgcov, r = 0.889)
+- June vegetation height (junvght, r = 0.840)
 
-These variables all load strongly and positively on the first factor,
-indicating that Factor 1 represents a gradient of overall vegetation
-density and structure across the growing season.
+All four of these variables show strong positive correlations with RC1 and relatively weaker correlations with RC2. Since these are vegetation cover and height variables measured during May and June, Factor 1 likely represents an early-season gradient of vegetation abundance and growth in the early summer season (though the dataset does not include later vegetation records, so we can't say that with total certainty). Sites with high scores on this factor likely have greater vegetation cover and taller vegetation during both months.
 
-Factor 2 (RC2) Variables strongly associated with Factor 2 include: -
-Grass (grass) - Bare ground (baregrnd) - Shrubs (shrubs)
+Variables strongly associated with Factor 2 include: 
+- Grass (grass, r = 0.930)
+- Bare ground (baregrnd, r = -0.859)
 
-Grass loads strongly and positively on this factor, while bare ground
-and shrubs load negatively, indicating that Factor 2 represents
-variation in ground cover composition, distinguishing grass-dominated
-sites from areas with more exposed soil or shrub cover. Several
-variables, including bryophytes, forbs, rocks, and trees, do not exceed
-the \|r\| ≥ 0.5 threshold for either factor. This suggests that these
-variables contribute less strongly to the two-factor structure and may
-represent more localized or independent variation in vegetation
-composition.
+Grass loads strongly and positively on this factor, while bare ground and shrubs load negatively, indicating that Factor 2 likely represents variation in ground cover composition, distinguishing grass-dominated sites from areas with more exposed soil or shrub cover. 
 
 **c. Add a possible label for each factor (e.g., vegetation structure
 might be one factor). Use your answers from part b, but also consider
 whether the correlations are positive or negative between a factor and
 the original variables correlated with it.**
 
-Factor 1 is strongly and positively correlated with May vegetation cover
-(mayvgcov), May vegetation height (mayvght), June vegetation cover
-(junvgcov), and June vegetation height (junvght). These variables all
-describe the amount and vertical structure of vegetation at a site.
-Because these correlations are positive, higher scores on Factor 1
-correspond to sites with greater vegetation cover and taller vegetation
-throughout the growing season. Lower scores on this factor would
-correspond to sites with less vegetation structure and more open ground.
-Therefore, Factor 1 can reasonably be labeled “Vegetation Structure” or
-“Vegetation Density.”
+Factor 1 is strongly and positively correlated with May vegetation cover (mayvgcov), May vegetation height (mayvght), June vegetation cover (junvgcov), and June vegetation height (junvght). These variables all describe the abundance and structure of vegetation at sites. Because these correlations are positive, higher scores on Factor 1 would correspond to sites with greater vegetation cover and taller vegetation. Lower scores on this factor would correspond to sites with less vegetation structure and more open ground. Therefore, Factor 1 could be labeled “Vegetation Density.”
 
-Factor 2 is strongly associated with grass, which loads positively, and
-bare ground and shrubs, which load negatively. This indicates that the
-factor represents a contrast between grass-dominated sites and sites
-characterized by exposed soil or shrub cover. High scores on this factor
-correspond to areas with greater grass cover, while low scores
-correspond to areas with more bare ground or woody vegetation. For this
-reason, Factor 2 can be labeled “Ground Cover Composition.”
+Factor 2 is strongly associated with grass, which loads positively, and bare ground and shrubs, which load negatively. This indicates that the factor represents a contrast between grass-dominated sites and sites with exposed soil or shrub cover. High scores on this factor correspond to areas with greater grass cover, while low scores correspond to areas with more bare ground. For this reason, Factor 2 could be labeled “Ground Cover Composition.”
 
 ```{r}
 
@@ -1466,17 +1425,17 @@ a.  How much of the variability of each of the original X variables is
 -   for both factors combined?
 
 ```{r}
-# Using varamax orthogonal rotation
-L <- as.matrix(veg.fac2$loadings)  # 11 x 2 matrix of loadings (RC1, RC2)
+#using varamax orthogonal rotation
+L <- as.matrix(veg.fac2$loadings)  
 
-# Communality contributions
+#communality contributions
 comm_by_factor <- L^2
 colnames(comm_by_factor) <- c("RC1_h2", "RC2_h2")
 
-# Total communality
+#total communality
 h2_total <- rowSums(comm_by_factor)
 
-# Put into one table
+#put into one table
 comm_table <- data.frame(
   Variable = rownames(L),
   RC1_h2 = round(comm_by_factor[,1], 3),
@@ -1486,38 +1445,18 @@ comm_table <- data.frame(
 
 comm_table
 
-
-
 ```
 
-Note: each squared loading represents the proportion of variance in that
-variable explained by that factor, and the total communality (h²) is the
-combined variance explained by both retained factors.
+Note: each squared loading represents the proportion of variance in that variable explained by that factor, and the total communality (h²) is the combined variance explained by both retained factors.
 
-Factor 1 explains most of the variance in the vegetation structure
-variables. For example, mayvgcov (0.650), mayvght (0.634), junvgcov
-(0.790), and junvght (0.706) all have large contributions from Factor 1.
-In each case, the majority of their variance is captured by this factor,
-indicating that Factor 1 strongly represents overall vegetation
-structure across the two months.
+Factor 1 explains most of the variance in the vegetation structure variables. For example, mayvgcov (0.650), mayvght (0.634), junvgcov (0.790), and junvght (0.706) all have large contributions from Factor 1. In each case, the majority of their variance is captured by Factor 1, indicating that Factor 1 strongly represents overall vegetation structure across the two months.
 
-Factor 2 explains most of the variance in ground surface variables.
-grass (0.865) and baregrnd (0.738) are especially strongly explained by
-Factor 2. These variables have very small contributions from Factor 1
-but large contributions from Factor 2, indicating that this factor
+Factor 2 explains most of the variance in ground surface variables. Grass (0.865) and baregrnd (0.738) are especially strongly explained by Factor 2. These variables have very small contributions from Factor 1 but large contributions from Factor 2, indicating that this factor
 captures variation in ground cover conditions.
 
-Some variables show weaker representation by the two factor solution.
-For example, bryopht (0.132) and forbs (0.122) have very low
-communalities, meaning that most of their variance is not explained by
-the retained factors. Similarly, rocks (0.299) and shrubs (0.415) have
-only moderate communalities, suggesting they are not strongly associated
-with either factor.
+Some variables show weaker representation by the two factor solution. For example, bryopht (0.132), trees (0.292) and forbs (0.122) have very low communalities, meaning that most of their variance is not explained by RC1 or 2. Similarly, rocks (0.299) and shrubs (0.415) have
+only moderate communalities, suggesting they are not strongly associated with either factor.
 
-Overall, the results show that the two-factor solution captures a large
-portion of variance for the main vegetation structure variables and
-ground cover variables, but explains relatively little variation for
-bryophytes and forbs.
 
 b.  How much of the variability of each of the original X variables is
     NOT accounted for (unique variance):
@@ -1526,7 +1465,7 @@ b.  How much of the variability of each of the original X variables is
 -   for both factors combined?
 
 ```{r}
-# starting from the communality table above
+#starting from the communality table above
 unique_table <- data.frame(
   Variable = comm_table$Variable,
   Unique_after_RC1 = round(1 - comm_table$RC1_h2, 3),
@@ -1535,21 +1474,12 @@ unique_table <- data.frame(
 )
 
 unique_table
+
 ```
 
-Looking at the combined unique variance for both factors, several
-variables are well explained by the model. For example, grass (0.134),
-junvgcov (0.127), and baregrnd (0.204) have relatively low unexplained
-variance, meaning most of their variability is captured by the
-two-factor solution. Similarly, mayvgcov (0.214) and mayvght (0.226)
-also show relatively small amounts of unexplained variation.
+Looking at the combined unique variance for both factors, several variables are well explained by the model. For example, grass (0.134), junvgcov (0.127), and baregrnd (0.204) have relatively low unexplained variance, meaning most of their variability is captured here. Similarly, mayvgcov (0.214) and mayvght (0.226) also show relatively small amounts of unexplained variation.
 
-In contrast, some variables retain large amounts of unique variance.
-bryopht (0.868) and forbs (0.878) have very high unexplained
-variability, indicating that the retained factors do not capture the
-main patterns associated with these vegetation types. Rocks (0.701) and
-shrubs (0.585) also show moderate to high unexplained variance,
-suggesting weaker relationships with the main factor structure.
+In contrast, some variables retain large amounts of unique variance. bryopht (0.868) and forbs (0.878) have very high unexplained variability, indicating that the retained factors do not capture the main patterns associated with these vegetation types. 
 
 c.  For all X variables combined, what are the communality and unique
     variances:
@@ -1557,16 +1487,13 @@ c.  For all X variables combined, what are the communality and unique
 -   by each factor
 -   for both factors combined?
 
-#Note from Subhorna: 
-
-
 
 ```{r}
 
-# Eigenvalues from the correlation matrix of numeric X variables
+#eigenvalues from the correlation matrix of numeric X variables
 eigcom <- eigen(cor(xdata, use = "pairwise.complete.obs"))$values
 
-# Communality explained by each retained factor (first two eigenvalues)
+#communality explained by each retained factor (first two eigenvalues)
 comm_F1 <- eigcom[1]
 comm_F2 <- eigcom[2]
 comm_total <- comm_F1 + comm_F2
@@ -1575,7 +1502,7 @@ comm_F1
 comm_F2
 comm_total
 
-# Proportion of variance explained (total variance = number of variables)
+#proportion of variance explained (total variance = number of variables)
 nvar <- ncol(xdata)
 
 prop_F1 <- comm_F1 / nvar
@@ -1586,22 +1513,16 @@ prop_F1
 prop_F2
 prop_total
 
-# Variance remaining (unique / unexplained by the two-factor solution)
+#variance remaining (unique / unexplained by the two-factor solution)
 unique_total <- nvar - comm_total
 unique_prop <- unique_total / nvar
 
 unique_total
 unique_prop
 
-
 ```
 
-From this, Factor 1 explains 39.33% of total variance, while Factor 2
-explains 16.08%. Together this means that 55.40% of total variance is
-explained, leaving 44.60% unexplained.
-
-#Note: I think we need to choose a factor, and then find the individual uniqueness and commonality. This looks right. 
-
+From this, Factor 1 explains 39.33% of total variance, while Factor 2 explains 16.08%. Together this means that 55.40% of total variance is explained, leaving 44.60% unexplained.
 
 
 **End of Question 4**
@@ -1611,71 +1532,54 @@ explained, leaving 44.60% unexplained.
 that you obtained the same communality value as you reported in 4a for
 this variable and factor.
 
-#Note from Subhorna: similar to 4a. 
-
-A principal components analysis with two components and varimax rotation
-was performed to identify the main underlying patterns in the vegetation
-dataset.The results show that the first rotated component (RC1) has an
-eigenvalue (SS loading) of 3.28, explaining 30% of the variance, while
-the second component (RC2) has an eigenvalue of 2.82, explaining 26% of
-the variance. Together, the two components explain about 55% of the
-total variance in the dataset.
-
-The model fit appears good, with an RMSR value of 0.08 and a fit based
-on off-diagonal values of 0.96, indicating that the two-component
-solution represents the relationships among the variables reasonably
-well.
-
-Looking at the factor loadings, RC1 has strong positive loadings for
-variables such as May vegetation cover (0.81), May vegetation height
-(0.80), June vegetation cover (0.89), and June vegetation height (0.84).
-RC2 has strong loadings for grass (0.93) and bare ground (-0.86). This
-suggests that the two components represent two main ecological
-gradients: RC1: Vegetation structure or vegetation density (cover and
-height of vegetation).RC2: Ground cover composition, particularly the
-contrast between grass-dominated areas and bare ground.
-
-Overall, the results indicate that most of the variation in the
-vegetation data can be summarized by these two major gradients.
+#Note from Suborna: similar to 4a. 
 
 ```{r}
-# your codes here (if applicable)
-# Running factor analysis with 2 factors (varimax rotation)
-veg.fac2 <- principal(xdata,
-                      nfactors = 2,
-                      rotate = "varimax",
-                      scores = TRUE)
 
-# Results
-print(veg.fac2)
+# loading of mayvgcov on Factor 1 from varimax rotation
+loading_mayvgcov_F1 <- veg.fac2$loadings["mayvgcov", 1]
+
+# communality contribution from Factor 1
+comm_mayvgcov_F1 <- loading_mayvgcov_F1^2
+
+comm_mayvgcov_F1
+
 ```
+The loading of mayvgcov on Factor 1 (RC1) in the varimax rotation is 0.807. The communality contribution of a factor is calculated as the square of the loading, so the communality of mayvgcov explained by Factor 1 is (by hand):
+
+0.807^2 = 0.651
+
+This matches the communality contribution reported in Question 4a for Factor 1. When the squared loading for Factor 2 is also included (0.368^ = 0.135), the total communality for mayvgcov is 0.786, confirming the values in the output table above.
 
 **End of Question 5**
 
 **TODO Question 6:** Calculate the factor score for **Factor 1** for the
 first observation in the dataset, using your selected orthogonal
 rotation. Confirm that this is the same as the score calculated using
-`princomp()` in R. #Note from Subhorna: 
+`princomp()` in R. Note from Suborna: this last bit was adjusted. Now we can use principal(). 
 
-The first rotated component (RC1) explains 29.8% of the total variance
-in the dataset. RC1 has strong positive loadings for: May vegetation
-cover (0.81), May vegetation height (0.80), June vegetation cover
-(0.89), and June vegetation height (0.84)
+For our selected varimax rotation (veg.fac2), the factor score for Factor 1 for the first observation was calculated manually by multiplying the standardized values for the first row of xdata by the corresponding Factor 1 weights, then summing those products. This gave us a score of -0.7532703. This matches the principal() score for the first observation on Factor 1. Both methods return -0.7532703, confirming that the manual calculation agrees with the factor score calculated by principal().
 
-These variables describe the amount and structure of vegetation at each
-site. Sites with high RC1 scores tend to have taller vegetation and
-higher vegetation cover, while sites with low RC1 scores tend to have
-less vegetation and more exposed ground or rocks.
-
-Therefore, RC1 can be interpreted as a vegetation density or vegetation
-structure gradient.This component reflects differences among sites in
-terms of how dense and tall the vegetation is.
 
 ```{r}
-# your codes here (if applicable)
-# Factor loadings
-veg.fac2$loadings
+#standardize the X variables
+Xscaled <- scale(xdata, center = TRUE, scale = TRUE)
 
+#factor 1 score for the first observation "by hand"
+score1_RC1 <- sum(Xscaled[1, ] * veg.fac2$weights[, 1])
+score1_RC1
+
+#compare with the score stored in the factor analysis object
+veg.fac2$scores[1, 1]
+
+#another way, using the full matrix multiplication
+score1_RC1_mat <- Xscaled[1, ] %*% veg.fac2$weights[, 1]
+score1_RC1_mat
+
+#compare again
+veg.fac2$scores[1, 1]
+
+#both methods have the same results, of -0.7532703
 ```
 
 **End of Question 6**
@@ -1688,8 +1592,15 @@ Run the same analysis, but this time with `rotate="oblimin"`. `oblimin`
 allows for the factors to be **correlated (not orthogonal)**.
 
 ```{r}
-veg.fac5 <- principal(xdata, nfactor = 2, rotate = "oblimin",
-  method = "regression", scores = TRUE, covar = FALSE, cor = "cor")
+veg.fac5 <- principal(
+  xdata,
+  nfactors = 2,
+  rotate = "oblimin",
+  method = "regression",
+  scores = TRUE,
+  covar = FALSE,
+  cor = "cor"
+)
 
 veg.fac5
 
@@ -1769,47 +1680,27 @@ will be demonstrate later on in this code.
 a.  What is the correlation between the two factors? Is this “low
     enough” for factors to be considered “nearly independent”?
 
-    The correlation between the two factors from the **oblique rotation
-    (veg.fac5)** is **-0.309**, as shown in the Phi matrix. This
-    indicates a moderate negative correlation between the two factors.
-
-    Because the correlation is close to \|0.30\|, the factors are not
-    completely independent, but the relationship is still relatively
-    small. Therefore, the factors can be considered nearly independent,
-    although some correlation exists between them.
+The correlation between the two factors from the oblique rotation (veg.fac5) is -0.309, as shown in the Phi matrix. This indicates a weak negative correlation between the two factors. Because the absolute value of the correlation is close to 0.30, the factors are not completely independent, but the relationship between them is still relatively small. Therefore, the two factors can be considered nearly independent, although a modest amount of shared variance exists between them.
 
 b.  Repeat what you did in question 3b and 3c.
 
-    Repeating what was done in Questions 3b and 3c, the loading and
-    structure values for the variable mayvgcov were extracted. The
-    loading value is 0.845, while the structure value is 0.880. These
-    values are **n**ot identical, which demonstrates that in oblique
-    rotation the loading and structure matrices differ because the
-    factors are allowed to be correlated.
+Repeating what was done in Questions 3b and 3c, the loading and structure values for the variable mayvgcov were extracted. The loading value is 0.845, while the structure value is 0.880. These values are **not** identical, which demonstrates that in oblique rotation the loading and structure matrices differ because the factors are allowed to be correlated. In this case, the factor correlation is -0.309, which means that the simple correlation between mayvgcov and TC1 (the structure value) is slightly different from the pattern loading.
 
-*Type your answer here:*
 
 ```{r}
-# your codes here (if applicable)
-# Run PCA with 2 factors using oblique rotation (oblimin)
-veg.fac5 <- principal(xdata,
-                      nfactors = 2,
-                      rotate = "oblimin",
-                      scores = TRUE)
 
-#Checking the correlation between the two factors
+#checking the correlation between the two factors
 veg.fac5$Phi
 
-# Repeating what was done in Question 3b
+#repeating what was done in Question 3b
 veg.fac5$loadings["mayvgcov", 1]
 
-
-# Repeating what was done in Question 3c
+#repeating what was done in Question 3c
 veg.fac5$Structure["mayvgcov", 1]
 
-
-# the difference between loading and structure values
+#the difference between loading and structure values
 veg.fac5$loadings["mayvgcov", 1] - veg.fac5$Structure["mayvgcov", 1]
+
 ```
 
 **End of Question 7**
@@ -1943,31 +1834,10 @@ recommended by you.
 
 *Type your answer here:*
 
-Overall, the varimax rotation is recommended because it produced the
-clearest and most interpretable factor structure in this analysis. In
-the varimax solution, the first component (RC1) is strongly associated
-with vegetation structure variables such as May vegetation cover, May
-vegetation height, June vegetation cover, and June vegetation height.
-The second component (RC2) captures variation in ground cover
-composition, with variables such as grass and bare ground loading
-strongly but in opposite directions. This separation creates two
-distinct ecological gradients, making the factors easier to interpret.
+Of the rotations considered here, we recommend the varimax rotation because it produced the most interpretable factor structure for this dataset. The first factor is primarily associated with vegetation cover and height variables, representing a gradient of overall vegetation density, while the second factor captures differences in ground cover composition, particularly the contrast between grass and bare ground. The other orthogonal rotations found similar underlying patterns in the dataset, revealing consistent patterns of vegetation density and ground cover across sites. However, the varimax rotation provided the clearest separation of variables across the two factors, making the ecological interpretation more straightforward. Although the oblimin rotation allowed the factors to correlate, the correlation between them was relatively small, suggesting that the vegetation and ground cover gradients are nearly independent and that an orthogonal rotation like varimax is appropriate.
 
-Although the oblique rotation (oblimin) allows factors to be correlated,
-the correlation between the two factors was relatively small
-(approximately −0.31). This suggests that the factors are only weakly
-related and can be considered nearly independent. Because of this low
-correlation, an orthogonal rotation such as varimax is appropriate and
-simplifies interpretation.
-
-Other rotations, such as varimin and equamax, were not recommended
-because they produced less clear factor structures and introduced more
-cross-loadings among variables. These cross-loadings made it more
-difficult to assign a clear ecological meaning to each factor.
-Therefore, the varimax rotation provides the simplest and most
-interpretable representation of the underlying patterns in the
-vegetation data.
+On a separate note: Although the dataset deals with bird abundance, this was not considered as a variable in this analysis. However, the vegetation gradients identified here could still be useful for interpreting connected ecological patterns from the original dataset. For example, variation in vegetation density and ground cover composition may influence habitat suitability for different bird species and could therefore help explain patterns in bird abundance across sites.
 
 **End of Question 8**
 
-### Congratulation!
+### Congratulations!
