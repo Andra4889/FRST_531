@@ -1,0 +1,603 @@
+---
+title: 'Exercise 4: Cluster Analysis'
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+**Course Instructor**: Dr. Suborna Ahmed\
+
+**Submission**:
+
+1. Write your code and answers in this RMD file
+2. Knit your completed RMD file to WORD document
+3. Check and upload your WORD document to Exercise 4 on Canvas
+
+------------------------------------------------------------------------
+
+## Exercise Objectives 
+
+1.  To become familiar with Cluster Analysis as a tool to uncover "natural" groups in data.
+2.  To learn how to obtain clustering solutions for alternative methods (and distance metrics) and choose one of the results.
+
+## General Description
+
+In Exercise 4, you will again use the data gathered by Tracy Hooper on bird abundances, along with vegetation and other variables in a grassland area (a subset of her data is used in FRST 531 with her approval). The data have been provided as TRABREV3.txt. Using cluster analysis, you will cluster the sites based on bird compositions. NOTE: The variable names are standard 4-letter bird species codes that you can find on the web if you wish.
+
+The overall objective is to final "natural" clusters in the bird data. For this, you will use a few alternative hierarchical methods, and then the k-means non-hierarchical method. From the results, you will choose one of the clustering solutions that best segregates the sites by bird composition.
+
+
+## Process 
+
+1. For this analysis, the data have been provided as *TRABREV3.txt* along with R code as *Exercise 4: Cluster Analysis - Student File. Rmd*. 
+
+2. Specifically, there are four sections in this exercise: 
+
++ In Part 1 (Data preparation), you will need to run the R code so as to read and clean the original data in preparation for your cluster analyses.
+
++ In Part 2 (Hierarchical clustering of sites by bird composition), you will examine four hierarchical clustering alternatives (hc1 to hc3 provided in the R code, plus you will add code for hc4) and answer Questions 1 to 4 to guide you through the outputs and interpret the results. 
+
++ In Part 3 (Non-Hierarchical clustering of sites by bird composition), you will perform analysis using k-means clustering altering the number of clusters from one to six, with a graph showing the within sums of squares. You will need to run the R code and get/understand/interpret the outputs from running the code. You will be answering Questions 5 to 7 to compare different methods and make your choice. 
+
++ The last part contains extra R code where the data are transposed. In Parts 1 to 3, the question is: Which sites have a similar bird composition? Now, the transpose of the data is done, and the goal is to cluster the birds using the sites. The question becomes: Which bird species occur on the same sites? This part is just for fun, and shows how the clustering can be altered to group variables instead of observations to match the question posed.
+
+**NOTE**: Under each question in the Rmd file, you will see dedicated code chunks or blank spaces that are prepared for you to write your own code and add your answers. As you answer the questions, paste in the relevant R outputs to support your answers.
+
+
+\newpage
+
+
+
+## Part 1: Data Preparation
+
+```{r, include = FALSE}
+## Uncomment the code if you have not yet installed the packages, or you can click on "Packages" on the bottom-right panel and then follow the steps to select the CRAN and install them
+
+#install.packages("knitr") 
+#install.packages("pastecs")
+
+library(knitr)
+library(pastecs)
+```
+
+Data from an outside text file from a birds in grasslands study by Tracy Hooper (subset of her data used by permission) is brought in to R from an outside space-delimited text file. Alternatively, you could bring the text file into EXCEL and save it as a .csv file. Using only information on bird species, the goal is to cluster the sites using the bird species. 
+
+### Read the data
+
+Let's first load it to R as "studydat".
+
+```{r, results="hide"}
+# Make sure you put this RMD file and TRABREV3.txt in the same folder before running the code
+studydat<- read.table("TRABREV3 (1).txt", header=T)
+
+#studydat<-read.csv("TRABREV3 (1).txt", header=T) # this line of code can read the comma delimited file instead.
+```
+
+Let's print out some aspects of the data to just check it out.
+
+```{r, results="hide"}
+class(studydat)  # what type of object is it?
+names(studydat)  # print out the column (i.e., variable) names
+dim(studydat)# number of rows and columns
+head(studydat)
+```
+
+### Data Cleaning
+
+For our exercise, keep only the site information and the bird information for clustering. Keep only 50 sites also. Name the subset of data as "clusdat".
+
+```{r, results="hide"}
+clusdat<-cbind(studydat[1:50,1:2],studydat[1:50,5:14])
+names(clusdat)
+str(clusdat) # point could be used as a label for the sites.
+dim(clusdat)
+```
+
+### Summary Statistics
+
+Get basic stats that is min, max, mean, std.dev. using a function from the package *pastecs*.
+
+```{r, results="hide"}
+# Tell R you want to use the package pastecs.
+library(pastecs) # won't work if you have not installed the package first!!
+
+# set the number of decimals to be 2
+options(digits=2) 
+
+#Use the function stat.desc from this package to get some basic stats.
+stat.desc(clusdat) 
+```
+
+
+## Part 2: Hierarchical clustering of sites by bird composition
+
+In this part, you will examine four hierarchical clustering alternatives. The first three alternatives (hc1 to hc3) are provided in the R code, and you will need to add in code for one more hierarchical clustering analysis (hc4). For that, you can choose to change the distance metric used and/or the method used. See *Cluster examples 531 2022.R* for some ideas. The output will include hierarchical clustering results and a tree dendrogram for each of the four alternatives. Then, you will be answering Questions 1 to 4 to guide you through the outputs and interpret the results. 
+
+Let's look at the first hierarchical clustering alternative (hc1). 
+
+### hc1
+
+For hc 1, the euclidean distance is chosen. The following code calculates the distance matrix via the function *dist()*! (There are other distance methods in the function *dist()*, including "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski".) 
+
+```{r, results="hide"}
+justx<-clusdat[,3:12] # just the bird info.
+head(justx) # print the first few lines
+
+# Calculate the distance matrix. 
+d <- dist(justx, method = "euclidean")  
+
+#d
+```
+
+Next, we pass the calculated distance matrix to the function *hclust()* to cluster using hierarchical methods. In *hclust()*, hierarchical methods can be one of "ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC). For hc1, the complete method is chosen.   
+
+```{r, results="hide"}
+# pass the distance matrix to hclust().  
+hc1 <- hclust(d,method = "complete") # apply hierarchical clustering 
+
+# check the class created by the hclust() function.
+class(hc1)  
+```
+
+Then, we plot the tree dendrogram. 
+
+```{r, results="hide", fig.show='hide'}
+# plot the dendrogram, 
+plot(hc1, labels =clusdat$point,hang = -1, main="Complete, Euclidean",cex=0.6) # Use the labels (uses hc$order to put the correct labels on), and place the labels at the same level.
+```
+
+### hc2
+
+For the second alternative (hc2), we retain the calculated distance matrix from hc1, pass it to hclust() again using a different method, and plot the dendrogram.  
+
+```{r, results="hide", fig.show='hide'}
+# pass the distance matrix to hclust() again.   
+hc2 <- hclust(d,method = "single") # apply hierarchical clustering 
+
+# check the class created by the hclust() function.
+class(hc2)  
+
+# plot the dendrogram
+plot(hc2, labels =clusdat$point,hang = -1, main="Single, Euclidean",cex=0.6)
+```
+
+### hc3
+
+For the third option (hc3), we use standardized x's instead to calculate the distance matrix and then pass it to hclust(). The dendrogram is plotted as well.  
+
+```{r, results="hide", fig.show='hide'}
+# Try again but use standardized x's instead.
+justx.scaled <- scale(justx, center = TRUE, scale = TRUE)
+dscale <- dist(justx.scaled,method = "euclidean")
+
+# pass the distance matrix to hclust()
+hc3 <- hclust(dscale,method = "complete") # apply hirarchical clustering 
+
+# check the class created by the hclust() function.
+class(hc3)  
+
+# plot the dendrogram
+plot(hc3, labels =clusdat$point,hang = -1, 
+     main="Complete, Standardized, Euclidean",cex=0.6)
+```
+
+### hc4
+
+There are lots more options for hierarchical clustering using different distance metrics and/or methods. It's time for you to add your own here as hc4.
+
+```{r, fig.show='hide'}
+
+#help(hclust)
+
+#Going to try two methoods: Ward's and Manhattan and see which is better
+#Manhattan
+d_man <- dist(justx, method = "manhattan")
+hc5 <- hclust(d_man, method = "average")
+
+plot(hc5, labels = clusdat$point, hang = -1,
+     main = "Average, Manhattan Distance", cex = 0.6)
+
+```
+
+```{r}
+#Ward
+hc4 <- hclust(d, method = "ward.D2")
+
+plot(hc4, labels = clusdat$point, hang = -1,
+     main = "Ward.D2, Euclidean", cex = 0.6)
+
+```
+Note: The Ward plot showed clear and immediate branching in two directions, but the Manhattan plot was more gradual with fewer obvious breaks. The Ward plot seems more straightforward for interpretation. 
+
+Looking at how to break things up: 
+```{r}
+# Ward dendrogram into 2 
+plot(hc4, labels = clusdat$point, hang = -1,
+     main = "Ward.D2, Euclidean",
+     xlab = "Sites", ylab = "Height", cex = 0.6)
+
+# Then add rectangles for 2 clusters
+rect.hclust(hc4, k = 2, border = 2)
+```
+
+and then 3 clusters for Ward: 
+```{r}
+plot(hc4, labels = clusdat$point, hang = -1,
+     main = "Ward.D2, Euclidean",
+     xlab = "Sites", ylab = "Height", cex = 0.6)
+
+rect.hclust(hc4, k = 3, border = 2:4)
+```
+
+Now for Manhattan
+```{r}
+plot(hc5, labels = clusdat$point, hang = -1,
+     main = "Average, Manhattan Distance",
+     xlab = "Sites", ylab = "Height", cex = 0.6)
+
+rect.hclust(hc5, k = 2, border = 2:4)
+```
+
+and now Manhattan into 3 clusters: 
+```{r}
+plot(hc5, labels = clusdat$point, hang = -1,
+     main = "Average, Manhattan Distance",
+     xlab = "Sites", ylab = "Height", cex = 0.6)
+
+rect.hclust(hc5, k = 3, border = 2:4)
+```
+
+Again, it seems that Ward's method is better for interpretation. Both have one small branch, but otherwise Ward makes a cleaner and more balanced clustering. We'll go with Ward's. 
+
+
+\
+
+**QUESTION 1.0**: Show the tree dendrogram for each of the four alternative hierarchical clustering analysis (i.e., hc1 to hc3, plus hc4 that you just added in). These will be very large; you may want to adjust the layout for each figure. Remember to include a figure caption at the bottom of each of the four figures (e.g., Figure 1. Euclidean distance and nearest neighbour clustering).
+
+Notes: 
+- hc1: Complete linkage clustering using Euclidean distance
+- hc2: Single linkage (nearest neighbour) clustering using Euclidean distance
+- hc3: Complete linkage clustering using Euclidean distance with standardized bird abundance variables
+- hc4: Ward’s hierarchical clustering using Euclidean distance
+
+```{r hc1plot, fig.width=10, fig.height=6, fig.cap="Figure 1. Tree dendrogram for hc1 using complete linkage with Euclidean distance, showing a 3-cluster cut."}
+plot(hc1, labels = clusdat$point, hang = -1,
+     main = "Complete linkage with Euclidean distance",
+     xlab = "Sites", ylab = "Height", cex = 0.5)
+
+rect.hclust(hc1, k = 3, border = 2:4)
+```
+
+```{r hc2plot, fig.width=10, fig.height=6, fig.cap="Figure 2. Tree dendrogram for hc2 using single linkage (nearest neighbor) with Euclidean distance, showing a 3-cluster cut."}
+plot(hc2, labels = clusdat$point, hang = -1,
+     main = "Single linkage (nearest neighbour) clustering using Euclidean distance",
+     xlab = "Sites", ylab = "Height", cex = 0.5)
+
+rect.hclust(hc2, k = 3, border = 2:4)
+```
+
+```{r hc3plot, fig.width=10, fig.height=6, fig.cap="Figure 3. Tree dendrogram for hc3 using complete linkage with Euclidean distance on standardized bird abundance variables, showing a 3-cluster cut."}
+plot(hc3, labels = clusdat$point, hang = -1,
+     main = "Complete linkage clustering using Euclidean distance with standardized bird abundance variables",
+     xlab = "Sites", ylab = "Height", cex = 0.5)
+
+rect.hclust(hc3, k = 3, border = 2:4)
+```
+
+```{r hc4plot, fig.width=10, fig.height=6, fig.cap="Figure 4. Tree dendrogram for hc4 using Ward's method with Euclidean distance, showing a 3-cluster cut."}
+plot(hc4, labels = clusdat$point, hang = -1,
+     main = "Ward’s hierarchical clustering using Euclidean distance",
+     xlab = "Sites", ylab = "Height", cex = 0.6)
+
+rect.hclust(hc4, k = 3, border = 2:4)
+```
+
+
+**QUESTION 2.0**: Compare the results for your four alternative hierarchical clustering analyses. For this comparison, **make a table** showing:  
+
+1. the label for the cluster analysis (e.g., hc1)  
+2. the distance measure used (e.g., Euclidean)    
+3. the method used (e.g., nearest neighbour/simple)  
+4. the number of clusters based on your interpretation of the dendrogram, and why    
+5. whether or not chaining occurred, and why  
+6. whether there was clear separation by distance between the clusters, and why
+
+```{r}
+# QUESTION 2.0 - Template Code
+
+# ## Uncomment the code chunk
+# ## Write your answers to question 2.0 in the corresponding "..." slots
+#
+# answer2.0 <- data.frame(
+#   # write the label for each cluster analysis (e.g., hc1)
+#   `Label` = c("hc1",
+#             "...",
+#             "...",
+#             "..."),
+# 
+#   # write the distance measure used (e.g., Euclidean)
+#   `Distance Measure` = c("Euclidean", # for hc1
+#                        "...",         # for hc2
+#                        "...",         # for hc3
+#                        "..."),        # for hc4
+# 
+#   # write the method used (e.g., nearest neighbour/simple)
+#   `Method` = c("...",
+#              "...",
+#              "...",
+#              "..."),
+# 
+#   # write the number of clusters based on your interpretation of the dendrogram, and why
+#   `Number Of Clusters` = c("...",
+#             "...",
+#             "...",
+#             "..."),
+# 
+#   # write whether or not chaining occurred, and why
+#   `Chaining` = c("...",
+#                "...",
+#                "...",
+#                "..."),
+# 
+#   # write whether there was clear separation by distance between the clusters, and why
+#   `Separation` = c("...",
+#                "...",
+#                "...",
+#                "...")
+# 
+#   )
+#
+# ## Knit the table. Remember to include a table caption at the top of the table.
+# knitr::kable(answer2.0, row.names = NA,
+#              caption = "Table 1. Cluster results for ...")
+```
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+
+
+\
+
+**QUESTION 3**: Based on your comparison table for hierarchical methods
+and your tree dendrograms: 
+
+1) **QUESTION 3.1**: Was there consistency in the number of clusters, or did this vary greatly over the four analyses? Explain briefly.
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+
+2) **QUESTION 3.2**: Which cluster analysis gave the clearest result? Justify your answer briefly.
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+
+\
+
+**QUESTION 4.0**: Select one of your hierarchical cluster methods. For the selected method, annotate the tree dendrogram to show the clusters and add this as a new figure. Remember to include a figure caption at the bottom of your figure. (i.e., Figure 5. ?? caption here??...)
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+[Write your answer to QUESTION 4.0 here...You might want to add the annotated dendrogram to the WORD document directly after knitting the RMD file]
+
+\
+
+\newpage
+
+## Part 3: Non-Hierarchical Clustering of sites by bird composition 
+
+In Part 3, you will use k-means non-Hierarchical clustering to cluster sites based on bird composition. Remember that the number of clusters is an input variable for k-means. The following code will try inputting 1 to 6 clusters separately, and you will need to interpret the results and choose the likely "natural" number of clusters.
+
+```{r, results="hide", fig.show='hide'}
+# Again, subset the data to retain just the bird info.
+justx<-clusdat[,3:12] 
+n <- nrow(justx)
+
+## calculate the within sums of squares (wss) for 1 to 6 clusters
+wss <- rep(0, 6)
+# calculate the wss when only having 1 cluster 
+wss[1] <- (n - 1) * sum(sapply(justx, var)) 
+# calculate wss when having 2 to 6 clusters for k-means
+for (i in 2:6)
+   wss[i] <- sum(kmeans(justx, centers = i)$withinss)
+
+# print out the wss for each scenario
+wss  
+
+```
+
+In order to choose the likely "natural" number of clusters, plotting the within sums of squares against the number of of clusters could be beneficial.  
+
+```{r, fig.show='hide'}
+plot(1:6, wss, type = "b", xlab = "Number of groups",
+   ylab = "Within groups sum of squares")
+```
+
+In addition to the wss plot, graphing the clustering results also helps us make a decision. The following code shows an example of where three clusters are formed (but that three-clusters may not be the best choice). You can modify the code and try to graph other scenarios.  
+
+```{r, results="hide", fig.show='hide'}
+## clustering results when forming 3 groups
+
+require(graphics, stats)
+
+# k-means with 3 clusters
+(threegroups <- kmeans(justx, centers = 3))  # since this is in brackets, the object - threegroups - is created and then also "printed" out.
+
+# add the cluster no to justx
+str(threegroups) 
+names(justx)
+Keep <- data.frame(justx, as.factor(threegroups$cluster))
+head(Keep) # cluster number is added to the data.
+
+# shows the summary of clusters
+summary(Keep) # most are in Cluster 1 here, with the 3 cluster solution.
+
+```
+
+We could also graph showing the clusters number and two of the bird species. The example below indicates which sites have a similar bird composition in terms of "hola" and "vesp" under the 3-cluster solution.  
+
+```{r, results="hide", fig.show='hide'}
+plot(justx[ ,c("hola","vesp")], xlab = "hola",
+     ylab = "Vesper sparrow", pch = 16, col = threegroups$cluster, 
+     cex = 2.0)
+text(clusdat[ ,"hola"], clusdat[ ,"vesp"], 
+     labels = row.names(justx),cex=0.7,
+     pos = 3)
+
+```
+
+\
+
+**QUESTION 5.0**: Using the k-means non-hierarchical method, how many natural clusters does there seem to be? For this, show the graph of the within sums of squares versus the number of clusters and add a figure caption. Then use this in justifying your choice of the number of clusters.
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+
+\
+
+Until now, you have explored various hierarchical and non-hierarchical clustering analyses. It's time for you to make a detailed comparison and choose your best segregation solution.  
+
+\
+
+**QUESTION 6.0**: Compare your selected hierarchical clustering analysis to the non-hierarchical k-means results in terms of: 1) Was there consistency in the number of natural clusters? and 2) Which was easier to interpret/use for this problem?
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+\
+
+**QUESTION 7.0**: Overall, based on your analyses and interpretation, which clustering method would you recommend of the five methods used? Briefly explain your choice.
+
+**Your Answer:** 
+
+```{r}
+# Provide your R codes here (if applicable)
+```
+
+
+\newpage
+
+
+
+## Extra R code, Part 4: Non-Hierarchical Clustering of birds by locations
+
+Below is extra code where the data are transposed and the objective is to cluster the birds based on locations that they exist (i.e., Which birds appear to be together?) This is just for fun, and shows how the clustering can be altered to group variables instead of observations to match the question posed.
+
+
+### Data Preparation
+
+First, let's just take 25 rows this time and transpose the data. 
+
+```{r, results="hide"}
+justxT<-t(justx[1:25,])
+head(justxT)
+```
+
+### K-means clustering
+
+Using k-means, cluster the birds into into 1 to 6 clusters based on sites where they occur. Then, choose the likely "natural" number of clusters.
+
+```{r, results="hide", fig.show='hide'}
+n <- nrow(justxT)
+
+wss <- rep(0, 6)
+wss[1] <- (n - 1) * sum(sapply(justxT, var)) # 1 cluster wss
+for (i in 2:6)
+   wss[i] <- sum(kmeans(justxT,
+   centers = i)$withinss)
+wss  # within sums of squares for 1 to 6 clusters
+
+plot(1:6, wss, type = "b", xlab = "Number of groups",
+   ylab = "Within groups sum of squares")
+```
+
+Graph the three-group solution in below... but that may not be the best one? 
+
+```{r, results="hide", fig.show='hide'}
+## clustering results when forming 3 groups
+
+require(graphics, stats)
+
+(threegroups <- kmeans(justxT, centers = 3))
+
+str(threegroups) # includes the cluster no, etc.
+Keep3<-data.frame(justxT,as.factor(threegroups$cluster) )
+head(Keep3) # cluster number is added to the data.
+summary(Keep3) # most are in Cluster 1 here.
+```
+
+Let's check the four-group solution as well. 
+
+```{r, results="hide", fig.show='hide'}
+## clustering results when forming 4 groups
+
+(fourgroups <- kmeans(justxT, centers = 4))
+
+str(fourgroups) # includes the cluster no, etc.
+Keep4<-data.frame(justxT,as.factor(fourgroups$cluster) )
+head(Keep4) # cluster number is added to the data.
+
+summary(Keep4) # most are in Cluster 3 here, with the 4 cluster solution.
+```
+
+Here is another graphic, showing the scatterplot matrix, but with points labelled. The upper panel is the 4-group solution and the lower panel is the 3-group solution. color schemes for K-means... adapted from Zellerman code example.
+
+```{r, results="hide", fig.show='hide'}
+colorlow <- rainbow(3)[threegroups$cluster]
+colorup <- rainbow(4)[fourgroups$cluster]
+panel.up <- function(x, y, ...)
+{ # function to produce scatterplot in pairs()
+  usr <- par("usr") # save par() values
+  on.exit(par(usr)) # set par() at end
+  par(usr = c(max(y), min(y), max(x), min(x))) # set bounds
+  points(y, x, col = colorup, pch = 16) # plot data points
+}
+pairs(justxT, pch = 16, gap = 0, xaxt = "n", yaxt = "n",
+col = colorlow, upper.panel = panel.up)
+```
+
+You can use the following code to generate statistics by cluster.
+
+```{r, results="hide", fig.show='hide'}
+dim(Keep4)
+summary(Keep4)
+
+cluster1<-Keep4[(Keep4$as.factor.fourgroups.cluster==1),]
+cluster2<-Keep4[(Keep4$as.factor.fourgroups.cluster==2),]
+cluster3<-Keep4[(Keep4$as.factor.fourgroups.cluster==3),]
+cluster4<-Keep4[(Keep4$as.factor.fourgroups.cluster==4),]
+
+dim(cluster1)
+dim(cluster2)
+dim(cluster3)
+dim(cluster4)
+
+rownames(cluster1) # what birds in cluster 1? 
+rownames(cluster2)
+rownames(cluster3)
+rownames(cluster4)
+
+```
