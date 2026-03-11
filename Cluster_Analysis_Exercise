@@ -261,6 +261,8 @@ Notes:
 - hc3: Complete linkage clustering using Euclidean distance with standardized bird abundance variables
 - hc4: Ward’s hierarchical clustering using Euclidean distance
 
+*Important note: while the plots below use k=3 to divide breaks for visual clarity (which we used to help compare plots), this should not imply that all dendrograms truly display 3 clusters.*  
+
 ```{r hc1plot, fig.width=10, fig.height=6, fig.cap="Figure 1. Tree dendrogram for hc1 using complete linkage with Euclidean distance, showing a 3-cluster cut."}
 plot(hc1, labels = clusdat$point, hang = -1,
      main = "Complete linkage with Euclidean distance",
@@ -356,7 +358,42 @@ rect.hclust(hc4, k = 3, border = 2:4)
 **Your Answer:** 
 
 ```{r}
-# Provide your R codes here (if applicable)
+answer2.0 <- data.frame(
+  
+  `Label` = c("hc1",
+              "hc2",
+              "hc3",
+              "hc4"),
+  
+  `Distance Measure` = c("Euclidean",
+                         "Euclidean",
+                         "Euclidean (standardized variables)",
+                         "Euclidean"),
+  
+  `Method` = c("Complete linkage",
+               "Single linkage (nearest neighbour)",
+               "Complete linkage (standardized data)",
+               "Ward's method"),
+  
+  `Number Of Clusters` = c("2 clusters, possibly 3. In the dendrogram, 2 clear clusters emerge on the left and right. On the right, though, another separate branch emerges but only for one site (B_E12). However, this may represent an outlier.",
+                           "1 cluster. In the dendrogram, chaining on the right complicates things. B_E12 emerges as a separate possible cluster again, but might be an outlier. Otherwise, 1 cluster appears around a height of 3.",
+                           "3 clusters. The dendrogram shows three major branches before the final merge at about height 9. One large branch occurs on the left, merging with the rest of the sites at around height 8, while two additional branches occur on the right and merge at lower heights (~6). The large vertical distances between these merges suggest that these groups of sites are relatively dissimilar and thus represent meaningful clusters.",
+                           "2 clusters. The Ward’s dendrogram shows two clear, large groups on the left and right that both remain distinct from ~11 height until merging at a very high dissimilarity level of ~18, indicating strong separation between them."),
+  
+  `Chaining` = c("No strong chaining. In the dendogram, there might be some slight chaining on the left after the break at height 7. However, the clusters are still tightly grouped after this break, without a clear visual pattern indicating strong chaining.",
+                 "Yes, chaining is evident. Sites merge quickly and sequentially from the right to the left until a height of 3. The ladder-like appearance with low heights suggests a chaining event.",
+                 "No evident chaining. Sites form compact subclusters that merge at progressively higher heights, with no ladder-like structure that would indicate chaining.",
+                 "No chaining. For one, Ward’s method minimizes within cluster variance, producing compact clusters. Second, the there is no ladder-like structure evident in the dendrogram. The sites form compact subclusters and merge at progressively higher heights."),
+  
+  `Separation` = c("Moderate separation. Vertical distance represents dissimilarity. There is a 6-height separation between the top and the closest clusters showing less dissimilarity, but the clusters thereafter are closer in vertical distance, displaying more dissimilarity afterward.",
+                  "Weak separation. In the dendrogram, clusters merge very gradually with little distance gaps between groups until a height of ~3.",
+                   "Strong separation. Sites begin to merge within clusters at relatively low heights, but the clusters only merge at much higher distances (~8), indicating clear differences between groups.",
+                   "Very strong separation. The large vertical distance before the final merge indicates the two clusters are highly dissimilar.")
+)
+
+knitr::kable(answer2.0, row.names = NA,
+             caption = "Table 1. Comparison of hierarchical clustering methods used to group sites based on bird composition.",
+             align = "l")
 ```
 
 
@@ -368,7 +405,8 @@ and your tree dendrograms:
 
 1) **QUESTION 3.1**: Was there consistency in the number of clusters, or did this vary greatly over the four analyses? Explain briefly.
 
-**Your Answer:** 
+The number of clusters was fairly consistent across most methods, but there were some differences. The complete linkage (hc1) and Ward’s method (hc4) both suggested at least two main clusters, while the standardized complete linkage (hc3) indicated three clusters. In contrast, the single linkage method (hc2) resulted in only 1 somehat ambiguous cluster (due to chaining).
+
 
 ```{r}
 # Provide your R codes here (if applicable)
@@ -377,7 +415,7 @@ and your tree dendrograms:
 
 2) **QUESTION 3.2**: Which cluster analysis gave the clearest result? Justify your answer briefly.
 
-**Your Answer:** 
+Ward’s method produced the clearest result. The dendrogram shows two clear clusters that remain separate until merging at a very high dissimilarity height (~18), indicating strong separation between groups. This method also avoids the problematic chaining seen in the single linkage dendrogram and produces more compact clusters than the complete linkage methods.
 
 ```{r}
 # Provide your R codes here (if applicable)
@@ -390,8 +428,19 @@ and your tree dendrograms:
 
 **Your Answer:** 
 
-```{r}
-# Provide your R codes here (if applicable)
+Providing the k=2plot from earlier, with extra annotations. 
+```{r ward_annotated, fig.width=10, fig.height=6, fig.cap="Figure 5. Annotated dendrogram for Ward’s hierarchical clustering using Euclidean distance, showing two clusters."}
+par(mar = c(8,4,4,2))
+plot(hc4, labels = clusdat$point, hang = -1,
+     main = "Ward.D2, Euclidean",
+     xlab = "Sites", ylab = "Height", cex = 0.6)
+
+rect.hclust(hc4, k = 2, border = c("red","blue"))
+
+# Add cluster labels (adjust x/y slightly if needed)
+text(x = 12, y = 17, labels = "Cluster 1", col = "red", font = 2)
+text(x = 45, y = 17, labels = "Cluster 2", col = "blue", font = 2)
+
 ```
 
 [Write your answer to QUESTION 4.0 here...You might want to add the annotated dendrogram to the WORD document directly after knitting the RMD file]
