@@ -11,7 +11,11 @@ editor_options:
 
 **Course Instructor**: Dr. Suborna Ahmed
 
+<<<<<<< HEAD
 **Student Name**: Sandra Inusah, Brandon Weigand
+=======
+**Student Name**: Brandon Weigand and Sandra Inusah
+>>>>>>> 4baf2a3 (Final)
 
 **Total Points**: 10
 
