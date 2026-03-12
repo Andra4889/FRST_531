@@ -8,17 +8,8 @@ output:
 
 **Course Instructor**: Dr. Suborna Ahmed\
 
-**Submission**:
+**Submission**: Brandon Weigland and Sandra Inusah
 
-<<<<<<< HEAD
-1. Write your code and answers in this RMD file
-2. Knit your completed RMD file to WORD document
-3. Check and upload your WORD document to Exercise 4 on Canvas
-
-------------------------------------------------------------------------
-
-## Exercise Objectives 
-=======
 1.  Write your code and answers in this RMD file
 2.  Knit your completed RMD file to WORD document
 3.  Check and upload your WORD document to Exercise 4 on Canvas
@@ -26,7 +17,14 @@ output:
 ------------------------------------------------------------------------
 
 ## Exercise Objectives
->>>>>>> f8b653f (Sandra's Version)
+
+1.  Write your code and answers in this RMD file
+2.  Knit your completed RMD file to WORD document
+3.  Check and upload your WORD document to Exercise 4 on Canvas
+
+------------------------------------------------------------------------
+
+## Exercise Objectives
 
 1.  To become familiar with Cluster Analysis as a tool to uncover "natural" groups in data.
 2.  To learn how to obtain clustering solutions for alternative methods (and distance metrics) and choose one of the results.
@@ -37,30 +35,6 @@ In Exercise 4, you will again use the data gathered by Tracy Hooper on bird abun
 
 The overall objective is to final "natural" clusters in the bird data. For this, you will use a few alternative hierarchical methods, and then the k-means non-hierarchical method. From the results, you will choose one of the clustering solutions that best segregates the sites by bird composition.
 
-<<<<<<< HEAD
-
-## Process 
-
-1. For this analysis, the data have been provided as *TRABREV3.txt* along with R code as *Exercise 4: Cluster Analysis - Student File. Rmd*. 
-
-2. Specifically, there are four sections in this exercise: 
-
-+ In Part 1 (Data preparation), you will need to run the R code so as to read and clean the original data in preparation for your cluster analyses.
-
-+ In Part 2 (Hierarchical clustering of sites by bird composition), you will examine four hierarchical clustering alternatives (hc1 to hc3 provided in the R code, plus you will add code for hc4) and answer Questions 1 to 4 to guide you through the outputs and interpret the results. 
-
-+ In Part 3 (Non-Hierarchical clustering of sites by bird composition), you will perform analysis using k-means clustering altering the number of clusters from one to six, with a graph showing the within sums of squares. You will need to run the R code and get/understand/interpret the outputs from running the code. You will be answering Questions 5 to 7 to compare different methods and make your choice. 
-
-+ The last part contains extra R code where the data are transposed. In Parts 1 to 3, the question is: Which sites have a similar bird composition? Now, the transpose of the data is done, and the goal is to cluster the birds using the sites. The question becomes: Which bird species occur on the same sites? This part is just for fun, and shows how the clustering can be altered to group variables instead of observations to match the question posed.
-
-**NOTE**: Under each question in the Rmd file, you will see dedicated code chunks or blank spaces that are prepared for you to write your own code and add your answers. As you answer the questions, paste in the relevant R outputs to support your answers.
-
-
-\newpage
-
-
-
-=======
 ## Process
 
 1.  For this analysis, the data have been provided as *TRABREV3.txt* along with R code as *Exercise 4: Cluster Analysis - Student File. Rmd*.
@@ -79,7 +53,24 @@ The overall objective is to final "natural" clusters in the bird data. For this,
 
 \newpage
 
->>>>>>> f8b653f (Sandra's Version)
+## Process
+
+1.  For this analysis, the data have been provided as *TRABREV3.txt* along with R code as *Exercise 4: Cluster Analysis - Student File. Rmd*.
+
+2.  Specifically, there are four sections in this exercise:
+
+-   In Part 1 (Data preparation), you will need to run the R code so as to read and clean the original data in preparation for your cluster analyses.
+
+-   In Part 2 (Hierarchical clustering of sites by bird composition), you will examine four hierarchical clustering alternatives (hc1 to hc3 provided in the R code, plus you will add code for hc4) and answer Questions 1 to 4 to guide you through the outputs and interpret the results.
+
+-   In Part 3 (Non-Hierarchical clustering of sites by bird composition), you will perform analysis using k-means clustering altering the number of clusters from one to six, with a graph showing the within sums of squares. You will need to run the R code and get/understand/interpret the outputs from running the code. You will be answering Questions 5 to 7 to compare different methods and make your choice.
+
+-   The last part contains extra R code where the data are transposed. In Parts 1 to 3, the question is: Which sites have a similar bird composition? Now, the transpose of the data is done, and the goal is to cluster the birds using the sites. The question becomes: Which bird species occur on the same sites? This part is just for fun, and shows how the clustering can be altered to group variables instead of observations to match the question posed.
+
+**NOTE**: Under each question in the Rmd file, you will see dedicated code chunks or blank spaces that are prepared for you to write your own code and add your answers. As you answer the questions, paste in the relevant R outputs to support your answers.
+
+\newpage
+
 ## Part 1: Data Preparation
 
 ```{r, include = FALSE}
@@ -92,11 +83,7 @@ library(knitr)
 library(pastecs)
 ```
 
-<<<<<<< HEAD
-Data from an outside text file from a birds in grasslands study by Tracy Hooper (subset of her data used by permission) is brought in to R from an outside space-delimited text file. Alternatively, you could bring the text file into EXCEL and save it as a .csv file. Using only information on bird species, the goal is to cluster the sites using the bird species. 
-=======
 Data from an outside text file from a birds in grasslands study by Tracy Hooper (subset of her data used by permission) is brought in to R from an outside space-delimited text file. Alternatively, you could bring the text file into EXCEL and save it as a .csv file. Using only information on bird species, the goal is to cluster the sites using the bird species.
->>>>>>> f8b653f (Sandra's Version)
 
 ### Read the data
 
@@ -104,11 +91,7 @@ Let's first load it to R as "studydat".
 
 ```{r, results="hide"}
 # Make sure you put this RMD file and TRABREV3.txt in the same folder before running the code
-<<<<<<< HEAD
-studydat<- read.table("TRABREV3 (1).txt", header=T)
-=======
 studydat<- read.table("TRABREV3.txt", header=T)
->>>>>>> f8b653f (Sandra's Version)
 
 #studydat<-read.csv("TRABREV3 (1).txt", header=T) # this line of code can read the comma delimited file instead.
 ```
@@ -148,18 +131,6 @@ options(digits=2)
 stat.desc(clusdat) 
 ```
 
-<<<<<<< HEAD
-
-## Part 2: Hierarchical clustering of sites by bird composition
-
-In this part, you will examine four hierarchical clustering alternatives. The first three alternatives (hc1 to hc3) are provided in the R code, and you will need to add in code for one more hierarchical clustering analysis (hc4). For that, you can choose to change the distance metric used and/or the method used. See *Cluster examples 531 2022.R* for some ideas. The output will include hierarchical clustering results and a tree dendrogram for each of the four alternatives. Then, you will be answering Questions 1 to 4 to guide you through the outputs and interpret the results. 
-
-Let's look at the first hierarchical clustering alternative (hc1). 
-
-### hc1
-
-For hc 1, the euclidean distance is chosen. The following code calculates the distance matrix via the function *dist()*! (There are other distance methods in the function *dist()*, including "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski".) 
-=======
 ## Part 2: Hierarchical clustering of sites by bird composition
 
 In this part, you will examine four hierarchical clustering alternatives. The first three alternatives (hc1 to hc3) are provided in the R code, and you will need to add in code for one more hierarchical clustering analysis (hc4). For that, you can choose to change the distance metric used and/or the method used. See *Cluster examples 531 2022.R* for some ideas. The output will include hierarchical clustering results and a tree dendrogram for each of the four alternatives. Then, you will be answering Questions 1 to 4 to guide you through the outputs and interpret the results.
@@ -169,7 +140,6 @@ Let's look at the first hierarchical clustering alternative (hc1).
 ### hc1
 
 For hc 1, the euclidean distance is chosen. The following code calculates the distance matrix via the function *dist()*! (There are other distance methods in the function *dist()*, including "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski".)
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide"}
 justx<-clusdat[,3:12] # just the bird info.
@@ -181,11 +151,7 @@ d <- dist(justx, method = "euclidean")
 #d
 ```
 
-<<<<<<< HEAD
-Next, we pass the calculated distance matrix to the function *hclust()* to cluster using hierarchical methods. In *hclust()*, hierarchical methods can be one of "ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC). For hc1, the complete method is chosen.   
-=======
 Next, we pass the calculated distance matrix to the function *hclust()* to cluster using hierarchical methods. In *hclust()*, hierarchical methods can be one of "ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC). For hc1, the complete method is chosen.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide"}
 # pass the distance matrix to hclust().  
@@ -195,11 +161,7 @@ hc1 <- hclust(d,method = "complete") # apply hierarchical clustering
 class(hc1)  
 ```
 
-<<<<<<< HEAD
-Then, we plot the tree dendrogram. 
-=======
 Then, we plot the tree dendrogram.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 # plot the dendrogram, 
@@ -208,11 +170,7 @@ plot(hc1, labels =clusdat$point,hang = -1, main="Complete, Euclidean",cex=0.6) #
 
 ### hc2
 
-<<<<<<< HEAD
-For the second alternative (hc2), we retain the calculated distance matrix from hc1, pass it to hclust() again using a different method, and plot the dendrogram.  
-=======
 For the second alternative (hc2), we retain the calculated distance matrix from hc1, pass it to hclust() again using a different method, and plot the dendrogram.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 # pass the distance matrix to hclust() again.   
@@ -227,11 +185,7 @@ plot(hc2, labels =clusdat$point,hang = -1, main="Single, Euclidean",cex=0.6)
 
 ### hc3
 
-<<<<<<< HEAD
-For the third option (hc3), we use standardized x's instead to calculate the distance matrix and then pass it to hclust(). The dendrogram is plotted as well.  
-=======
 For the third option (hc3), we use standardized x's instead to calculate the distance matrix and then pass it to hclust(). The dendrogram is plotted as well.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 # Try again but use standardized x's instead.
@@ -275,17 +229,11 @@ plot(hc4, labels = clusdat$point, hang = -1,
      main = "Ward.D2, Euclidean", cex = 0.6)
 
 ```
-<<<<<<< HEAD
-Note: The Ward plot showed clear and immediate branching in two directions, but the Manhattan plot was more gradual with fewer obvious breaks. The Ward plot seems more straightforward for interpretation. 
-
-Looking at how to break things up: 
-=======
 
 Note: The Ward plot showed clear and immediate branching in two directions, but the Manhattan plot was more gradual with fewer obvious breaks. The Ward plot seems more straightforward for interpretation.
 
 Looking at how to break things up:
 
->>>>>>> f8b653f (Sandra's Version)
 ```{r}
 # Ward dendrogram into 2 
 plot(hc4, labels = clusdat$point, hang = -1,
@@ -296,12 +244,8 @@ plot(hc4, labels = clusdat$point, hang = -1,
 rect.hclust(hc4, k = 2, border = 2)
 ```
 
-<<<<<<< HEAD
-and then 3 clusters for Ward: 
-=======
 and then 3 clusters for Ward:
 
->>>>>>> f8b653f (Sandra's Version)
 ```{r}
 plot(hc4, labels = clusdat$point, hang = -1,
      main = "Ward.D2, Euclidean",
@@ -311,10 +255,7 @@ rect.hclust(hc4, k = 3, border = 2:4)
 ```
 
 Now for Manhattan
-<<<<<<< HEAD
-=======
 
->>>>>>> f8b653f (Sandra's Version)
 ```{r}
 plot(hc5, labels = clusdat$point, hang = -1,
      main = "Average, Manhattan Distance",
@@ -323,12 +264,8 @@ plot(hc5, labels = clusdat$point, hang = -1,
 rect.hclust(hc5, k = 2, border = 2:4)
 ```
 
-<<<<<<< HEAD
-and now Manhattan into 3 clusters: 
-=======
 and now Manhattan into 3 clusters:
 
->>>>>>> f8b653f (Sandra's Version)
 ```{r}
 plot(hc5, labels = clusdat$point, hang = -1,
      main = "Average, Manhattan Distance",
@@ -337,30 +274,17 @@ plot(hc5, labels = clusdat$point, hang = -1,
 rect.hclust(hc5, k = 3, border = 2:4)
 ```
 
-<<<<<<< HEAD
-Again, it seems that Ward's method is better for interpretation. Both have one small branch, but otherwise Ward makes a cleaner and more balanced clustering. We'll go with Ward's. 
-
-=======
 Again, it seems that Ward's method is better for interpretation. Both have one small branch, but otherwise Ward makes a cleaner and more balanced clustering. We'll go with Ward's.
->>>>>>> f8b653f (Sandra's Version)
 
 \
 
 **QUESTION 1.0**: Show the tree dendrogram for each of the four alternative hierarchical clustering analysis (i.e., hc1 to hc3, plus hc4 that you just added in). These will be very large; you may want to adjust the layout for each figure. Remember to include a figure caption at the bottom of each of the four figures (e.g., Figure 1. Euclidean distance and nearest neighbour clustering).
 
-<<<<<<< HEAD
-Notes: 
-- hc1: Complete linkage clustering using Euclidean distance
-- hc2: Single linkage (nearest neighbour) clustering using Euclidean distance
-- hc3: Complete linkage clustering using Euclidean distance with standardized bird abundance variables
-- hc4: Ward’s hierarchical clustering using Euclidean distance
-
-*Important note: while the plots below use k=3 to divide breaks for visual clarity (which we used to help compare plots), this should not imply that all dendrograms truly display 3 clusters.*  
-=======
 Notes: - hc1: Complete linkage clustering using Euclidean distance - hc2: Single linkage (nearest neighbour) clustering using Euclidean distance - hc3: Complete linkage clustering using Euclidean distance with standardized bird abundance variables - hc4: Ward’s hierarchical clustering using Euclidean distance
 
-*Important note: while the plots below use k=3 to divide breaks for visual clarity (which we used to help compare plots), this should not imply that all dendrograms truly display 3 clusters.*
->>>>>>> f8b653f (Sandra's Version)
+# *Important note: while the plots below use k=3 to divide breaks for visual clarity (which we used to help compare plots), this should not imply that all dendrograms truly display 3 clusters.*
+
+Notes: - hc1: Complete linkage clustering using Euclidean distance - hc2: Single linkage (nearest neighbour) clustering using Euclidean distance - hc3: Complete linkage clustering using Euclidean distance with standardized bird abundance variables - hc4: Ward’s hierarchical clustering using Euclidean distance
 
 ```{r hc1plot, fig.width=10, fig.height=6, fig.cap="Figure 1. Tree dendrogram for hc1 using complete linkage with Euclidean distance, showing a 3-cluster cut."}
 plot(hc1, labels = clusdat$point, hang = -1,
@@ -394,17 +318,6 @@ plot(hc4, labels = clusdat$point, hang = -1,
 rect.hclust(hc4, k = 3, border = 2:4)
 ```
 
-<<<<<<< HEAD
-
-**QUESTION 2.0**: Compare the results for your four alternative hierarchical clustering analyses. For this comparison, **make a table** showing:  
-
-1. the label for the cluster analysis (e.g., hc1)  
-2. the distance measure used (e.g., Euclidean)    
-3. the method used (e.g., nearest neighbour/simple)  
-4. the number of clusters based on your interpretation of the dendrogram, and why    
-5. whether or not chaining occurred, and why  
-6. whether there was clear separation by distance between the clusters, and why
-=======
 **QUESTION 2.0**: Compare the results for your four alternative hierarchical clustering analyses. For this comparison, **make a table** showing:
 
 1.  the label for the cluster analysis (e.g., hc1)\
@@ -413,7 +326,6 @@ rect.hclust(hc4, k = 3, border = 2:4)
 4.  the number of clusters based on your interpretation of the dendrogram, and why\
 5.  whether or not chaining occurred, and why\
 6.  whether there was clear separation by distance between the clusters, and why
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r}
 # QUESTION 2.0 - Template Code
@@ -465,11 +377,7 @@ rect.hclust(hc4, k = 3, border = 2:4)
 #              caption = "Table 1. Cluster results for ...")
 ```
 
-<<<<<<< HEAD
-**Your Answer:** 
-=======
 **Your Answer:**
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r}
 answer2.0 <- data.frame(
@@ -510,20 +418,6 @@ knitr::kable(answer2.0, row.names = NA,
              align = "l")
 ```
 
-<<<<<<< HEAD
-
-
-\
-
-**QUESTION 3**: Based on your comparison table for hierarchical methods
-and your tree dendrograms: 
-
-1) **QUESTION 3.1**: Was there consistency in the number of clusters, or did this vary greatly over the four analyses? Explain briefly.
-
-The number of clusters was fairly consistent across most methods, but there were some differences. The complete linkage (hc1) and Ward’s method (hc4) both suggested at least two main clusters, while the standardized complete linkage (hc3) indicated three clusters. In contrast, the single linkage method (hc2) resulted in only 1 somehat ambiguous cluster (due to chaining).
-
-
-=======
 \
 
 **QUESTION 3**: Based on your comparison table for hierarchical methods and your tree dendrograms:
@@ -532,44 +426,36 @@ The number of clusters was fairly consistent across most methods, but there were
 
 The number of clusters was fairly consistent across most methods, but there were some differences. The complete linkage (hc1) and Ward’s method (hc4) both suggested at least two main clusters, while the standardized complete linkage (hc3) indicated three clusters. In contrast, the single linkage method (hc2) resulted in only 1 somehat ambiguous cluster (due to chaining).
 
->>>>>>> f8b653f (Sandra's Version)
+\
+
+**QUESTION 3**: Based on your comparison table for hierarchical methods and your tree dendrograms:
+
+1)  **QUESTION 3.1**: Was there consistency in the number of clusters, or did this vary greatly over the four analyses? Explain briefly.
+
+The number of clusters was fairly consistent across most methods, but there were some differences. The complete linkage (hc1) and Ward’s method (hc4) both suggested at least two main clusters, while the standardized complete linkage (hc3) indicated three clusters. In contrast, the single linkage method (hc2) resulted in only 1 somehat ambiguous cluster (due to chaining).
+
 ```{r}
 # Provide your R codes here (if applicable)
 ```
 
-<<<<<<< HEAD
-
-2) **QUESTION 3.2**: Which cluster analysis gave the clearest result? Justify your answer briefly.
-
-Ward’s method produced the clearest result. The dendrogram shows two clear clusters that remain separate until merging at a very high dissimilarity height (~18), indicating strong separation between groups. This method also avoids the problematic chaining seen in the single linkage dendrogram and produces more compact clusters than the complete linkage methods.
-=======
 2)  **QUESTION 3.2**: Which cluster analysis gave the clearest result? Justify your answer briefly.
 
 Ward’s method produced the clearest result. The dendrogram shows two clear clusters that remain separate until merging at a very high dissimilarity height (\~18), indicating strong separation between groups. This method also avoids the problematic chaining seen in the single linkage dendrogram and produces more compact clusters than the complete linkage methods.
->>>>>>> f8b653f (Sandra's Version)
+
+2)  **QUESTION 3.2**: Which cluster analysis gave the clearest result? Justify your answer briefly.
+
+Ward’s method produced the clearest result. The dendrogram shows two clear clusters that remain separate until merging at a very high dissimilarity height (\~18), indicating strong separation between groups. This method also avoids the problematic chaining seen in the single linkage dendrogram and produces more compact clusters
 
 ```{r}
 # Provide your R codes here (if applicable)
 ```
 
-<<<<<<< HEAD
-
-=======
->>>>>>> f8b653f (Sandra's Version)
-\
-
 **QUESTION 4.0**: Select one of your hierarchical cluster methods. For the selected method, annotate the tree dendrogram to show the clusters and add this as a new figure. Remember to include a figure caption at the bottom of your figure. (i.e., Figure 5. ?? caption here??...)
 
-<<<<<<< HEAD
-**Your Answer:** 
-
-Providing the k=2plot from earlier, with extra annotations. 
-=======
 **Your Answer:**
 
 Providing the k=2plot from earlier, with extra annotations.
 
->>>>>>> f8b653f (Sandra's Version)
 ```{r ward_annotated, fig.width=10, fig.height=6, fig.cap="Figure 5. Annotated dendrogram for Ward’s hierarchical clustering using Euclidean distance, showing two clusters."}
 par(mar = c(8,4,4,2))
 plot(hc4, labels = clusdat$point, hang = -1,
@@ -590,11 +476,7 @@ text(x = 45, y = 17, labels = "Cluster 2", col = "blue", font = 2)
 
 \newpage
 
-<<<<<<< HEAD
-## Part 3: Non-Hierarchical Clustering of sites by bird composition 
-=======
 ## Part 3: Non-Hierarchical Clustering of sites by bird composition
->>>>>>> f8b653f (Sandra's Version)
 
 In Part 3, you will use k-means non-Hierarchical clustering to cluster sites based on bird composition. Remember that the number of clusters is an input variable for k-means. The following code will try inputting 1 to 6 clusters separately, and you will need to interpret the results and choose the likely "natural" number of clusters.
 
@@ -616,22 +498,14 @@ wss
 
 ```
 
-<<<<<<< HEAD
-In order to choose the likely "natural" number of clusters, plotting the within sums of squares against the number of of clusters could be beneficial.  
-=======
 In order to choose the likely "natural" number of clusters, plotting the within sums of squares against the number of of clusters could be beneficial.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, fig.show='hide'}
 plot(1:6, wss, type = "b", xlab = "Number of groups",
    ylab = "Within groups sum of squares")
 ```
 
-<<<<<<< HEAD
-In addition to the wss plot, graphing the clustering results also helps us make a decision. The following code shows an example of where three clusters are formed (but that three-clusters may not be the best choice). You can modify the code and try to graph other scenarios.  
-=======
 In addition to the wss plot, graphing the clustering results also helps us make a decision. The following code shows an example of where three clusters are formed (but that three-clusters may not be the best choice). You can modify the code and try to graph other scenarios.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 ## clustering results when forming 3 groups
@@ -652,11 +526,7 @@ summary(Keep) # most are in Cluster 1 here, with the 3 cluster solution.
 
 ```
 
-<<<<<<< HEAD
-We could also graph showing the clusters number and two of the bird species. The example below indicates which sites have a similar bird composition in terms of "hola" and "vesp" under the 3-cluster solution.  
-=======
 We could also graph showing the clusters number and two of the bird species. The example below indicates which sites have a similar bird composition in terms of "hola" and "vesp" under the 3-cluster solution.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 plot(justx[ ,c("hola","vesp")], xlab = "hola",
@@ -668,22 +538,16 @@ text(clusdat[ ,"hola"], clusdat[ ,"vesp"],
 
 ```
 
-\
-
 **QUESTION 5.0**: Using the k-means non-hierarchical method, how many natural clusters does there seem to be? For this, show the graph of the within sums of squares versus the number of clusters and add a figure caption. Then use this in justifying your choice of the number of clusters.
 
-<<<<<<< HEAD
-**Your Answer:** 
+**Your Answer:**
 
 ```{r}
 # Provide your R codes here (if applicable)
 ```
 
+Until now, you have explored various hierarchical and non-hierarchical clustering analyses. It's time for you to make a detailed comparison and choose your best segregation solution.
 
-\
-
-Until now, you have explored various hierarchical and non-hierarchical clustering analyses. It's time for you to make a detailed comparison and choose your best segregation solution.  
-=======
 **Your Answer:** The plot shows a clear elbow around 2 clusters, where the decrease in within-group sum of squares begins to level off. This indicates that adding more clusters beyond two provides only small improvements in explaining variation. Therefore, the likely natural number of clusters is two.
 
 ```{r}
@@ -716,19 +580,12 @@ plot(1:6, wss,
 \
 
 Until now, you have explored various hierarchical and non-hierarchical clustering analyses. It's time for you to make a detailed comparison and choose your best segregation solution.
->>>>>>> f8b653f (Sandra's Version)
-
-\
 
 **QUESTION 6.0**: Compare your selected hierarchical clustering analysis to the non-hierarchical k-means results in terms of: 1) Was there consistency in the number of natural clusters? and 2) Which was easier to interpret/use for this problem?
 
-<<<<<<< HEAD
-**Your Answer:** 
-=======
 **Your Answer:** The hierarchical clustering results were generally consistent with the k-means clustering results. The Ward hierarchical method suggested two main clusters, and the k-means elbow method also indicated two natural clusters. This suggest confidence in the clustering result.
 
 In terms of interpretation, hierarchical clustering was easier to interpret for this problem because the dendrogram visually shows how sites merge at different dissimilarity levels. This makes it easier to see cluster structure and relationships among sites compared with k-means, which only outputs cluster assignments.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r}
 # Provide your R codes here (if applicable)
@@ -738,9 +595,6 @@ In terms of interpretation, hierarchical clustering was easier to interpret for 
 
 **QUESTION 7.0**: Overall, based on your analyses and interpretation, which clustering method would you recommend of the five methods used? Briefly explain your choice.
 
-<<<<<<< HEAD
-**Your Answer:** 
-=======
 **Your Answer:** Ward’s method produced the clearest and most interpretable clustering structure compared to the other hierarchical methods. Unlike single linkage, which often suffers from the chaining effect where clusters form long chains of observations, Ward’s method minimizes the **w**ithin-cluster variance, resulting in more compact and well-separated clusters. This makes the clusters easier to interpret in terms of similarities among the sites.
 
 The dendrogram produced by Ward’s method also showed a clear separation between **t**wo main groups of sites, suggesting that the dataset naturally divides into two clusters based on bird species composition. This result was further supported by the k-means elbow method, which also indicated that two clusters provide the best balance between simplicity and explanatory power.
@@ -748,36 +602,20 @@ The dendrogram produced by Ward’s method also showed a clear separation betwee
 Additionally, hierarchical clustering provides a useful visual representation of the relationships among sites, allowing us to observe how clusters form at different dissimilarity levels. This makes it easier to understand the underlying structure of the data compared to k-means clustering, which only provides final cluster assignments without showing how observations are grouped.
 
 Therefore, because Ward’s method produced **c**ompact clusters, clear separation between groups, and results consistent with the k-means analysis, it appears to be the most reliable clustering approach for this dataset.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r}
 # Provide your R codes here (if applicable)
 ```
 
-<<<<<<< HEAD
-
 \newpage
 
-
-
-=======
-\newpage
-
->>>>>>> f8b653f (Sandra's Version)
 ## Extra R code, Part 4: Non-Hierarchical Clustering of birds by locations
 
 Below is extra code where the data are transposed and the objective is to cluster the birds based on locations that they exist (i.e., Which birds appear to be together?) This is just for fun, and shows how the clustering can be altered to group variables instead of observations to match the question posed.
 
-<<<<<<< HEAD
-
-### Data Preparation
-
-First, let's just take 25 rows this time and transpose the data. 
-=======
 ### Data Preparation
 
 First, let's just take 25 rows this time and transpose the data.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide"}
 justxT<-t(justx[1:25,])
@@ -802,11 +640,7 @@ plot(1:6, wss, type = "b", xlab = "Number of groups",
    ylab = "Within groups sum of squares")
 ```
 
-<<<<<<< HEAD
-Graph the three-group solution in below... but that may not be the best one? 
-=======
 Graph the three-group solution in below... but that may not be the best one?
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 ## clustering results when forming 3 groups
@@ -821,11 +655,7 @@ head(Keep3) # cluster number is added to the data.
 summary(Keep3) # most are in Cluster 1 here.
 ```
 
-<<<<<<< HEAD
-Let's check the four-group solution as well. 
-=======
 Let's check the four-group solution as well.
->>>>>>> f8b653f (Sandra's Version)
 
 ```{r, results="hide", fig.show='hide'}
 ## clustering results when forming 4 groups
