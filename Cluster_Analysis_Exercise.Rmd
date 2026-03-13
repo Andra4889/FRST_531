@@ -548,7 +548,7 @@ text(clusdat[ ,"hola"], clusdat[ ,"vesp"],
 
 Until now, you have explored various hierarchical and non-hierarchical clustering analyses. It's time for you to make a detailed comparison and choose your best segregation solution.
 
-**Your Answer:** The plot shows a clear elbow around 2 clusters, where the decrease in within-group sum of squares begins to level off. This indicates that adding more clusters beyond two provides only small improvements in explaining variation. Therefore, the likely natural number of clusters is two.
+**Your Answer:** The plot shows a clear elbow at k = 2, where the decrease in within-group sum of squares begins to level off more gradually. The WSS drops sharply from 496.22 with one cluster to 300.76 with two clusters, which is the largest reduction in within-group variation. After this point, the reductions become progressively smaller (300.76 to 225.69 for three clusters, then to 174.74, 138.77, and 120.84 for four to six clusters). This pattern suggests that most of the variation in the data is explained by dividing the sites into two clusters, while additional clusters provide only modest improvements. Overall, it appears that there are two natural clusters.
 
 ```{r}
 # Provide your R codes here (if applicable)
@@ -574,7 +574,7 @@ plot(1:6, wss,
      pch=19,
      xlab="Number of Clusters",
      ylab="Within Groups Sum of Squares",
-     main="Elbow Method for Determining Optimal Clusters")
+     main="Fig. 6. Elbow Method for Determining Optimal Clusters")
 ```
 
 \
@@ -583,25 +583,39 @@ Until now, you have explored various hierarchical and non-hierarchical clusterin
 
 **QUESTION 6.0**: Compare your selected hierarchical clustering analysis to the non-hierarchical k-means results in terms of: 1) Was there consistency in the number of natural clusters? and 2) Which was easier to interpret/use for this problem?
 
-**Your Answer:** The hierarchical clustering results were generally consistent with the k-means clustering results. The Ward hierarchical method suggested two main clusters, and the k-means elbow method also indicated two natural clusters. This suggest confidence in the clustering result.
+**Your Answer:** The hierarchical clustering results were generally consistent with the k-means clustering results. The Ward hierarchical method suggested two main clusters, and the k-means elbow method also indicated two natural clusters. This consistency suggests confidence in the clustering result.
 
-In terms of interpretation, hierarchical clustering was easier to interpret for this problem because the dendrogram visually shows how sites merge at different dissimilarity levels. This makes it easier to see cluster structure and relationships among sites compared with k-means, which only outputs cluster assignments.
+In terms of interpretation, hierarchical clustering was easier to interpret because the dendrogram visually shows how sites merge at different dissimilarity levels, making it easier to see the cluster structure and relationships among sites. In contrast, k-means primarily provides cluster assignments and requires additional plots or diagnostics, like the elbow plot, to determine the number of clusters.
 
 ```{r}
-# Provide your R codes here (if applicable)
+# k-means with 2 clusters
+set.seed(123)
+twogroups <- kmeans(justx, centers = 2)
+
+# Ward clusters cut into 2 groups
+ward_clusters <- cutree(hc4, k = 2)
+
+# Compare assignments
+comparison <- data.frame(
+  Site = row.names(justx),
+  Ward_Cluster = ward_clusters,
+  Kmeans_Cluster = twogroups$cluster
+)
+
+knitr::kable(comparison,
+             caption = "Table 2. Comparison of site assignments between Ward hierarchical clustering and k-means clustering using two clusters.")
 ```
 
 \
 
 **QUESTION 7.0**: Overall, based on your analyses and interpretation, which clustering method would you recommend of the five methods used? Briefly explain your choice.
 
-**Your Answer:** Ward’s method produced the clearest and most interpretable clustering structure compared to the other hierarchical methods. Unlike single linkage, which often suffers from the chaining effect where clusters form long chains of observations, Ward’s method minimizes the **w**ithin-cluster variance, resulting in more compact and well-separated clusters. This makes the clusters easier to interpret in terms of similarities among the sites.
+In comparing the five methods tested here, Ward’s method produced the clearest and most reliable clustering structure. The single linkage method showed evidence of chaining, where sites merged sequentially rather than forming distinct groups, making the resulting cluster structure difficult to interpret. The complete linkage methods (hc1 and hc3) produced more compact clusters, but the separation between groups was moderate and less distinct than with Ward’s method. The Manhattan distance clustering also produced clusters, but the separation was not as clear as with Ward’s method. 
 
-The dendrogram produced by Ward’s method also showed a clear separation between **t**wo main groups of sites, suggesting that the dataset naturally divides into two clusters based on bird species composition. This result was further supported by the k-means elbow method, which also indicated that two clusters provide the best balance between simplicity and explanatory power.
+The dendrogram produced by Ward’s method also showed a clear separation between **t**wo main groups of sites, suggesting that the dataset naturally divides into two clusters based on bird species composition. This interpretation was further supported by the k means analysis, where the elbow plot indicated that two clusters best represented the natural structure of the data.
 
-Additionally, hierarchical clustering provides a useful visual representation of the relationships among sites, allowing us to observe how clusters form at different dissimilarity levels. This makes it easier to understand the underlying structure of the data compared to k-means clustering, which only provides final cluster assignments without showing how observations are grouped.
+Overall, because Ward’s method produced the most compact clusters, the clearest separation between groups, and results consistent with the k means analysis, it appears to be the most appropriate clustering approach for this dataset.
 
-Therefore, because Ward’s method produced **c**ompact clusters, clear separation between groups, and results consistent with the k-means analysis, it appears to be the most reliable clustering approach for this dataset.
 
 ```{r}
 # Provide your R codes here (if applicable)
