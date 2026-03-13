@@ -610,12 +610,11 @@ knitr::kable(comparison,
 
 **QUESTION 7.0**: Overall, based on your analyses and interpretation, which clustering method would you recommend of the five methods used? Briefly explain your choice.
 
-In comparing the five methods tested here, Ward’s method produced the clearest and most reliable clustering structure. The single linkage method showed evidence of chaining, where sites merged sequentially rather than forming distinct groups, making the resulting cluster structure difficult to interpret. The complete linkage methods (hc1 and hc3) produced more compact clusters, but the separation between groups was moderate and less distinct than with Ward’s method. The Manhattan distance clustering also produced clusters, but the separation was not as clear as with Ward’s method. 
+In comparing the five methods tested here, Ward’s method produced the clearest and most reliable clustering structure. The single linkage method showed evidence of chaining, where sites merged sequentially rather than forming distinct groups, making the resulting cluster structure difficult to interpret. The complete linkage methods (hc1 and hc3) produced more compact clusters, but the separation between groups was moderate and less distinct than with Ward’s method. The Manhattan distance clustering also produced clusters, but the separation was not as clear as with Ward’s method.
 
 The dendrogram produced by Ward’s method also showed a clear separation between **t**wo main groups of sites, suggesting that the dataset naturally divides into two clusters based on bird species composition. This interpretation was further supported by the k means analysis, where the elbow plot indicated that two clusters best represented the natural structure of the data.
 
 Overall, because Ward’s method produced the most compact clusters, the clearest separation between groups, and results consistent with the k means analysis, it appears to be the most appropriate clustering approach for this dataset.
-
 
 ```{r}
 # Provide your R codes here (if applicable)
