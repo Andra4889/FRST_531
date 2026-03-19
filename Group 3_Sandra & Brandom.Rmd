@@ -9,26 +9,24 @@ output: html_document
 
 **Submission**: Brandon Weigland and Sandra Inusah
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+## General Description/Motivationn
 
-## R Markdown
+Urban freshwater ponds play important roles in moderating microclimates and supporting local biodiversity. In Vancouver, however, several urban ponds now experience seasonal dry out by late summer, coinciding with periods of peak biological demand. While broader drivers such as climate warming and water management policy are implicated, there remains limited fine-scale knowledge of the physical mechanisms that sustain pond water levels through the summer season when precipitation is limited. In particular, it is not yet clear how declining water volume interacts with proximate biophysical factors such as temperature, nutrient content, vegetation growth, canopy structure, and shading to influence seasonal water loss. 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This study examines fifteen urban ponds across the City of Vancouver to investigate the processes associated with pond dry out. We integrate LiDAR derived canopy data with solar modeling to quantify spatial variation in shade intensity, coverage, and distribution. These shade metrics are paired with in-situ measurements of vegetation spread, pH, air temperature, water temperature, humidity, and water recession. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+By examining interactions between microclimate and surrounding pond features, this work aims to clarify mechanisms of urban pond dry out and inform habitat management directives for pond resilience in large urban centres.
 
-```{r cars}
-summary(cars)
-```
+## Research Question 
 
-## Including Plots
+What environmental gradients best differentiate ponds that dry out from those that remain stable or are refilled?
 
-You can also embed plots, for example:
+##Hypothesis
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+Ponds that experience dry-out display a distinct pattern characterized by higher temperatures, reduced shading, and greater water loss rates. Or, We expect dry-out ponds to be associated with lower shade, higher thermal exposure, and greater rates of water loss.
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
