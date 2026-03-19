@@ -111,7 +111,7 @@ PCA will be used to identify the main environmental gradients driving variation 
 
 Cluster Analysis will be used as a complementary method to group ponds based on overall similarity in environmental conditions. A hierarchical clustering approach (e.g., Ward’s method with Euclidean distance) will be applied to produce compact and interpretable clusters. These clusters will then be compared with pond classifications (dry-out, stable, refill) to assess whether ponds naturally group according to their drying behavior. Together, PCA and cluster analysis provide both a gradient-based and grouping-based understanding of differences among ponds.
 
-.........You can add or take something out f its not makng sense....................
+.........You can add or take something out if its not making sense....................
 
 ## Assumptions and Checks
 
