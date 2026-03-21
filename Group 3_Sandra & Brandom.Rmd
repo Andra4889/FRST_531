@@ -1,91 +1,88 @@
 ---
-title: "Group 3_Brandon and Sandra"
+title: "Group 3: Brandon Weigand and Sandra Inusah"
 author: "Brandon and Sandra"
 date: "2026-03-18"
 output: html_document
 ---
 
 **Course Instructor**: Dr. Suborna Ahmed\
-
 **Submission**: Brandon Weigland and Sandra Inusah
+
+## Title: Drivers of Urban Pond Dry-Out: Identifying Environmental Gradients and Patterns of Water Loss in Pond Habitats Across Vancouver
 
 ## General Description
 
-Urban freshwater ponds play important roles in moderating microclimates and supporting local biodiversity. In Vancouver, however, several urban ponds now experience seasonal dry out by late summer, coinciding with periods of peak biological demand. While broader drivers such as climate warming and water management policy are implicated, there remains limited fine-scale knowledge of the physical mechanisms that sustain pond water levels through the summer season when precipitation is limited. In particular, it is not yet clear how declining water volume interacts with proximate biophysical factors such as temperature, nutrient content, vegetation growth, canopy structure, and shading to influence seasonal water loss.
+In response to growing pressures on freshwater resources, the City of Vancouver recently implemented water conservation strategies through its 2017 and 2023 Water Priority Action Plans. These policies prioritize long-term water security by reducing potable water use across urban infrastructure, including fountains, spray parks, and ornamental water features. As part of this transition, several aesthetic ponds that were historically maintained through regular potable water inputs have been reclassified as seasonal systems and no longer receive supplemental water. Consequently, ponds that once retained stable water levels throughout the year now undergo substantial seasonal drawdown, with some transitioning from water-filled habitats in winter to dry basins by late summer.
 
-This study examines fifteen urban ponds across the City of Vancouver to investigate the processes associated with pond dry out. We integrate LiDAR derived canopy data with solar modeling to quantify spatial variation in shade intensity, coverage, and distribution. These shade metrics are paired with in-situ measurements of vegetation spread, pH, air temperature, water temperature, humidity, and water recession.
+This policy-driven shift creates a rare opportunity to examine urban pond dynamics under reduced human intervention, allowing processes of water loss and persistence to emerge more clearly than in artificially maintained systems. Despite their small size, urban freshwater ponds play a critical role in moderating microclimates and supporting biodiversity, particularly during the summer months when aquatic and semi-aquatic species experience peak resource demand. However, the mechanisms governing seasonal water loss in these systems remain poorly understood. In particular, it is unclear how interacting biophysical factors including temperature, nutrient availability, vegetation growth, canopy structure, and shading influence the rate and extent of water decline across ponds embedded within the same urban landscape.
 
-## Research Question
+## Leading Research Question
 
-What environmental gradients best differentiate ponds that dry out from those that remain stable or are refilled?
+Which environmental gradients differentiate urban ponds that dry out from those that remain stable or receive supplemental water?
+
+## Secondary Research Questions:
+
+Which biophysical variables contribute most strongly to the environmental gradients associated with variation in rates of pond water loss?
+
+How do environmental gradients and pond conditions shift over the summer season, and how do these shifts relate to differences in rates of water loss among ponds?
+
+Do ponds with different rates of water loss form distinct clusters or patterns, or do they fall along a continuous gradient of environmental conditions?
 
 ## Hypothesis
 
-Ponds that experience dry-out display a distinct pattern characterized by higher temperatures, reduced shading, and greater water loss rates.
+Ponds that experience higher rates of water loss display distinct patterns characterized by higher temperatures, reduced shading, and greater water loss rates.
 
 ## Motivation
 
-This research is motivated by the need to better understand how urban freshwater ecosystems respond to increasing climatic variability and urban pressures. As ponds provide critical habitat for aquatic and semi-aquatic species, their seasonal loss can have cascading ecological impacts. By identifying the key environmental factors associated with pond persistence or dry-out, this study aims to clarify mechanisms of urban pond dry out and inform habitat management directives for pond resilience in large urban centres.
+This research is motivated by the need to better understand how urban freshwater ecosystems respond to increasing climatic variability and urban pressures. As ponds provide critical habitat for aquatic and semi-aquatic species, their seasonal loss can have cascading ecological impacts. By identifying the key environmental factors and patterns associated with pond persistence or dry-out, this study aims to clarify the mechanisms of urban pond water loss and inform habitat management strategies for enhancing pond resilience in Vancouver and other cities facing similar water conservation pressures. In doing so, it provides an early diagnosis of urban pond vulnerability under a future in which reduced water inputs and stricter management policies become increasingly common.
 
 ## Data Overview
 
 ## 1. Study Area
 
-This study was conducted across 15 urban freshwater ponds in the City of Vancouver, British Columbia, Canada, during the June–August (the year)\_\_summer period, when precipitation is typically low and evaporative demand is high. Vancouver has a temperate coastal climate, characterized by mild temperatures, dry summers, and wet winters, making summer months particularly important for understanding water balance and drought dynamics in shallow urban water bodies.
+This study was conducted across 15 urban freshwater ponds in the City of Vancouver, British Columbia, Canada, during the June–August 2025 summer period, when precipitation is typically low and evaporative demand is high. Vancouver has a temperate coastal climate, characterized by mild temperatures, dry summers, and wet winters, making summer months particularly important for understanding water balance and drought dynamics in shallow urban water bodies with uneven annual climate regimes.
 
-The ponds included: Avalon Pond (AVL), Botanical Garden Large (BGL), Botanical Garden Small (BGS), Cariboo Park (BOO), Charles Park (CHS), Charleson Park (CSN), Granville Island (GVI), Jericho Beach Park (JCO), McCleery Golf Course (MCC), Memorial South Park (MSP), Queen Elizabeth Park Duck Pond (QED), Rupert Putt Course Pond (RUP), Sanctuary Pond (SCT), Trout Lake (TRT), and Vanier Park (VAN).
+The ponds include: Avalon Pond (AVL), Botanical Garden Large (BGL), Botanical Garden Small (BGS), Cariboo Park (BOO), Charles Park (CHS), Charleson Park (CSN), Granville Island (GVI), Jericho Beach Park (JCO), McCleery Golf Course (MCC), Memorial South Park (MSP), Queen Elizabeth Park Duck Pond (QED), Rupert Putt Course Pond (RUP), Sanctuary Pond (SCT), Trout Lake (TRT), and Vanier Park (VAN).
 
-The ponds vary substantially in size, depth, and hydrological behavior, ranging from small, shallow systems that frequently dry out to larger, managed ponds that remain stable or are periodically refilled. All ponds were delineated using high-resolution aerial imagery and field validation, representing their maximum early-season water extent.
+The ponds vary substantially in size, depth, and hydrological behavior, ranging from small, shallow systems that frequently dry out to larger, managed ponds that remain stable or are periodically refilled. Sites were intentionally selected to capture variation along key gradients, including pond area, canopy cover, and spatial distance across the urban matrix, while also representing contrasting hydrological conditions. Of the fifteen ponds, five experienced complete or near-complete dry-out during the 2024 summer season, whereas five others maintained consistent water levels due to continued inputs and exemption from water restriction policies, with the remaining ponds exhibiting intermediate behavior. This distribution enables direct comparison across a spectrum of water persistence conditions. All ponds were delineated using high-resolution aerial imagery and field validation, representing their maximum early-season water extent.
 
-The selected ponds are distributed across a range of urban land use contexts, including public parks (e.g., Trout Lake, Queen Elizabeth Park), recreational areas (e.g., Jericho Beach, Vanier Park), institutional landscapes (e.g., UBC Botanical Garden), and highly built environments (e.g., Granville Island). This spatial diversity captures variation in surrounding land cover, including impervious surfaces, vegetation structure, and canopy density, which are hypothesized to influence microclimate and water loss processes.
+The selected ponds are distributed across a range of urban land use contexts, including public parks (e.g., Trout Lake, Queen Elizabeth Park), recreational areas (e.g., Jericho Beach, Vanier Park), institutional landscapes (e.g., UBC Botanical Garden), and highly built environments (e.g., Granville Island). This spatial diversity captures variation in surrounding land cover, including impervious surfaces, within-pond vegetation structure, and canopy density, which are hypothesized to influence microclimate and water loss processes.
 
-The study area is embedded within a highly urbanized landscape, where anthropogenic factors such as heat retention from built surfaces, altered hydrology, and fragmented vegetation interact with natural processes. These conditions create strong spatial gradients in shading, temperature, and moisture availability, making Vancouver an ideal setting for examining the drivers of urban pond dry-out and resilience.
+The study area is embedded within a highly urbanized landscape, where anthropogenic factors such as heat retention from built surfaces, altered hydrology, and fragmented vegetation interact with natural processes. These conditions create strong spatial gradients in shading, temperature, and moisture availability.
 
 ## 2. Data Source
 
-The study integrates field-based measurements, in-situ sensor data, and spatial datasets to examine factors associated with urban pond water loss.
+The study integrates field-based measurements, in-situ sensor data, and spatial datasets to examine patterns associated with excelerated rates of urban pond water loss.
 
-Water level data were collected through repeated field visits, where pond depth was measured using meter sticks at fixed sampling locations (minimum of six visits per pond). Vegetation cover was estimated using a grid-based visual survey approach, where observers independently assessed percentage cover within predefined grid cells and averaged their estimates to reduce bias. Water quality variables (pH and phosphate) were measured in the field using high-sensitivity test strips and vial-based assays.
+Water level data were collected through repeated field visits, where pond depth was measured using meter sticks at fixed sampling locations (minimum of six visits per pond, roughly 3 weeks between visits). 
 
-Microclimate data (air temperature, water temperature, and humidity) were recorded using iButton loggers deployed at each pond. These sensors recorded measurements at 20-minute intervals throughout the study period. Loggers were installed at representative locations based on modeled shade conditions (high shade, intermediate, and high exposure) to capture within-pond microclimatic variability.
+Vegetation cover was estimated using a grid-based visual survey approach during each site visit, where 2 observers independently assessed percentage cover within predefined 20x20 meter grid cells and averaged their estimates. Water quality variables (pH and phosphate) were measured in the field using high-sensitivity test strips and vial-based assays.
 
-Spatial predictor variables were derived from geospatial datasets. Impervious surface and canopy cover were calculated within 50 m and 100 m buffers using a classified City of Vancouver land cover raster (\~4.8 m resolution) and processed in R using the landscapemetrics package.
+Microclimate data (air temperature, water temperature, and humidity) were recorded using iButton loggers (MAXIM Inc.) deployed at each pond. These sensors recorded measurements at 20-minute intervals throughout the study period. Loggers were installed at centroid locations within each pond. 
 
-Shade metrics were generated using LiDAR-derived digital surface models (DSM) and solar radiation modeling in ArcGIS. Hourly hillshade simulations (07:00–18:00) were used to produce binary shade rasters, which were temporally stacked to quantify shade duration, coverage, persistence, and spatial distribution across pond surfaces.
+For shade data, ArcGIS Pro was used to model within-pond shading dynamics using a LiDAR-derived workflow. Digital elevation (DEM), surface (DSM), and canopy height (CHM) models were generated from high-resolution LiDAR data and used to represent terrain and vegetation structure. Solar position (azimuth and altitude) was calculated at hourly intervals on June 21, July 21, and August 21 between 07:00 and 18:00, and hillshade rasters were produced for each time step to simulate incident solar radiation. These outputs were reclassified into binary shade and sun exposure layers and aggregated to derive spatially explicit metrics of shade intensity, coverage, and distribution. Based on these outputs, areas within each pond were categorized into high shade, intermediate, and high exposure conditions to capture daily shade variability.
 
-All raw and cleaned data are available at: <https://docs.google.com/spreadsheets/d/1INgRR1rHrhaoGNrlkq3hGot1tx46EbdfggESUael5dQ/edit?gid=0#gid=0>. check the link.....................
+Spatial predictor variables were derived from geospatial datasets. Impervious surface and canopy cover were calculated within 50 m and 100 m buffers using a classified City of Vancouver land cover raster (4.8 m resolution) and processed in R using the landscapemetrics package.
+
+All raw and cleaned data are available at: <https://docs.google.com/spreadsheets/d/1INgRR1rHrhaoGNrlkq3hGot1tx46EbdfggESUael5dQ/edit?gid=0#gid=0>.
 
 ## 3. Sample Size
 
-Each pond was sampled at least six times for water depth measurements, with continuous environmental monitoring throughout the June–August study period.
-
-Data are structured at multiple levels:
-
--   Pond level (e.g., total water loss, land cover metrics)
--   Daily / monthly level (e.g., temperature, humidity)
--   Spatial pixel level (shade metrics derived from rasters) ............ help with this
+The dataset was structured hierarchically across both spatial and temporal scales. Fifteen ponds served as the primary sampling units, each characterized by site-level attributes including pond area, hydrological condition, and surrounding land cover. Land cover metrics were obtained once prior to the field season from the 2022 Vancouver land cover dataset and treated as static landscape variables. Within each pond, paired air and water temperature loggers recorded microclimatic conditions at 20-minute intervals for a minimum of approximately 70 days, although deployment length and continuity varied somewhat among sites due to occasional logger failure. Additional field-based measurements, including vegetation extent, water recession, and water quality variables, were collected at roughly three-week intervals throughout the summer. Monthly shade metrics were also derived for each pond to represent seasonal changes in canopy influence and solar exposure.
 
 ## 4. Variables and Measurement Scales
 
--   Response Variables
-
-1.  Total seasonal water loss (cm)
-2.  Daily water loss (cm/day)
-3.  Total volume lost (m³) and mean daily volume loss (m³/day)
-4.  Standardized metrics (Z-scores): drying rate and total loss
-5.  Pond classification: stable, refill, dry-out
-
 -   Predictor Variables
+Predictor variables captured landscape context, microclimate, shading, and within-pond conditions. Landscape variables included impervious surface and canopy cover within 50 m and 100 m buffers. Microclimate variables were derived from high-frequency logger data and summarized as monthly air and water temperatures, relative humidity, and thermal metrics such as water–air temperature offsets and daily warming duration. Shade metrics were derived from LiDAR-based modeling and included mean shade intensity, shade coverage, temporal persistence of shade, high-shade extent, and shade evenness. Finally, field-based measurements captured within-pond conditions, including vegetation cover and water chemistry (e.g., pH and phosphate), collected at regular intervals throughout the summer.
 
 a.  Landscape
-1.  Impervious surface (%) within 50 m and 100 m
-2.  Canopy cover (%) within 50 m and 100 m
+1.  Impervious surface (%) within 50 m and 100 m buffers
+2.  Canopy cover (%) within 50 m and 100 m buffers
 
 b.  Microclimate
-1.  Air temperature (°C): daily and monthly summaries
-2.  Water temperature (°C): daily and monthly summaries
-3.  Humidity (% RH)
-4.  Derived thermal metrics (e.g., water–air temperature difference, warming duration)
+1.  Air temperature (°C): monthly summaries
+2.  Water temperature (°C): monthly summaries
+3.  Derived thermal metrics (e.g., water–air temperature difference, mean monthly warming duration [in hours] from minimum to maximum daily values)
 
 c.  Shade Metrics (LiDAR-derived)
 1.  Mean Shade Duration (MSD)
@@ -95,23 +92,55 @@ c.  Shade Metrics (LiDAR-derived)
 5.  Shade Evenness Index (SEI)
 
 d.  Vegetation & Water Chemistry
-1.  Vegetation cover (%) (grid-based and overall)
-2.  pH and phosphate
-...............I will add the meaning of each later within the day............
+1.  Vegetation cover (%) (grid-based summaries, in addition to monthly and seasonal changes)
+2.  pH changes
+
+-   Response Variables
+Response variables quantified both the magnitude and rate of water loss, including total seasonal water loss (cm), daily water loss (cm/day), total and mean daily volume loss (m³), and standardized indices of drying intensity and cumulative loss (Z-scores).
+
+1.  Total seasonal water loss (cm)
+2.  Daily water loss rate (cm/day)
+3.  Total volume lost (m³) and mean daily volume loss (m³/day)
+4.  Standardized metrics (Z-scores): drying rate and total loss
 
 ## 5. Known Issues (Missingness, Outliers, and Limitations)
 
-Some limitations are associated with the dataset. Missing data occurred due to sensor failures, rotation of humidity loggers, and field logistics, resulting in gaps of approximately 1–3 weeks in some ponds; these periods were recorded and not interpolated. Temperature data were cleaned to remove outliers using jump filters, physical thresholds (e.g., values exceeding 40 °C), and a rolling median with MAD-based filtering. The first hour of deployment and any handling-period measurements were excluded, along with implausible early readings associated with sensor initialization. Because sensors were deployed at different times, timestamps did not always align and were standardized by rounding forward to the nearest matching interval, using water temperature as the primary reference. Humidity measurements were collected using rotating sensors, meaning that not all ponds were sampled simultaneously. In addition, when ponds dried out, water sensors were removed and not redeployed after refilling, resulting in shorter records for dry-out ponds. Some measurement assumptions may also introduce uncertainty, as water volume loss was estimated assuming constant pond area, and depth measurements were collected at discrete intervals that may not capture short-term fluctuations. Spatial constraints required minor adjustments to sampling locations due to accessibility, safety (e.g., deep mud), and vandalism risk. The land cover dataset used (~4.8 m resolution) may miss fine-scale variation, although classes were simplified to reduce classification noise. Finally, shade metrics are derived from the same raster stack and are therefore highly correlated, which limits their combined use in multivariate analyses.
+1.  Missing water and air temperature data occurred due to sensor failures and/or field logistics, resulting in gaps of approximately 1–3 weeks in some ponds; these periods were recorded and not interpolated. 
+2.  Temperature data were cleaned to remove outliers using jump filters, physical thresholds (e.g., values exceeding 40 °C), and a rolling median with MAD-based filtering. 
+3.  Because sensors were deployed at different times, timestamps did not always align and were standardized by rounding forward to the nearest matching interval, using water temperature as the primary reference.  
+4.  Some measurement assumptions may also introduce uncertainty, as water volume loss was estimated assuming constant pond area despite some ponds losing water surface area over time, and depth measurements were collected at discrete intervals that may not capture short-term fluctuations. 
+5.  The land cover dataset used (~4.8 m resolution) may miss fine-scale variation, although classes were simplified to reduce classification noise. 
+6.  Shade metrics are derived from the same set of raster "stacks" per month and are therefore highly correlated between each other, which limits their combined use in multivariate analyses.
 
 ## Method
 
-To address the research question—what environmental gradients best differentiate ponds that dry out from those that remain stable or are refilled—we will use Principal Component Analysis (PCA) and Cluster Analysis (CA).
+1. PCA Analysis
 
-PCA will be used to identify the main environmental gradients driving variation among ponds. Because the dataset contains multiple continuous and potentially correlated variables (e.g., temperature, shade metrics, and land cover), PCA is appropriate for reducing dimensionality and summarizing these variables into a smaller set of components. These components will represent key gradients such as thermal conditions, shading, and landscape context. Pond class (dry-out, stable, refill) will not be included in the PCA itself but will be overlaid afterward to interpret how these groups separate along the identified gradients. This directly addresses the research question by revealing which environmental factors most strongly differentiate pond types.
+To address the research questions, Principal Component Analysis (PCA) and cluster analysis will be used as complementary statistical approaches. Prior to both analyses, the environmental predictor variables, including temperature, shade metrics, and landscape cover percentages, will be standardized to ensure comparability across units and scales. PCA will then be applied to these variables to reduce dimensionality and summarize them into a smaller set of orthogonal components representing the dominant environmental gradients among ponds. PCA will assess all ponds simultaneously, treating each pond as a single observation within the dataset. 
 
-Cluster Analysis will be used as a complementary method to group ponds based on overall similarity in environmental conditions. A hierarchical clustering approach (e.g., Ward’s method with Euclidean distance) will be applied to produce compact and interpretable clusters. These clusters will then be compared with pond classifications (dry-out, stable, refill) to assess whether ponds naturally group according to their drying behavior. Together, PCA and cluster analysis provide both a gradient-based and grouping-based understanding of differences among ponds.
+The PCA approach is preferred in order to reduce the large set of correlated environmental variables into a smaller number of independent components that represent dominant environmental gradients among ponds. Many of the measured variables, including temperature, canopy cover, and the shade metrics, are expected to covary, making it difficult to interpret their individual effects in isolation. PCA would address this concern by combining related variables into composite axes that capture the main patterns of biophysical variations in the dataset.
 
-.........You can add or take something out if its not making sense....................
+Each pond will receive a score on these components in PCA, indicating its position along these gradients. For example, one component may represent a gradient from cool, shaded, high-canopy ponds to warm, exposed ponds with low canopy cover, while another may reflect differences in surrounding landscape cover, like increasing impervious surface or reduced vegetation. In other cases, the components may capture gradients related to variations in pH or nutrient concentrations, depending on how these variables covary across ponds. These components would be derived directly from the structure of the data and would be interpreted based on the contribution of the original environmental variables.
+
+The interpretation of PCA results will depend on which variables load most strongly onto each component. For instance, if the first principal component is dominated by temperature and shade variables, this would indicate that thermal and radiation-related conditions are the primary drivers differentiating ponds. Alternatively, if a component is driven by canopy cover and impervious surface, this would suggest that broader landscape structure plays a stronger role. Or, if water pH loads strongly onto a component, this may indicate that internal pond conditions or nutrient dynamics are important in interpreting differences among sites. By examining how ponds are distributed along these components, the analysis will reveal which combinations of environmental conditions define the major gradients across the system. 
+
+Water loss metrics, including daily drying rates and total seasonal loss, will then be compared to these component scores to assess how drying behavior aligns with these environmental gradients. For instance, if ponds with higher drying rates consistently have high scores along a component associated with warm temperatures and low shade, this would suggest that these conditions contribute to faster water loss. Similarly, if total seasonal loss is associated with a gradient of high impervious surface and reduced canopy cover, this would indicate a broader landscape influence on pond persistence.
+
+Importantly, the variables describing water loss, including daily drying rates and total seasonal loss, will not be included in the PCA itself. Instead, PCA will be based solely on the predictor variables. After the PCA is completed, scores for each pond on the main principal component axes will be extracted. These scores will indicate where each pond falls along the identified dominant environmental gradients. Water loss variables will then be compared with these PCA scores using correlation analysis to determine whether ponds with faster or greater water loss are consistently associated with particular gradients. For example, correlations will test whether higher drying rates tend to occur in ponds scoring more strongly along axes associated with warmer temperatures, reduced canopy cover, or lower shade. 
+
+2. Cluster Analysis 
+
+Cluster analysis will be used alongside PCA to group ponds based on overall similarity in their environmental conditions. While PCA identifies the main environmental gradients across ponds, cluster analysis asks a different question: do ponds with similar conditions naturally group together into distinct types, or do they instead vary gradually along a continuum? In this way, PCA describes how ponds differ, whereas cluster analysis evaluates whether those differences form clear groupings.
+
+To do this, ponds will be grouped based on how similar they are across all standardized environmental variables, including temperature, shade, and landscape characteristics. A hierarchical clustering approach will be used, which builds groups step by step by first linking the most similar ponds and then progressively combining them into larger clusters. The results will be visualized using a dendrogram, which shows how ponds are related to one another and where natural groupings may occur.
+
+Once clusters are identified, they will be compared with observed rates of water loss and pond classifications. This will help determine whether ponds with similar drying behavior also share similar environmental conditions. For example, if ponds that dry quickly are consistently grouped together, this would suggest that certain combinations of conditions, such as higher temperatures or reduced shading, are associated with rapid water loss. In contrast, if ponds with different drying rates are spread across multiple clusters, this would suggest that water loss varies more gradually across environmental conditions rather than forming distinct pond types.
+
+Cluster results will also be interpreted alongside the PCA outputs. This combined approach allows assessment of whether environmental variation among ponds is best understood as a set of distinct groups or as a continuous gradient. Rather than serving as a test of the PCA, cluster analysis provides an additional way to interpret the structure of the system and to better understand how patterns of water loss relate to underlying environmental conditions.
+
+Cluster analysis is particularly relevant to the third research question, which asks whether ponds with different rates of water loss form distinct groups or fall along a continuous environmental gradient. While PCA identifies the dominant gradients structuring variation among ponds, it does not determine whether these gradients produce discrete categories of pond conditions. Cluster analysis addresses this by evaluating whether ponds with similar environmental characteristics, and potentially similar drying behavior, group together into identifiable clusters. This allows assessment of whether rapidly drying ponds represent a distinct pattern or simply occupy one end of a broader environmental spectrum. In this way, clustering provides a good link between the identified environmental gradients and the actual structure of pond drying patterns.
+
+The interpretation of cluster analysis will depend on how clearly ponds group together and how those groupings relate to both environmental gradients and water loss patterns identified in the PCA. For example, if cluster analysis reveals distinct groups of ponds and these groups align with patterns observed in the PCA, such as one group occupying warmer, more exposed positions along a temperature and shading gradient, this would suggest that ponds can be categorized into identifiable types with shared environmental conditions and drying behavior. In this case, rapidly drying ponds may form a distinct cluster characterized by high temperatures, low canopy cover, and reduced shading. Alternatively, if cluster analysis does not reveal clear groupings, or if ponds with different drying rates are distributed across clusters, this would indicate that environmental variation and water loss are better understood as part of a continuous gradient rather than discrete categories. In this scenario, PCA results would still identify the dominant environmental drivers, but cluster analysis would suggest that ponds transition more gradually along these gradients, rather than forming distinct types. Comparing both approaches will therefore help to determine whether patterns of pond drying reflect clearly defined environmental groupings or more gradual shifts in conditions across pond sites. Perhaps most importantly, these two analyses might reveal patterns inherent to ponds within urban environments. 
 
 ## Assumptions and Checks
 
@@ -120,11 +149,11 @@ Several assumptions will be evaluated to ensure the methods are appropriate for 
 -    Variable scaling
 All variables will be standardized (e.g., using z-scores) to ensure comparability and prevent variables with larger magnitudes from dominating the analysis.
 
--    Linearity (PCA)
-PCA assumes linear relationships among variables. Relationships such as temperature vs. evaporation and shade vs. temperature are expected to be approximately linear. This will be assessed using scatterplots and correlation matrices.
+-    Linearity (for PCA)
+PCA assumes that relationships among the variables are approximately linear. This assumption is reasonable for expected relationships such as temperature, shading, and canopy effects, but will be evaluated using scatterplots and correlation matrices to ensure that major patterns are not strongly non-linear.
 
 -    Multicollinearity / redundancy
-Highly correlated variables (e.g., MSD, MSF, HSF, and monthly temperature variables) may reduce interpretability. A correlation matrix will be used to identify variables with high correlation (e.g., >0.8), and redundant variables will be removed or reduced.
+Many variables in the dataset, particularly shade metrics and temperature summaries, are expected to be highly correlated. While PCA can accommodate correlated variables, excessive redundancy can complicate interpretation of component loadings. For example, multiple shade metrics such as Mean Shade Duration (MSD), Shade Coverage Percentage (SCP), and High Shade Fraction (HSF) may all capture similar aspects of shading and therefore show strong correlations with one another. Including all of these variables may cause them to load strongly onto the same component, making it difficult to interpret what that component represents beyond general “shade.” Similarly, monthly temperature variables (e.g., June, July, and August water temperature) may be highly correlated and reflect a common thermal signal. Correlation matrices will be used to identify strongly correlated variables (e.g., >0.8), and redundant variables may be reduced or grouped (e.g., selecting a representative month or metric) to retain key ecological signals while improving interpretability.
 
 -    Sample size and variable selection
 With 15 ponds, the sample size is relatively small compared to the number of variables. To address this, we will reduce the number of variables and focus on key predictors (e.g., selecting representative months such as July or key metrics) to ensure stable results.
@@ -133,46 +162,43 @@ With 15 ponds, the sample size is relatively small compared to the number of var
 PCA does not handle missing values well. Observations with excessive missing data will be removed or carefully handled. Missing data are limited but will be checked prior to analysis.
 
 -   Outliers
-Both PCA and cluster analysis are sensitive to outliers. Although major outliers will be removed during data cleaning, variables such as water loss and pond size will be checked to ensure no extreme values influence results.
+Both PCA and cluster analysis are sensitive to outliers. Although major outliers were removed during the data cleaning process, variables like water loss and pond size will be checked to ensure no extreme values influence results.
 
 -   Distance metric and clustering method (CA)
-Cluster analysis requires selecting an appropriate distance metric and linkage method. Euclidean distance and Ward’s method will be used, as they minimize within-cluster variance and produce interpretable groupings. Alternative methods may be tested for robustness.
+Cluster analysis requires selecting an appropriate distance metric and linkage method. Euclidean distance and Ward’s method will likely be used, since they minimize within-cluster variance and produce more interpretable groupings. Alternative methods may be tested. 
 
 -  Meaningful variable selection
 Only variables that represent meaningful ecological processes will be included. Redundant or highly correlated variables will be excluded, and temporal variables may be simplified (e.g., focusing on peak summer conditions).
 
+-  Interpretation and linkage to response variables
+Because water loss variables are not included in the PCA, their relationship to environmental gradients will be evaluated separately through correlation and visualization. Because water loss variables are not included in the PCA, their relationship to environmental gradients will be evaluated separately through correlation and visualization. This avoids circularity, which would occur if water loss variables were included in the PCA and then later used to interpret the same components. In other words, the PCA would be partially built from the phenomenon we're trying to explain, making it unclear whether environmental variables are actually explaining variation in drying or simply reflecting it. By excluding water loss from the PCA and comparing it to the resulting components afterward, the analysis maintains a clear distinction between environmental predictors and drying responses, allowing for more meaningful interpretation of how environmental conditions relate to observed water loss patterns.
+
+
 ## Preliminary work
 
-Evidence of feasibility (e.g., data import/cleaning steps + at least one exploratory table/figure).
+All data streams have been processed, cleaned, and integrated prior to analysis. All variables were then combined into a single, pond-level dataset, with each pond represented by a consistent set of environmental predictors and water loss metrics. This integrated dataset forms the basis for subsequent analyses.
 
-Can you add the code for the cleaning and the table here. may a graph will help too. what do you think??
 
 ## Interpretation plan
 
-To address the research question—what environmental gradients best differentiate ponds that dry out from those that remain stable or are refilled—we will interpret outputs from both PCA and Cluster Analysis.
+To address the research question (Which environmental gradients best differentiate ponds that dry out from those that remain stable or are refilled?) we will interpret outputs from both PCA and Cluster Analysis.
 
 1. For PCA, we will report:
 
--  Scree plot and proportion of variance explained to determine the number of meaningful components
+a.  Scree plots and proportion of variance explained to determine the number of meaningful components
+Loadings (variable contributions) for each principal component to identify key environmental gradients (e.g., temperature, shade, canopy cover, land cover)
+b.  PCA biplots showing ponds positioned in ordination space, with vectors representing environmental variables
 
--  Loadings (variable contributions) for each principal component to identify key environmental gradients (e.g., temperature, shade, impervious surface)
+Interpretation will focus on identifying the dominant environmental gradients represented by each component and understanding how ponds are distributed along these gradients. Water loss variables, including daily drying rates and total seasonal loss, will then be compared to PCA results by examining correlations with principal component scores and by visualizing drying rates within the ordination space. This will allow assessment of whether higher rates of water loss are associated with specific environmental gradients. Pond classifications (dry-out, stable, refill) will also be overlaid to support interpretation, but emphasis will be placed on continuous variation in drying behavior rather than categorical differences alone.
 
--  PCA biplots showing ponds in ordination space, with vectors representing variables
-
-Interpretation will focus on identifying which variables load strongly on each component and how these components represent environmental gradients. Pond classes (dry-out, stable, refill) will be overlaid on the PCA plots to assess whether groups separate along these gradients. For example, if dry-out ponds cluster in areas associated with high temperature and low shade, this would indicate that these gradients are important drivers of water loss.
 
 2. For Cluster Analysis, we will report:
 
--  Dendrograms to visualize grouping of ponds
+a.  Dendrograms to visualize how ponds group based on environmental similarity
+b.  Cluster groupings for each pond
 
--  Cluster membership for each pond
+Interpretation will focus on whether ponds form distinct environmental groupings or instead vary along a continuous gradient. The environmental characteristics of each cluster will be examined to identify shared conditions (e.g., warm and exposed versus cool and shaded ponds). Cluster membership will then be compared with water loss metrics to assess whether ponds with similar drying rates group together. If ponds with faster drying rates consistently fall within the same cluster, this would suggest that distinct combinations of environmental conditions are associated with rapid water loss. Alternatively, if drying rates vary within clusters, this would indicate that water loss occurs along a continuum rather than within clearly defined pond types.
 
-Interpretation will focus on whether ponds naturally group into clusters that correspond to dry-out, stable, or refill categories. We will also examine the environmental characteristics of each cluster to understand what differentiates them.
+Across both methods, results will be interpreted together to evaluate whether patterns of water loss are best explained by discrete pond types or by continuous environmental gradients. PCA will identify the dominant environmental drivers, while cluster analysis will assess whether these gradients correspond to distinct groupings of ponds. Particular attention will be given to variables related to temperature, shading, canopy structure, and surrounding land cover, as these are hypothesized to significantly influence rates of water loss.
 
-Across both methods, results will be interpreted in terms of key environmental gradients and patterns that explain differences among ponds. Particular attention will be given to variables related to temperature, shading, and surrounding land cover, as these are hypothesized to influence water loss.
-
-
-Can you suggest any??
-
-
-
+## Thank you. 
