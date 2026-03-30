@@ -8,7 +8,7 @@ output:
 
 **Course Instructor**: Dr. Suborna Ahmed\
 
-**Submission**:
+**Submission**: Sandra Inusah and Brandon Weigland
 
 1. Write your code and answers in this RMD file
 
