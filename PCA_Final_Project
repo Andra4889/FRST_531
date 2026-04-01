@@ -1,0 +1,1868 @@
+---
+title: "PCA Analysis"
+author: "Brandon Weigand"
+date: "2026-03-29"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages("tidyr")
+#install.packages("lubridate")
+#install.packages("slider")
+#install.packages("stringr")
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lubridate)
+library(stringr)
+library(slider)
+```
+
+With a sample size of 15, no more than 7 variables should be included. 
+
+July would likely be best, since this month represents the extreme end of temperature values generally. This also includes complete data between the ponds, since most of the dry-out ponds dried by late July or August. 
+
+Best candidates:
+
+canopy_50 
+imp_100
+july_water_mean OR july_water-air OR av_hrs_water_july_mintomax
+july_HSF
+veg_mean_cover
+
+pH does not technically relate to drying mechanics, so opting to ignore it. 
+
+canopy → structural shading potential
+impervious → runoff / heat loading
+water-air → thermal buffering
+warming time → thermal inertia
+HSF → realized shade persistence
+vegetation → biological response (increases vegetation, thereby using more water resources)
+
+
+But let's do correlation checks beforehand to test variables anc check for redundancy. 
+Then we need to standardize everything using z scores. 
+
+If PC1 loads on multiple temperature variables, the variables selection failed. 
+
+Import data: 
+```{r}
+
+metrics_wide <- read.csv("metrics_wide.csv")
+metrics_wide
+
+```
+
+```{r}
+
+#install.packages("janitor")
+library(janitor)
+
+metrics_wide <- clean_names(metrics_wide)
+```
+```{r}
+metrics_wide
+names(metrics_wide)
+```
+
+
+
+Correlation/redundacy check
+```{r}
+vars <- metrics_wide[, c(
+  "canopy_50",
+  "imp_100",
+  "july_water_air",
+  "av_hrs_water_july_mintomax",
+  "july_hsf",
+  "veg_mean_cover",
+  "veg_percent_change",
+  "mean_season_ph"
+)]
+
+vars
+
+```
+
+```{r}
+cor_mat <- cor(vars, use = "pairwise.complete.obs")
+round(cor_mat, 2)
+```
+
+```{r}
+
+high_cor_idx <- which(abs(cor_mat) > 0.7 & abs(cor_mat) < 1, arr.ind = TRUE)
+
+high_cor_df <- data.frame(
+  var1 = rownames(cor_mat)[high_cor_idx[, 1]],
+  var2 = colnames(cor_mat)[high_cor_idx[, 2]],
+  corr = cor_mat[high_cor_idx]
+)
+
+
+```
+
+```{r}
+high_cor_df <- high_cor_df[high_cor_df$var1 != high_cor_df$var2, ]
+
+high_cor_df <- high_cor_df[
+  !duplicated(t(apply(high_cor_df[, 1:2], 1, sort))),
+]
+
+high_cor_df <- high_cor_df[order(-abs(high_cor_df$corr)), ]
+
+high_cor_df
+```
+
+
+looking for:
+
+|r| ≥ 0.7 → moderate redundancy
+|r| ≥ 0.8 → strong redundancy (remove one)
+
+Results:
+july_hsf vs july_water_air = -0.71
+
+This is not just “high correlation.” It’s telling you:
+
+high persistent shade → cooler water relative to air
+low persistent shade → hotter water relative to air
+
+So:
+
+👉 july_hsf = driver (cause)
+👉 july_water_air = response (effect)
+
+If you include both, PCA will double-count the same mechanism and muddy interpretation.
+
+
+Need to check the other shade metrics:
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_msd,   # swap here
+    veg_mean_cover,
+    veg_percent_change,
+    mean_season_ph
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+MSD is worse. july_msd vs july_water_air = -0.81
+
+Look at this:
+
+july_msd vs canopy_50 = 0.53
+july_msd vs imp_100 = 0.50
+
+MSD is also strongly tied to landscape structure.
+
+So it is:
+
+correlated with temperature
+correlated with landscape
+correlated with vegetation (0.33)
+
+👉 It’s becoming a catch-all variable
+
+That’s dangerous in PCA because:
+
+it dominates loadings
+it blurs interpretation
+
+So definitely no MSD. MAYBE HSF given the borderline -0.71 value. 
+
+Next testing SCP
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_scp,   # swap here
+    veg_mean_cover,
+    veg_percent_change,
+    mean_season_ph
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+
+```
+
+july_scp vs july_water_air = -0.71
+
+👉 SCP is almost identical to HSF in redundancy strength
+👉 but weaker than MSD (which was -0.81)
+
+SCP = “was any part of the pond shaded at any time?”
+
+That sounds useful, but in practice:
+
+it inflates shade presence
+it ignores duration and intensity
+it often saturates near high values
+
+So two ponds can both have high SCP but:
+
+one is lightly shaded briefly
+one is deeply shaded for hours
+
+👉 Yet SCP treats them similarly
+
+Even though SCP and HSF have similar correlations:
+
+HSF
+tied to persistent, high-intensity shade
+aligns with thermal stress buffering
+ecologically meaningful for drying
+SCP
+tied to any shade occurrence
+doesn’t reflect how effective that shade is
+
+👉 Same correlation strength
+👉 very different ecological meaning
+
+Another red flag with SCP
+
+Look at this:
+
+july_scp vs imp_100 = 0.48
+july_scp vs veg_mean_cover = 0.43
+
+SCP is:
+
+moderately tied to landscape
+moderately tied to vegetation
+strongly tied to temperature
+
+👉 It’s drifting toward being a blended, non-specific variable
+
+That weakens PCA interpretation.
+
+So far, HSF is the best option, but still trying others. 
+
+Now trying MSF
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_msf,   # swap here
+    veg_mean_cover,
+    veg_percent_change,
+    mean_season_ph
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+july_msf vs july_water_air = -0.77
+
+MSF is behaving like:
+
+a softened version of HSF, but still tightly tied to thermal response
+
+It captures:
+
+moderate-to-high shade persistence
+not just extremes like HSF
+
+But the result is:
+
+👉 it tracks temperature more closely than HSF does
+
+Now trying SEI:
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_sei,   # swap here
+    veg_mean_cover,
+    veg_percent_change,
+    mean_season_ph
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+july_sei vs july_water_air = -0.59
+
+So for the first time:
+
+👉 SEI is not just mirroring temperature
+
+SEI is not measuring:
+
+how much shade
+how long shade lasts
+
+It’s measuring:
+
+how evenly shade is distributed across the pond
+
+So:
+
+two ponds can have the same HSF
+but one has shade clustered in one corner
+the other has shade spread across the whole surface
+
+👉 SEI captures that difference
+👉 water temperature alone does not
+
+From your matrix:
+
+vs av_hrs_water_july_mintomax = 0.62
+vs july_water_air = -0.59
+vs canopy_50 = 0.25
+vs imp_100 = 0.26
+vs veg_mean_cover = 0.15
+
+This is exactly what you want:
+
+👉 moderate relationships
+👉 no domination
+👉 not a proxy for anything else
+
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_sei,   # swap here
+    veg_mean_cover,
+    veg_percent_change,
+    mean_season_ph
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+
+Keep SEI! it looks good. 
+
+Focus should be on: 
+landscape drivers
+realized shade
+thermal responses
+vegetation responses
+chemistry
+
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_sei,   # swap here
+    veg_mean_cover,
+    veg_percent_change,
+    mean_season_ph
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+Can't use veg_percent_change, since some values are extreme. 
+
+Re-calculated veg_mean_cover for only up-to July. Adding this new column to the working df. 
+
+```{r}
+veg_july <- data.frame(
+  pond_id = c(
+    "AVL","BGL","BGS","BOO","CHS",
+    "CSN","GVI","JCO","MCC","MSP",
+    "QED","RUP","SCT","TRT","VAN"
+  ),
+  veg_mean_cover_july = c(
+    59.68585, 36.18167, 74.5, 92.33333, 88.42042,
+    51.04105, 32.44856, 75.23547, 43.91515, 59.11719,
+    13.94435, 95.15545, 11.13489, 20.8059, 15.60173
+  )
+)
+
+metrics_wide <- metrics_wide %>%
+  left_join(veg_july, by = "pond_id")
+
+metrics_wide
+
+```
+
+```{r}
+
+print("veg_mean_cover_july" %in% names(metrics_wide))
+
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    july_water_air,
+    av_hrs_water_july_mintomax,
+    july_sei, 
+    veg_mean_cover_july,
+    mean_season_ph, 
+    slope_per_day
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+
+```
+Checking for veg slope per day
+```{r}
+cor(metrics_wide$veg_mean_cover_july, metrics_wide$slope_per_day)
+```
+
+Also thinking of dropping july_water_air. PCA is not a process model. It’s a structure detector.
+
+Answer:
+
+shade
+canopy
+impervious surroundings
+vegetation
+pond size and exposure
+
+So in your dataset:
+
+👉 july_water_air is downstream of your other variables
+
+That makes it a derived state variable, even if it has causal meaning in physics.
+
+Why that matters for PCA
+
+If you include it, PCA will do this:
+
+find the strongest variance signal
+which is likely temperature
+and then align PC1 around it
+
+So instead of discovering:
+
+canopy + shade + vegetation gradients
+
+you’ll get:
+
+“hot ponds vs cool ponds”
+
+Which you already know.
+
+Plus the other water value (av_hrs_water_july_mintomax) can still be perceived as a driver anyway. 
+
+
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    av_hrs_water_july_mintomax,
+    july_sei, 
+    veg_mean_cover_july,
+    mean_season_ph, 
+    slope_per_day
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+Final selected variables:
+
+canopy_50,
+imp_100,
+av_hrs_water_july_mintomax,
+july_sei, 
+veg_mean_cover_july,
+mean_season_ph, 
+slope_per_day
+
+PCA is trying to capture:
+
+the environmental and ecological gradients structuring urban ponds at peak summer conditions (July), prior to or during divergence in drying trajectories
+
+Right now, your variables fall into three clean groups:
+
+1. Landscape structure
+canopy_50
+imp_100
+2. Microclimate and shading processes
+july_sei
+av_hrs_water_july_mintomax
+3. Biological and chemical state
+veg_mean_cover_july
+slope_per_day
+mean_season_ph
+
+
+canopy_50
+
+Represents:
+
+local vegetative structure surrounding the pond
+
+Why keep it:
+
+direct influence on shading potential
+influences wind exposure, radiation, and microclimate
+structurally upstream of shade metrics
+
+Key point:
+👉 this is potential shading, not realized shading
+
+imp_100
+
+Represents:
+
+broader urban context and landscape modification
+
+Why keep it:
+
+captures heat loading, runoff, and urban intensity
+complements canopy by representing the opposite end of the gradient
+stronger signal than imp_50 in your dataset
+
+Key point:
+👉 this gives you a landscape-scale gradient, not just local conditions
+
+july_sei
+
+Represents:
+
+spatial distribution of shade across the pond surface
+
+Why keep it:
+
+not redundant with canopy
+captures how shade is distributed, not just how much exists
+directly relevant to thermal refuge availability
+
+Key point:
+👉 this is realized spatial heterogeneity, which temperature alone cannot capture
+
+
+av_hrs_water_july_mintomax
+
+Represents:
+
+temporal dynamics of water warming
+
+Why keep it:
+
+captures how quickly ponds heat, not just how warm they get
+integrates multiple processes (shade, exposure, mixing)
+not redundant with SEI
+
+Key point:
+👉 this is your temporal thermal behavior variable
+
+veg_mean_cover_july
+
+Represents:
+
+state of vegetation at peak season
+
+Why keep it:
+
+reflects cumulative growth up to July
+influences shading, evapotranspiration, and habitat structure
+stable and well-behaved variable (no skew issues)
+
+Key point:
+👉 this is a state variable, not a rate or artifact
+
+slope_per_day
+
+Represents:
+
+rate of vegetation development
+
+Why keep it:
+
+captures dynamics, not just structure
+weak correlation with mean cover (r ≈ -0.24) → non-redundant
+distinguishes actively changing ponds from stable ones
+
+Key point:
+👉 this adds a temporal ecological dimension that PCA would otherwise miss
+
+⚠️ caveat:
+You should still log-transform this before PCA:
+
+mean_season_ph
+
+Represents:
+
+chemical environment of the pond
+
+Why keep it:
+
+integrates biological activity and water chemistry
+largely independent of other variables
+may capture nutrient or productivity gradients
+
+Key point:
+👉 this is your biogeochemical axis
+
+Your PCA now captures three independent but interacting gradients:
+
+Axis type 1: Landscape structure
+canopy vs impervious
+Axis type 2: Thermal mediation
+shade distribution (SEI)
+warming dynamics
+Axis type 3: Biological state and change
+vegetation cover
+vegetation growth rate
+pH
+
+Variables were selected to represent complementary dimensions of pond systems at peak summer conditions, including landscape structure (canopy cover, impervious surface), realized shading and thermal dynamics (shade evenness and warming duration), biological state and change (vegetation cover and growth rate), and water chemistry (pH), while avoiding inclusion of downstream thermal response variables (like july_water_air) to reduce circularity.
+
+*We should re-run the PCA with only 5 variables later too!*
+
+Maybe with:
+
+canopy_50,
+av_hrs_water_july_mintomax,
+july_sei, 
+veg_mean_cover_july,
+mean_season_ph, 
+
+
+TIME TO CLEAN THINGS UP!
+
+Your slope_per_day:
+
+has a long right tail
+a few large values relative to the rest
+
+Even though it’s not extreme like percent change, it’s still:
+
+👉 non-normal and slightly heavy-tailed
+
+If you do not transform it:
+
+those high values will still pull the PCA axis
+just in standardized units instead of raw units
+
+```{r}
+metrics_wide <- metrics_wide %>%
+  mutate(slope_per_day_log = log1p(slope_per_day))
+```
+
+Create a new pca-focused dataframe with only the necessary datastreams
+
+```{r}
+pca_df <- metrics_wide %>%
+  select(
+    canopy_50,
+    imp_100,
+    av_hrs_water_july_mintomax,
+    july_sei,
+    veg_mean_cover_july,
+    mean_season_ph,
+    slope_per_day_log
+  )
+
+names(pca_df)
+summary(pca_df)
+
+```
+
+But also consider that the pond names can't be included either, since its not numeric. 
+
+```{r}
+pca_df_with_id <- metrics_wide %>%
+  select(
+    pond_id,
+    canopy_50,
+    imp_100,
+    av_hrs_water_july_mintomax,
+    july_sei,
+    veg_mean_cover_july,
+    mean_season_ph,
+    slope_per_day_log
+  )
+```
+
+```{r}
+which.max(pca_df$slope_per_day_log)
+```
+
+```{r}
+hist(pca_df$veg_mean_cover_july)
+```
+Your instinct about bimodality was close, but the plot tells a more nuanced story:
+
+What it actually shows
+Values spread across the full range (0–100)
+No strong clustering into two clean groups
+Slight gaps, but nothing structurally problematic
+
+👉 This is not truly bimodal, just wide and uneven
+
+Interpretation
+You have a strong gradient variable, not a categorical split
+That’s exactly what PCA wants
+
+✅ Verdict: keep as-is
+
+
+Check for leverage
+```{r}
+boxplot(pca_df)
+```
+
+A. Scale differences (expected, but important)
+
+You’ve got:
+
+canopy: 0–100
+impervious: 0–100
+veg cover: 10–95
+pH: ~6–7.5
+SEI: 0–1
+slope_log: ~0–1
+
+👉 These are wildly different scales
+
+But:
+
+You are scaling in PCA, so this is fine.
+
+
+Outliers and leverage
+The one that stands out:
+
+👉 slope_per_day_log
+
+You have:
+
+most values near 0–0.2
+a few pushing toward ~1
+
+That’s still visible even in log space.
+
+What that means:
+This variable will pull one axis if it aligns with anything else
+
+Not necessarily wrong, but:
+
+👉 this is your highest-leverage variable
+
+
+SEI distribution
+Very compressed at low values with a few higher ones
+Slight skew
+
+👉 Not a problem, but:
+
+It behaves more like a threshold variable than a smooth gradient
+
+This might:
+
+create non-linear structure PCA can’t fully capture
+
+Still acceptable.
+
+
+pH
+Very tight spread
+No outliers
+
+👉 This variable will likely:
+
+contribute weakly
+sit in later PCs
+
+That’s fine, but don’t expect it to drive structure.
+
+
+
+
+*RUNNING INTIIAL PCA TEST* Everything is scaled internally. 
+
+```{r}
+pca <- prcomp(pca_df, scale. = TRUE)
+
+summary(pca)
+pca$rotation
+
+```
+
+Biplot
+```{r}
+biplot(pca, scale = 0)
+
+```
+Or a better one:
+
+```{r}
+install.packages("factoextra")
+
+library(factoextra)
+
+fviz_pca_biplot(
+  pca,
+  repel = TRUE,        # avoids label overlap
+  col.var = "black",   # variable arrows
+  col.ind = "blue",    # ponds
+  pointsize = 3
+)
+
+
+```
+Biplot: what PC1 actually represents
+
+Your system is NOT driven by one gradient.
+
+It’s driven by:
+
+1. Thermal buffering (PC1)
+2. Vegetation structure vs growth dynamics (PC2)
+3. Landscape context (PC3)
+
+
+Look at the loadings:
+
+Strong contributors to PC1:
+av_hrs_water_july_mintomax → -0.57
+july_sei → -0.59
+slope_per_day_log → -0.32
+mean_season_ph → +0.39
+Interpretation
+
+PC1 is NOT a simple “shade” axis.
+
+It is:
+
+👉 Thermal buffering vs exposure
+
+Negative PC1 (left):
+
+high shade duration
+high shade evenness
+longer time to max temperature
+lower pH
+→ cool, buffered, stable systems
+
+Positive PC1 (right):
+
+lower shade influence
+higher pH
+→ more exposed, thermally active systems
+
+PC2: this is your vegetation axis
+Strong contributors:
+veg_mean_cover_july → +0.55
+imp_100 → +0.37
+canopy_50 → +0.35
+slope_per_day_log → -0.48
+Interpretation
+
+This is messy, but meaningful:
+
+👉 Structural vegetation + landscape vs active growth
+
+Positive PC2 (top):
+
+high vegetation cover
+higher impervious influence
+more canopy
+
+Negative PC2 (bottom):
+
+higher growth rate (slope)
+
+👉 This is subtle but important:
+
+You’re separating:
+
+“already vegetated” ponds
+vs
+“actively changing” ponds
+
+That’s a real ecological distinction.
+
+PC3 (you cannot ignore this)
+Key loadings:
+canopy_50 → +0.58
+imp_100 → -0.62
+
+👉 This is your pure landscape gradient
+
+PC3 = canopy vs impervious
+
+This is exactly why stopping at PC2 is a mistake.
+
+A. Arrow structure
+
+You’ve got three clear clusters:
+
+Cluster 1 (left side)
+july_sei
+av_hrs_water
+
+👉 strong thermal buffering signal
+
+Cluster 2 (up-right)
+veg_mean_cover
+imp_100
+pH
+
+👉 structural / chemical / landscape interaction
+
+Cluster 3 (down)
+slope_per_day_log
+
+👉 isolated driver
+
+This is key.
+
+Your earlier concern about slope
+
+You were worried it would dominate.
+
+It doesn’t.
+
+But:
+
+👉 it behaves independently
+
+That’s actually more interesting.
+
+Even without labels, we can see:
+
+Bottom-right cluster (e.g., 3, 9, 14, 15)
+high PC1
+low PC2
+
+These are 
+
+
+👉 exposed + high growth systems
+→ likely unstable / drying-prone
+
+
+
+
+
+
+
+
+```{r}
+plot(pca, type = "l")
+```
+
+Scree plot first: how many PCs matter?
+
+You’ve got:
+
+PC1 = 28.5%
+PC2 = 24.4%
+PC3 = 19.7%
+PC1–3 = 72.7%
+What this means
+
+👉 There is no single dominant axis
+👉 This is a multi-gradient system
+
+That’s important.
+
+The elbow
+
+There’s a noticeable drop after PC3.
+
+👉 Keep 3 PCs, not just 2
+
+If you only interpret PC1–PC2:
+
+👉 you are throwing away ~20% of meaningful structure
+
+
+Attach pond IDs to PCA scores
+```{r}
+pca_scores <- pca_df_with_id %>%
+  select(pond_id) %>%
+  bind_cols(as.data.frame(pca$x))
+
+pca_scores
+```
+
+```{r}
+loadings <- as.data.frame(pca$rotation)
+loadings$var <- rownames(loadings)
+```
+
+```{r}
+ggplot() +
+  geom_point(data = pca_scores,
+             aes(x = PC1, y = PC2),
+             color = "blue", size = 3) +
+  
+  geom_text(data = pca_scores,
+            aes(x = PC1, y = PC2, label = pond_id),
+            nudge_y = 0.2, size = 4) +
+  
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "black") +
+  
+  geom_text(data = loadings,
+            aes(x = PC1*2, y = PC2*2, label = var),
+            size = 4) +
+  
+  theme_minimal() +
+  labs(title = "PCA Biplot with Pond IDs")
+```
+
+Dry-out ponds:
+BOO
+CSN
+JCO
+MSP
+QED
+Where they sit:
+
+They are not clustered in one tight group
+
+Instead:
+
+Group A (left side, high PC2)
+JCO
+MSP
+
+👉 high shade / thermal buffering
+
+Group B (bottom left)
+CSN
+QED
+
+👉 high slope (growth), low structure
+
+
+Group C (far right, high PC1)
+BOO
+
+👉 extreme outlier in exposed / high pH space
+
+
+👉 Dry-out is not a single environmental state
+
+It occurs under multiple different conditions
+
+That is a strong ecological result.
+
+PC1 (horizontal)
+Right → exposed, higher pH, less buffering
+Left → shaded, thermally buffered
+
+👉 Dry ponds occur on BOTH sides
+
+That immediately tells you:
+
+❌ Drying is not just “too much sun”
+
+PC2 (vertical)
+Up → high vegetation cover / structure
+Down → high growth rate / dynamic systems
+
+👉 Dry ponds span both
+
+4. Let’s talk about VAN (this is where you’re onto something)
+
+You said:
+
+VAN didn’t dry out but looks similar to a dry pond
+
+Correct.
+
+VAN sits here:
+
+right side (exposed)
+low PC2 (growth-dominated)
+
+👉 It is very close to drying-type conditions
+
+Your interpretation should be:
+
+👉 VAN is functionally similar to drying ponds but resisted drying
+
+Drying is not caused by ONE gradient
+
+It’s likely:
+
+multiple pathways to drying
+
+The three drying pathways your PCA suggests
+
+This is the real result.
+
+Pathway 1: Exposure-driven drying
+BOO
+VAN (borderline)
+
+Low buffering, high pH, exposed
+
+Pathway 2: Low-structure / dynamic systems
+CSN
+QED
+
+High growth, low stability
+
+Pathway 3: Surprisingly buffered systems
+JCO
+MSP
+
+This is the interesting one.
+
+👉 These ponds dry despite high shade signals
+
+That suggests:
+
+small size
+hydrology
+connectivity
+or substrate seepage
+
+👉 Drying occurs across multiple environmental gradients and is not associated with a single dominant axis of variation. Instead, dry-out ponds occupy distinct regions of ordination space, suggesting multiple ecological pathways leading to water loss.
+
+*TRYING WITH ADDED AREA VARIABLE*
+
+```{r}
+metrics_wide <- metrics_wide %>%
+  mutate(log_area = log(area))
+```
+
+```{r}
+vars_test <- metrics_wide %>%
+  select(
+    canopy_50,
+    log_area,
+    imp_100,
+    av_hrs_water_july_mintomax,
+    july_sei, 
+    veg_mean_cover_july,
+    mean_season_ph, 
+    slope_per_day_log
+  )
+
+cor(vars_test, use = "pairwise.complete.obs")
+```
+
+New PCA test with area included
+
+```{r}
+pca_df_area <- metrics_wide %>%
+  select(
+    canopy_50,
+    log_area,
+    imp_100,
+    av_hrs_water_july_mintomax,
+    july_sei,
+    veg_mean_cover_july,
+    mean_season_ph,
+    slope_per_day_log
+  )
+```
+
+```{r}
+pca_area <- prcomp(pca_df_area, scale. = TRUE)
+pca_area
+```
+
+```{r}
+plot(pca_area, type = "l")
+```
+
+1. Scree plot: did structure change?
+
+New PCA:
+
+PC1 = 30.1%
+PC2 = 22.7%
+PC3 = 19.4%
+PC1–3 = 72.3%
+Compare to before:
+almost identical variance structure
+
+👉 Key point:
+Area did NOT fundamentally change the dimensionality of your system.
+
+That’s important.
+
+
+
+```{r}
+pca_scores_area <- metrics_wide %>%
+  select(pond_id) %>%
+  bind_cols(as.data.frame(pca_area$x))
+```
+
+```{r}
+loadings_area <- as.data.frame(pca_area$rotation)
+loadings_area$var <- rownames(loadings_area)
+```
+
+```{r}
+ggplot() +
+  # points
+  geom_point(data = pca_scores_area,
+             aes(x = PC1, y = PC2),
+             color = "blue", size = 3) +
+  
+  # labels
+  geom_text(data = pca_scores_area,
+            aes(x = PC1, y = PC2, label = pond_id),
+            nudge_y = 0.2, size = 4) +
+  
+  # arrows
+  geom_segment(data = loadings_area,
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "black") +
+  
+  # arrow labels
+  geom_text(data = loadings_area,
+            aes(x = PC1*2, y = PC2*2, label = var),
+            size = 4) +
+  
+  theme_minimal() +
+  labs(title = "PCA Biplot with Area Included")
+```
+
+
+```{r}
+summary(pca_area)
+pca_area$rotation
+```
+
+Interpretation
+
+PC1 is now:
+
+👉 Size–exposure gradient
+
+Negative PC1 (left):
+larger ponds
+more thermally buffered
+less urban
+Positive PC1 (right):
+smaller ponds
+more impervious
+higher pH
+more vegetated edges
+
+
+Previously:
+👉 PC1 = thermal buffering
+
+Now:
+👉 PC1 = size-mediated environmental gradient
+
+
+Strong loadings:
+july_sei → 0.61
+av_hrs_water → 0.44
+veg_cover → 0.43
+imp_100 → 0.37
+
+PC2 is now:
+
+👉 Shade + vegetation structure axis
+
+So:
+
+buffering signal didn’t disappear
+it just moved to PC2
+
+
+Look at PC1:
+
+slope = -0.28
+
+Look at PC4:
+
+slope = -0.70
+
+👉 slope got pushed out of dominant axes
+
+Without area:
+👉 slope had meaningful influence
+
+With area:
+👉 slope becomes secondary
+
+Do dry ponds cluster better?
+
+Short answer:
+
+👉 No
+
+They are STILL spread out.
+
+Far right (high PC1):
+BOO
+BGS
+TRT
+
+👉 small, exposed systems
+
+Left side:
+JCO
+MSP
+CSN
+
+👉 larger / buffered systems
+
+And yet…
+
+👉 Both sides contain dry ponds
+
+That means:
+
+👉 Size alone does not explain drying
+
+That’s a very important conclusion.
+
+Interpretation
+
+👉 VAN is not protected by size alone
+
+It sits in:
+
+moderate size
+low buffering structure
+
+👉 high-risk but not deterministic
+
+What area actually did to your PCA
+
+Let’s be precise:
+
+It did NOT:
+collapse your PCA
+dominate completely
+create clean clustering
+It DID:
+reorganize PC1 into a size-driven gradient
+reduce the influence of slope
+reveal that size is part of the system, not the driver
+
+Your data now supports:
+
+👉 Drying is not controlled by a single dominant factor
+
+Instead:
+
+It emerges from interaction between:
+Size (area / volume constraint)
+Thermal buffering (shade, duration)
+Vegetation dynamics (structure vs growth)
+
+Pond area contributes to environmental gradients structuring pond conditions, but does not independently explain drying outcomes. Instead, drying occurs across a range of pond sizes, indicating that size interacts with microclimatic and vegetative processes rather than acting as a primary driver.
+
+
+*Now regressing against z_water_loss*
+
+```{r}
+pca_scores_area$z_loss_rate <- metrics_wide$z_loss_rate
+summary(pca_scores_area$z_loss_rate)
+```
+
+```{r}
+lm_pc1 <- lm(z_loss_rate ~ PC1, data = pca_scores_area)
+lm_pc2 <- lm(z_loss_rate ~ PC2, data = pca_scores_area)
+lm_pc3 <- lm(z_loss_rate ~ PC3, data = pca_scores_area)
+
+summary(lm_pc1)
+summary(lm_pc2)
+summary(lm_pc3)
+```
+```{r}
+lm_full <- lm(z_loss_rate ~ PC1 + PC2 + PC3, data = pca_scores_area)
+summary(lm_full)
+```
+
+PC1 plot
+```{r}
+ggplot(pca_scores_area, aes(x = PC1, y = z_loss_rate)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Drying vs PC1")
+```
+
+PC2 plot
+```{r}
+ggplot(pca_scores_area, aes(x = PC2, y = z_loss_rate)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Drying vs PC1")
+```
+
+PC3
+```{r}
+ggplot(pca_scores_area, aes(x = PC3, y = z_loss_rate)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Drying vs PC1")
+```
+
+```{r}
+library(broom)
+
+tidy(lm_full)
+glance(lm_full)
+```
+
+PC1
+R² ≈ 0.002
+p = 0.878
+slope ≈ 0
+
+👉 That is noise. Not “weak”. Not “emerging”. Just noise.
+
+Your plot confirms it:
+
+flat line
+symmetric scatter
+no structure
+PC2
+R² ≈ 0.001
+p = 0.892
+
+Same story.
+
+👉 These axes may explain environmental variation
+👉 but they do not explain drying
+
+That matters for your interpretation later.
+
+
+2. PC3: finally something real
+
+Now this is where it gets interesting.
+
+PC3
+R² ≈ 0.17
+slope = -0.32
+p = 0.126
+
+Let’s be precise:
+
+👉 Not statistically significant
+👉 But non-trivial effect size
+
+And your plot shows it clearly:
+
+visible downward trend
+not driven by a single extreme point
+reasonably consistent gradient
+
+Your PCA is doing two different things:
+
+PC1 & PC2
+capture dominant environmental variation
+but that variation is irrelevant to drying
+PC3
+explains less variance overall
+but aligns with drying process
+
+👉 This is extremely important.
+
+It means:
+
+The biggest environmental gradients in your system are not the ones driving water loss.
+
+“The dominant environmental gradients (PC1, PC2) are decoupled from drying dynamics, while a secondary gradient (PC3) shows the strongest relationship with water loss.”
+
+PC3 probably mixes:
+
+vegetation
+pH
+drying rate proxy
+maybe microclimate timing
+
+👉 In other words: process-level conditions, not structure
+
+While:
+
+PC1 = size / landscape
+PC2 = shade / structure
+
+Your model explains:
+
+👉 ~17% of variation in drying
+
+That means:
+
+👉 83% is unexplained
+
+So either:
+
+key drivers are missing
+or drying is inherently noisy / nonlinear
+
+Probably both.
+
+
+Check PC3 loadings
+```{r}
+pca_area$rotation[,3]
+```
+
+Trying a direct model
+```{r}
+lm_direct <- lm(z_loss_rate ~ canopy_50 + log_area + imp_100 +
+                av_hrs_water_july_mintomax + july_sei +
+                veg_mean_cover_july + mean_season_ph +
+                slope_per_day_log,
+                data = metrics_wide)
+
+summary(lm_direct)
+```
+
+Your direct model is stronger than your PCA
+
+This is the key takeaway.
+
+PCA result:
+best axis R² ≈ 0.17
+Direct model:
+R² = 0.72
+adjusted R² = 0.34
+
+👉 That gap is massive.
+
+Even with overfitting risk, this tells you:
+
+The predictors contain real signal, but PCA is not aligning that signal with drying.
+
+That is a methodological insight, not just a result.
+
+The only truly strong variable: canopy
+canopy_50
+coefficient: -0.039
+p = 0.011
+
+👉 This is real.
+
+Interpretation:
+
+more canopy → less drying
+consistent with your whole framework
+
+This is your most defensible finding so far.
+
+The almost-important variable: SEI
+july_sei
+coefficient: +4.50
+p ≈ 0.066
+
+This is not noise. It is borderline.
+
+But here is where you need to think carefully:
+
+👉 higher evenness = more drying
+
+That’s counterintuitive if you assumed “even shade is good”
+
+So what could it mean?
+
+evenly distributed light exposure
+fewer consistently shaded refuges
+more uniform thermal exposure across the pond
+
+👉 This is interesting. Do not ignore it.
+
+Everything else: weak individually
+
+These are not useless, but they are not dominant:
+
+log_area → weak positive
+imp_100 → weak negative
+temp timing → weak negative
+veg → weak
+pH → weak
+slope_per_day_log → weak
+
+👉 This suggests:
+
+drying is not controlled by a single variable, but canopy stands out.
+
+Now look back at PC3 (this matters)
+
+Your PC3 loadings:
+
+canopy: +0.56
+pH: +0.54
+slope: -0.46
+
+That is not random.
+
+PC3 ≈
+👉 canopy + chemistry − drying dynamics
+
+And your regression showed:
+
+👉 higher PC3 → less drying
+
+So:
+
+high canopy → less drying
+high pH → slightly less drying
+high slope_per_day → more drying
+
+That aligns cleanly.
+
+The dominant environmental gradients captured by PCA were not strongly associated with drying rates. Instead, drying aligned most closely with a secondary axis representing a combination of canopy cover, water chemistry, and vegetation dynamics, indicating that the processes driving water loss operate along subtler environmental gradients rather than the primary axes of variation.
+
+1. Canopy is the primary control
+reduces energy input
+reduces evaporation
+consistent and strong
+2. Shade structure (SEI) matters in a nuanced way
+not just presence of shade
+distribution matters
+3. Landscape context is weaker than expected
+impervious and area are not dominating
+
+That is actually interesting for urban ecology.
+
+One issue you cannot ignore
+
+You are overfitting.
+
+15 ponds
+8 predictors
+6 residual degrees of freedom
+
+👉 that adjusted R² drop to 0.34 is telling you something
+
+So:
+
+❗ Do NOT present this as a predictive model
+✔ Present it as exploratory evidence of drivers
+
+Trying a reduced model
+
+```{r}
+lm_reduced <- lm(z_loss_rate ~ canopy_50 + july_sei + slope_per_day_log,
+                 data = metrics_wide)
+
+summary(lm_reduced)
+
+```
+Check redundancy
+```{r}
+library(car)
+vif(lm_direct)
+```
+
+Fit
+R² = 0.50
+Adjusted R² = 0.36
+p = 0.047
+
+👉 For n = 15, this is solid. Not amazing, but real.
+
+This is now:
+✔ interpretable
+✔ not overfit
+✔ statistically supported
+
+Canopy is your anchor result
+canopy_50
+strong negative effect
+p = 0.0075
+
+This is no longer debatable.
+
+👉 This is your primary driver of drying
+
+Interpretation:
+
+Increased canopy cover substantially reduces water loss rates, likely through shading and reduced energy input.
+
+This should sit at the center of your story.
+
+SEI: still interesting, but not clean
+july_sei
+positive effect
+p = 0.15
+
+So:
+
+not statistically strong
+but still directionally consistent
+
+This is where you need discipline.
+
+Do NOT say:
+❌ “SEI significantly affects drying”
+
+Instead:
+✔ “SEI shows a positive but uncertain relationship with drying”
+
+This is worth keeping conceptually:
+
+👉 evenly distributed shade ≠ strong refuge
+
+high SEI = shade spread thin
+low SEI = concentrated deep shade patches
+
+So:
+
+👉 ponds with patchy, strong shade may resist drying better than evenly lit ones
+
+That’s subtle and good.
+
+This is the real ecological takeaway:
+
+Strong signal:
+canopy → consistent control on drying
+Weak / secondary:
+shade structure (SEI)
+thermal timing
+landscape context
+Implication:
+
+Drying is not driven by broad landscape gradients but by localized canopy-mediated energy balance.
+
+That is a clean, strong statement.
+
+Let’s connect it back:
+
+PC1 = structure → irrelevant
+PC2 = shade pattern → weak
+PC3 = canopy + process → relevant
+
+👉 PCA didn’t fail
+👉 but it buried the important gradient
+
+That’s a great discussion point.
+
+Canopy cover is the dominant predictor of pond drying rates, with higher canopy associated with reduced water loss. Shade structure may also play a role, with more evenly distributed shading potentially increasing exposure and drying, although this relationship remains uncertain.
+
+*Now need to rerun PCA with the most important variables*
+
+canopy_50
+imp_100
+log_area
+av_hrs_water_july_mintomax
+mean_season_ph
+
+
+❌ july_sei
+
+Because:
+
+overlaps with canopy + thermal exposure
+adds complexity without clear independent signal
+
+You already saw it was borderline in regression.
+
+❌ veg_mean_cover_july
+
+Because:
+
+partially redundant with canopy
+and with in-pond processes (pH already captures some biology)
+
+❌ veg_mean_cover_july
+
+Because:
+
+partially redundant with canopy
+and with in-pond processes (pH already captures some biology)
+
+I disgaree with not having vegetation included. However, 
+
+Your vegetation variable is doing 3 jobs at once
+
+That’s the problem.
+
+It is:
+
+partially a shade proxy
+partially a biological productivity proxy
+partially a hydrological driver (ET)
+
+👉 That makes it composite and ambiguous
+
+So in PCA:
+
+it can blur axes
+it can load weakly across multiple PCs
+it reduces interpretability
+
+Your vegetation variable is doing 3 jobs at once
+
+That’s the problem.
+
+It is:
+
+partially a shade proxy
+partially a biological productivity proxy
+partially a hydrological driver (ET)
+
+👉 That makes it composite and ambiguous
+
+So in PCA:
+
+it can blur axes
+it can load weakly across multiple PCs
+it reduces interpretability
+
+
+
+
+Focus on: 
+canopy_50
+imp_100
+log_area
+av_hrs_water_july_mintomax
+veg_mean_cover_july
+mean_season_ph
+
+
+*Also really need to consider comparisons between groupings!!*
+
+
+```{r}
+write.csv(metrics_wide, "metrics_wide_updated.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
