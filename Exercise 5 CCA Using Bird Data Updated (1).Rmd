@@ -8,47 +8,51 @@ output:
 
 **Course Instructor**: Dr. Suborna Ahmed\
 
-**Submission**: Sandra Inusah and Brandon Weigland
+**Submission**: Brandon Weigand, Sandra Inusah
 
-1.  Write your code and answers in this RMD file
+1. Write your code and answers in this RMD file
 
-2.  Knit your completed RMD file to WORD document
+2. Knit your completed RMD file to WORD document
 
-3.  Check and upload your WORD document to Exercise 5 on Canvas
+3. Check and upload your WORD document to Exercise 5 on Canvas
 
 ------------------------------------------------------------------------
 
 # Exercise Objectives
 
-1.  To become familiar with Canonical Correlation Analysis (CCA) as a tool to uncover multivariate relationships between and within two groups of variables.
+1. To become familiar with Canonical Correlation Analysis (CCA) as a tool to uncover multivariate relationships between and within two groups of variables. 
 
-2.  To learn how to obtain clustering solutions for alternative methods (and distance metrics) and choose one of the results.
+2. To learn how to obtain clustering solutions for alternative methods (and distance metrics) and choose one of the results. 
 
-# General Description
+
+# General Description 
 
 You have a choice as to which problem you would like to investigate using CCA. Two datasets with matching objectives and R code have been provided, one using research data from a study of birds in grasslands and the other from a study on tree shape changes over time for Coastal Douglas-fir. You will choose only **ONE** of these datasets and investigate relationships using CCA.
 
+
 Here are brief descriptions of two datasets and the objectives:
 
-1.  **Birds in grasslands study**: The data for this study is a subset of the data gathered by Tracy Hooper to study bird abundances, along with vegetation and other variables in a grassland area (a subset of her data is used in FRST 531 with her approval). The data are in *TRABREV3.txt* and the R code has been provided as *Exercise 5 CCA using bird data.Rmd*. The objective of the analysis is examine the relationships between bird abundances and vegetation measures using CCA. For the CCA, the Y variable set has the amount (percent) of bare ground for each sample location (baregrnd), the June vegetation cover (junvgcov, percent) and June vegetation height (junvght, metres) (5 variables). The X variable set has the bird abundances by species (10 variables). NOTE: The bird variable names are standard 4-letter bird species codes that you can find on the web if you wish.
+1. **Birds in grasslands study**: The data for this study is a subset of the data gathered by Tracy Hooper to study bird abundances, along with vegetation and other variables in a grassland area (a subset of her data is used in FRST 531 with her approval). The data are in *TRABREV3.txt* and the R code has been provided as *Exercise 5 CCA using bird data.Rmd*. The objective of the analysis is examine the relationships between bird abundances and vegetation measures using CCA. For the CCA, the Y variable set has the amount (percent) of bare ground for each sample location (baregrnd), the June vegetation cover (junvgcov, percent) and June vegetation height (junvght, metres) (5 variables). The X variable set has the bird abundances by species (10 variables). NOTE: The bird variable names are standard 4-letter bird species codes that you can find on the web if you wish.
 
-2.  **Tree taper (shape) study**: On 264 Coastal Douglas-fir trees, radial increments (ring widths) were measured at several heights above ground to study the changes in tree shape over time (data owned by V. LeMay, UBC, used with permission). Here, a subset of that data is used to investigate the relationships between the radial increments for the last five years (RADINCR1 to RADINCR5, mm \* 100, 5 y-variables) and the diameter at breast height (DBH, cm), height (m) and age (years) (3 x-variables) at the time of measurement is of interest. The data are in *tree shape.csv* and the R code has been provided as *Exercise 5 CCA using tree data.Rmd*.
+2. **Tree taper (shape) study**: On 264 Coastal Douglas-fir trees, radial increments (ring widths) were measured at several heights above ground to study the changes in tree shape over time (data owned by V. LeMay, UBC, used with permission). Here, a subset of that data is used to investigate the relationships between the radial increments for the last five years (RADINCR1 to RADINCR5, mm * 100, 5 y-variables) and the diameter at breast height (DBH, cm), height (m) and age (years) (3 x-variables) at the time of measurement is of interest. The data are in *tree shape.csv* and the R code has been provided as *Exercise 5 CCA using tree data.Rmd*. 
+
 
 # Process
 
-1.  Choose **ONE** of the two problems with associated data and R code. This Rmd file is for **BIRD** data.
+1. Choose **ONE** of the two problems with associated data and R code. This Rmd file is for **BIRD** data.
 
-2.  Run the R code and get the outputs from running the code. (You will need to run each individual code chunk and get the outputs, or run the R code by clicking on the Knit button in RStudio to run the entire file).
+2. Run the R code and get the outputs from running the code. (You will need to run each individual code chunk and get the outputs, or run the R code by clicking on the Knit button in RStudio to run the entire file).
 
-3.  The outputs will be similar to those examples we looked at in class using the hormones versus blood variables.
+3. The outputs will be similar to those examples we looked at in class using the hormones versus blood variables.
 
-4.  You will be answering 10 questions to guide you through the outputs and interpret the results. Under each question in the Rmd file, you will see dedicated code chunks or blank spaces that are prepared for you to write your own code and add your answers. As you answer the questions, paste in the relevant R outputs to support your answers.
+4. You will be answering 10 questions to guide you through the outputs and interpret the results. Under each question in the Rmd file, you will see dedicated code chunks or blank spaces that are prepared for you to write your own code and add your answers. As you answer the questions, paste in the relevant R outputs to support your answers.
+
+
 
 ------------------------------------------------------------------------
-
 # Canonical Correlation Analysis Using Bird Data
 
-In grasslands near Williams Lake, Tracy Hooper studied bird species relative to vegetation and to food availability. In this exercise, the relationship between bird abundances and vegetation are investigated using CCA.
+In grasslands near Williams Lake, Tracy Hooper studied bird species relative to vegetation and to food availability. In this exercise, the relationship between bird abundances and vegetation are investigated using CCA. 
 
 ## Part 1: Data Preparation and Visualization
 
@@ -56,7 +60,7 @@ The Y variable set has the amount (percent) of bare ground for each sample locat
 
 ### Import Data
 
-Let's first read in the bird data into the R object birddat.
+Let's first read in the bird data into the R object birddat. 
 
 ```{r}
 # Make sure you put this RMD file and TRABREV3.txt in the same folder before running the code
@@ -72,7 +76,8 @@ str(birddat)
 dim(birddat) 
 ```
 
-### Data Cleaning and Preparation
+
+### Data Cleaning and Preparation 
 
 We need to change site and point to be factors, since they are norminal variables. We will put this into new variable names (new columns).
 
@@ -85,7 +90,8 @@ head(birddat)
 summary(birddat)
 ```
 
-Similar to the in-class R examples, we will separate out the X and the Y.
+
+Similar to the in-class R examples, we will separate out the X and the Y. 
 
 ```{r}
 # Segregate the X and Y sets of data
@@ -93,6 +99,7 @@ VegY <- subset(birddat,select = c(mayvgcov,mayvght,junvgcov,junvght,baregrnd))
 BirdX <- subset(birddat,select = c(hola,vesp,star,weme,lbcu,brbl,tres,
          mobl,amcr,savs))
 ```
+
 
 We can print out the summary on the X and Y, and see the range of values.
 
@@ -102,7 +109,7 @@ summary(VegY)
 summary(BirdX)
 ```
 
-For this exercise, we need complete observations, so we remove any observation with an incomplete set of variables.
+For this exercise, we need complete observations, so we remove any observation with an incomplete set of variables. 
 
 ```{r}
 dim(VegY) # No NAs shown in the summary
@@ -129,7 +136,37 @@ round(cor(VegY,BirdX),digits=3) # Ryx
 round(cor(BirdX,VegY),digits=3) # Rxy
 ```
 
+
 \
+
+**QUESTION 1**: Using simple correlations first, which variables are strongly correlated within each set of variables and across (i.e., between) the two sets of variables?  What about moderately correlated?
+
+We used thresholds of |r| ≥ 0.85 to identify significant correlations and |r| ≥ 0.50 to identify moderate correlations. 
+
+Significant (|r| ≥ 0.85): 
+- mayvgcov - mayvght = 0.922
+- junvgcov - junvght = 0.877
+
+Moderate (|r| ≥ 0.50): 
+- mayvgcov – junvgcov = 0.794
+- mayvght – junvgcov = 0.765
+- mayvgcov – junvght = 0.601
+- mayvght – junvght = 0.601
+
+Significant and moderate correlatins occur only in the vegetation set. 
+
+Near-moderate (|r| ≈ 0.40–0.49):
+- vesp – mayvgcov = 0.496
+- vesp – junvgcov = 0.464
+- weme – junvgcov = 0.430
+- weme – junvght = 0.420
+- hola – junvgcov = −0.411
+
+Strong and moderate correlations occurred only with the vegetation variables, particularly between cover and height within the same month (r = 0.922 and 0.877) and across months (r = 0.601–0.794). This indicates a high degree of redundancy in vegetation structure, where sites with greater vegetation cover also tend to have greater height, and these patterns remain consistent over time. In contrast, bird variables show no moderate or strong correlations, suggesting that species vary more independently across sites.
+
+Between the two sets, only near-moderate relationships are observed. Species such as vesp and weme show positive associations with vegetation cover and height (r ≈ 0.42–0.50), while hola shows a negative association with vegetation (r ≈ −0.41), suggesting differing habitat preferences along a vegetation gradient.
+
+
 
 **QUESTION 1**: Using simple correlations first, which variables are strongly correlated within each set of variables and across (i.e., between) the two sets of variables? What about moderately correlated?
 
@@ -141,17 +178,57 @@ Between vegetation and bird variables, several moderate correlations highlight h
 
 Overall, vegetation variables are strongly interrelated and show clear structural patterns across time, while bird species exhibit mostly weak associations with each other. However, some bird species demonstrate moderate relationships with vegetation characteristics, indicating that vegetation structure plays an important role in shaping bird community composition, with some species favoring dense vegetation and others preferring more open environments.
 
+
+
+
 ```{r}
-# Provide your R codes here (if applicable)
-# Vegetation (within)
-cor(VegY)[abs(cor(VegY)) >= 0.4 & abs(cor(VegY)) < 1]
+library(dplyr)
+library(tidyr)
 
-# Birds (within)
-cor(BirdX)[abs(cor(BirdX)) >= 0.4 & abs(cor(BirdX)) < 1]
+veg_corr <- cor(VegY) %>%
+  as.data.frame() %>%
+  mutate(var1 = rownames(.)) %>%
+  pivot_longer(-var1, names_to = "var2", values_to = "cor") %>%
+  filter(var1 != var2) %>%
+  rowwise() %>%
+  mutate(pair = paste(sort(c(var1, var2)), collapse = "_")) %>%
+  ungroup() %>%
+  distinct(pair, .keep_all = TRUE) %>%
+  filter(abs(cor) >= 0.60) %>%
+  mutate(strength = ifelse(abs(cor) >= 0.85, "strong", "moderate")) %>%
+  arrange(desc(abs(cor)))
 
-# Between vegetation and birds
-cor(VegY, BirdX)[abs(cor(VegY, BirdX)) >= 0.4]
+bird_corr <- cor(BirdX) %>%
+  as.data.frame() %>%
+  mutate(var1 = rownames(.)) %>%
+  pivot_longer(-var1, names_to = "var2", values_to = "cor") %>%
+  filter(var1 != var2) %>%
+  rowwise() %>%
+  mutate(pair = paste(sort(c(var1, var2)), collapse = "_")) %>%
+  ungroup() %>%
+  distinct(pair, .keep_all = TRUE) %>%
+  filter(abs(cor) >= 0.60) %>%
+  mutate(strength = ifelse(abs(cor) >= 0.85, "strong", "moderate")) %>%
+  arrange(desc(abs(cor)))
+
+cross_corr <- cor(VegY, BirdX) %>%
+  as.data.frame() %>%
+  mutate(var1 = rownames(.)) %>%
+  pivot_longer(-var1, names_to = "var2", values_to = "cor") %>%
+  filter(abs(cor) >= 0.60) %>%
+  mutate(strength = ifelse(abs(cor) >= 0.85, "strong", "moderate")) %>%
+  arrange(desc(abs(cor)))
+
+
 ```
+
+```{r}
+veg_corr
+bird_corr
+cross_corr
+```
+
+
 
 \
 
@@ -163,13 +240,15 @@ VegY.stand<-scale(VegY, center = TRUE, scale = TRUE) #Center by -mean # scale by
 BirdX.stand<-scale(BirdX, center=TRUE, scale=TRUE)
 ```
 
-### Data Visualization
 
-There are two options for data visualization:
 
-*Option 1*: Scatterplots, simple correlations with p-values add in a function for correlations for graphing. This will add in the correlations and p-values to upper graphs of pairwise graphs using the pairs( ) function.
+### Data Visualization 
 
-In the code below, text(0.5,0.5,cex=1.1) is used to place the r= in the center of the box with 1.1 expansion from default, and text(0.5,0.4,cex=1.1) is used to place p= for each r=.
+There are two options for data visualization: 
+
+*Option 1*: Scatterplots, simple correlations with p-values add in a function for correlations for graphing. This will add in the correlations and p-values to upper graphs of pairwise graphs using the pairs( ) function. 
+
+In the code below, text(0.5,0.5,cex=1.1) is used to place the r= in the center of the box with 1.1 expansion from default, and text(0.5,0.4,cex=1.1) is used to place p= for each r=. 
 
 ```{r}
 panel.cor <- function(x, y, digits = 2, cex.cor, ...)
@@ -193,23 +272,23 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...)
 XandY <- data.frame(VegY,BirdX)
 ```
 
-Then, use the "pairs()" function to get a matrix of scatterplots, where the upper graphs are replaced by correlations using panel.cor.
+Then, use the "pairs()" function to get a matrix of scatterplots, where the upper graphs are replaced by correlations using panel.cor. 
 
 ```{r, fig.width=12, fig.height=8}
 pairs(XandY, upper.panel = panel.cor,cex.labels=1.3)
 ```
 
 Do the pairs() again, but just use VegY, columns 1:3
-
 ```{r, fig.width=12, fig.height=8}
 pairs(VegY, upper.panel = panel.cor,cex.labels=1.5)
 ```
 
 Do the pairs() again, but just use BirdX measures, columns 4:6
-
 ```{r, fig.width=12, fig.height=8}
 pairs(BirdX, upper.panel = panel.cor,cex.labels=1.5)
 ```
+
+
 
 *Option 2*: Distribution, correlations and their P-values
 
@@ -224,7 +303,6 @@ pairs(XandY,
 ```
 
 Pairwise Plots for Vegetation Variables (VegY)
-
 ```{r, fig.width=12, fig.height=8}
 pairs(VegY,
       upper.panel = panel.cor,
@@ -234,7 +312,6 @@ pairs(VegY,
 ```
 
 Pairwise Plots for Bird Abundance Variables (BirdX)
-
 ```{r, fig.width=12, fig.height=8}
 pairs(BirdX,
       upper.panel = panel.cor,
@@ -243,14 +320,15 @@ pairs(BirdX,
       cex.labels = 1.5)
 ```
 
+
 ## Part 2: Canonical Correlation Analysis (CCA)
 
 Canonical Correlation Analysis (CCA) is used to examine the relationship between two sets of variables simultaneously.
 
 In this analysis:
 
--   **X = BirdX** (bird abundance variables)\
--   **Y = VegY** (vegetation variables)
+- **X = BirdX** (bird abundance variables)  
+- **Y = VegY** (vegetation variables)
 
 Because the variables are standardized, the analysis is effectively based on the **correlation matrix**.
 
@@ -258,11 +336,13 @@ In this exercise, we will use the built-in `cancor()` function from **base R**, 
 
 This approach allows us to:
 
--   understand how the canonical variates are constructed\
--   interpret the relationships between the two variable sets\
--   replicate the key outputs typically provided by specialized CCA packages
+- understand how the canonical variates are constructed  
+- interpret the relationships between the two variable sets  
+- replicate the key outputs typically provided by specialized CCA packages  
 
-Let's perform CCA on the bird data.
+
+Let's perform CCA on the bird data. 
+
 
 ```{r}
 # =========================================================
@@ -485,16 +565,15 @@ dim(m1.cancor$scores$X)    # should be n x 5
 dim(m1.cancor$scores$Y)    # should be n x 5
 m1.cancor$ndim             # should be 5
 ```
-
 There are several important components in the canonical correlation analysis results:
 
-1.  **Canonical correlations**: these are the correlations between each pair of canonical variates. Their squared values (`CanRSQ`) show the proportion of shared variation between each paired canonical variate.
+1. **Canonical correlations**: these are the correlations between each pair of canonical variates. Their squared values (`CanRSQ`) show the proportion of shared variation between each paired canonical variate.
 
-2.  **Eigenvalues**: these are calculated as `CanRSQ / (1 - CanRSQ)`. They are **not the same as the squared canonical correlations**. The eigenvalues help show the relative importance of each canonical function.
+2. **Eigenvalues**: these are calculated as `CanRSQ / (1 - CanRSQ)`. They are **not the same as the squared canonical correlations**. The eigenvalues help show the relative importance of each canonical function.
 
-3.  **Tests of significance**: these evaluate whether the canonical correlations, starting from a given canonical function and including all smaller ones, are significantly different from zero. These tests are most appropriate when the multivariate normality assumption is reasonably satisfied.
+3. **Tests of significance**: these evaluate whether the canonical correlations, starting from a given canonical function and including all smaller ones, are significantly different from zero. These tests are most appropriate when the multivariate normality assumption is reasonably satisfied.
 
-4.  **Standardized coefficients (canonical weights)**: these are the coefficients used to calculate the canonical variates for the X and Y variable sets. They are similar to eigenvectors and are often denoted by the **a** and **b** vectors.
+4. **Standardized coefficients (canonical weights)**: these are the coefficients used to calculate the canonical variates for the X and Y variable sets. They are similar to eigenvectors and are often denoted by the **a** and **b** vectors.
 
 ```{r}
 # Canonical correlations
@@ -526,12 +605,12 @@ m1.cancor$coef$Y
 
 The canonical correlation analysis produces two key components:
 
-1.  **Canonical correlations**: These represent the strength of association between each pair of canonical variates (one from X and one from Y). Larger values indicate stronger relationships between the two variable sets.
+1. **Canonical correlations**: These represent the strength of association between each pair of canonical variates (one from X and one from Y). Larger values indicate stronger relationships between the two variable sets.
 
-2.  **Standardized coefficients (canonical weights)**: These coefficients are used to construct the canonical variates. They are similar to eigenvectors and are often denoted as:
+2. **Standardized coefficients (canonical weights)**: These coefficients are used to construct the canonical variates. They are similar to eigenvectors and are often denoted as:
 
--   **a coefficients** for the X variables (BirdX)
--   **b coefficients** for the Y variables (VegY)
+- **a coefficients** for the X variables (BirdX)
+- **b coefficients** for the Y variables (VegY)
 
 These coefficients show how each original variable contributes to the corresponding canonical variate.
 
@@ -560,21 +639,20 @@ m1.cancor$coef$X
 # Y-side coefficients (b vector)
 m1.cancor$coef$Y
 ```
-
 ### Explanation
 
--   `m1.cancor$cancor` gives the canonical correlations.
--   `m1.cancor$CanRSQ` gives the squared canonical correlations.
--   `m1.cancor$Eigen` gives the eigenvalues for each canonical function.
--   `m1.cancor$tests` gives the approximate significance tests.
--   `m1.cancor$coef$X` and `m1.cancor$coef$Y` give the standardized coefficients used to calculate the canonical variates.
+- `m1.cancor$cancor` gives the canonical correlations.
+- `m1.cancor$CanRSQ` gives the squared canonical correlations.
+- `m1.cancor$Eigen` gives the eigenvalues for each canonical function.
+- `m1.cancor$tests` gives the approximate significance tests.
+- `m1.cancor$coef$X` and `m1.cancor$coef$Y` give the standardized coefficients used to calculate the canonical variates.
 
 ### 5. Canonical variate scores
 
 The canonical variates (scores) are obtained by multiplying the standardized data by the standardized coefficients (canonical weights).
 
--   $X^* = X \times a$: canonical variates for the X variables (BirdX)\
--   $Y^* = Y \times b$: canonical variates for the Y variables (VegY)
+- \( X^* = X \times a \): canonical variates for the X variables (BirdX)  
+- \( Y^* = Y \times b \): canonical variates for the Y variables (VegY)  
 
 Each column represents a canonical function, and each row corresponds to an observation.
 
@@ -586,7 +664,6 @@ round(head(m1.cancor$scores$Y), digits = 3)
 ```
 
 We can also verify the canonical variate scores manually by multiplying the standardized data matrices by the standardized coefficients. These manually calculated scores should match the scores stored in the `m1.cancor` object.
-
 ```{r}
 # Check the canonical variate scores manually
 
@@ -604,18 +681,18 @@ head(Ystar)
 
 ### Explanation
 
--   `Xstar` gives the canonical variate scores for the X variables (BirdX).
--   `Ystar` gives the canonical variate scores for the Y variables (VegY).
--   The dimensions should be:
-    -   `Xstar`: number of observations × number of canonical variates
-    -   `Ystar`: number of observations × number of canonical variates
+- `Xstar` gives the canonical variate scores for the X variables (BirdX).
+- `Ystar` gives the canonical variate scores for the Y variables (VegY).
+- The dimensions should be:
+  - `Xstar`: number of observations × number of canonical variates
+  - `Ystar`: number of observations × number of canonical variates
 
 These manually calculated scores should be the same as:
 
--   `m1.cancor$scores$X`
--   `m1.cancor$scores$Y`
+- `m1.cancor$scores$X`
+- `m1.cancor$scores$Y`
 
-6.  Canonical structure, that is correlations between the standardized X and Y and the canonical variates.
+6. Canonical structure, that is correlations between the standardized X and Y and the canonical variates.
 
 ### 6. Canonical structure (loadings and cross-loadings)
 
@@ -623,15 +700,15 @@ The canonical structure refers to the correlations between the original standard
 
 There are two types of structure correlations:
 
--   **Loadings**: correlations between variables and their own canonical variates
-    -   X with X\*\
-    -   Y with Y\*
--   **Cross-loadings**: correlations between variables and the opposite canonical variates
-    -   X with Y\*\
-    -   Y with X\*
+- **Loadings**: correlations between variables and their own canonical variates  
+  - X with X*  
+  - Y with Y*  
+
+- **Cross-loadings**: correlations between variables and the opposite canonical variates  
+  - X with Y*  
+  - Y with X*  
 
 These correlations are used to interpret which variables are most strongly associated with each canonical function.
-
 ```{r}
 # Cross-loadings: X (BirdX) with Y*, and Y (VegY) with X*
 round(m1.cancor$structure$X.yscores, digits = 3)   # X with Y*
@@ -641,20 +718,19 @@ round(m1.cancor$structure$Y.xscores, digits = 3)   # Y with X*
 round(m1.cancor$structure$X.xscores, digits = 2)   # X with X*
 round(m1.cancor$structure$Y.yscores, digits = 2)   # Y with Y*
 ```
-
 ### Explanation
 
--   `X.yscores`: correlation between X variables (BirdX) and Y canonical variates (Y\*)\
--   `Y.xscores`: correlation between Y variables (VegY) and X canonical variates (X\*)
+- `X.yscores`: correlation between X variables (BirdX) and Y canonical variates (Y*)  
+- `Y.xscores`: correlation between Y variables (VegY) and X canonical variates (X*)  
 
 These are called **cross-loadings** and help interpret relationships between the two variable sets.
 
--   `X.xscores`: correlation between X variables and their own canonical variates (X\*)\
--   `Y.yscores`: correlation between Y variables and their own canonical variates (Y\*)
+- `X.xscores`: correlation between X variables and their own canonical variates (X*)  
+- `Y.yscores`: correlation between Y variables and their own canonical variates (Y*)  
 
 These are called **loadings** and help identify which variables contribute most to each canonical variate.
 
-In practice, variables with **large absolute correlations** (e.g., \|r\| \> 0.4 or 0.5) are considered important contributors.
+In practice, variables with **large absolute correlations** (e.g., |r| > 0.4 or 0.5) are considered important contributors.
 
 ### 7. Canonical redundancy coefficients
 
@@ -662,35 +738,37 @@ The canonical redundancy coefficients show how much variance in one variable set
 
 More specifically:
 
--   the variance of **X explained by its own canonical variates** is based on the loadings of X with X\*\
--   the variance of **Y explained by its own canonical variates** is based on the loadings of Y with Y\*
+- the variance of **X explained by its own canonical variates** is based on the loadings of X with X*  
+- the variance of **Y explained by its own canonical variates** is based on the loadings of Y with Y*  
 
 To obtain redundancy, we combine these average extracted variances with the squared canonical correlations.
 
 This gives:
 
--   **Redundancy of X by Y\***: how much variance in X is explained by the opposite canonical variates\
--   **Redundancy of Y by X\***: how much variance in Y is explained by the opposite canonical variates
-
+- **Redundancy of X by Y\***: how much variance in X is explained by the opposite canonical variates  
+- **Redundancy of Y by X\***: how much variance in Y is explained by the opposite canonical variates
 ```{r}
 # Canonical redundancy table
 round(m1.cancor$redundancy, 4)
+redun_table <- round(m1.cancor$redundancy, 4)
+
 
 # Total redundancy for each variable set across all canonical functions
 colSums(m1.cancor$redundancy[, c("Redundancy_X_by_Y", "Redundancy_Y_by_X")])
+
 ```
 
 ### Explanation
 
 The redundancy table includes:
 
--   `Canonical_Function`: canonical function number\
--   `CanR`: canonical correlation\
--   `CanRSQ`: squared canonical correlation\
--   `AveVar_X`: average variance extracted from X by its own canonical variate\
--   `AveVar_Y`: average variance extracted from Y by its own canonical variate\
--   `Redundancy_X_by_Y`: variance in X explained by the opposite canonical variate\
--   `Redundancy_Y_by_X`: variance in Y explained by the opposite canonical variate
+- `Canonical_Function`: canonical function number  
+- `CanR`: canonical correlation  
+- `CanRSQ`: squared canonical correlation  
+- `AveVar_X`: average variance extracted from X by its own canonical variate  
+- `AveVar_Y`: average variance extracted from Y by its own canonical variate  
+- `Redundancy_X_by_Y`: variance in X explained by the opposite canonical variate  
+- `Redundancy_Y_by_X`: variance in Y explained by the opposite canonical variate  
 
 The column sums give the **total redundancy** across all retained canonical functions for each variable set.
 
@@ -698,9 +776,9 @@ The column sums give the **total redundancy** across all retained canonical func
 
 We can visualize the canonical correlation analysis results in two ways:
 
-1.  **Structure plots (loadings and cross-loadings)**: these show how the original variables are related to the canonical variates.
+1. **Structure plots (loadings and cross-loadings)**: these show how the original variables are related to the canonical variates.
 
-2.  **Scatterplots of paired canonical variates**: these show the relationship between the X-side and Y-side canonical scores for each canonical function.
+2. **Scatterplots of paired canonical variates**: these show the relationship between the X-side and Y-side canonical scores for each canonical function.
 
 These plots help us interpret the canonical functions and assess the strength of the relationships between the two variable sets.
 
@@ -741,10 +819,11 @@ abline(h = 0, v = 0, lty = 2)
 par(mfrow = c(1, 1), mai = c(1, 1, 1, 1), cex = 1)
 ```
 
+
 The first two plots show the structure correlations for the first two canonical functions.
 
--   The left plot shows how the vegetation variables relate to the X-side canonical variates.
--   The right plot shows how the bird variables relate to the Y-side canonical variates.
+- The left plot shows how the vegetation variables relate to the X-side canonical variates.
+- The right plot shows how the bird variables relate to the Y-side canonical variates.
 
 Variables farther from zero are more strongly associated with the canonical functions.
 
@@ -777,109 +856,344 @@ abline(lm(m1.cancor$scores$Y[,3] ~ m1.cancor$scores$X[,3]), lty = 2)
 
 par(mfrow = c(1, 1), mai = c(1, 1, 1, 1), cex = 1)
 ```
-
 These scatterplots compare the paired canonical variate scores for the first three canonical functions.
 
--   A stronger linear pattern indicates a stronger canonical correlation.
--   The first canonical function usually shows the strongest relationship.
--   Later canonical functions often show weaker relationships and may be less important for interpretation.
+- A stronger linear pattern indicates a stronger canonical correlation.
+- The first canonical function usually shows the strongest relationship.
+- Later canonical functions often show weaker relationships and may be less important for interpretation.
 
-**QUESTION 2**: How many canonical variates were obtained? Why?
 
-**Your Answer:** The number of canonical variates obtained is five. This is because the number of canonical functions in Canonical Correlation Analysis is limited by the smaller number of variables in the two datasets. In this case, the bird dataset contains ten variables, while the vegetation dataset contains five variables, so the maximum number of canonical variates is the minimum of the two, which is five. This is also confirmed in the code where the number of dimensions is defined as the minimum of the number of variables in each dataset.
+
+**QUESTION 2**: How many canonical variates were obtained? Why? 
+
+5 canonical variates were obtained. This is because the number of canonical functions in canonical correlation analysis is equal to the minimum number of variables in either dataset. Here, the BirdX dataset contains 10 variables, while the VegY dataset contains 5, so the maximum number of canonical variates is 5. This is also reflected in the code above and below, where the number of dimensions is defined as the minimum of the number of variables in each dataset.
 
 ```{r}
-# Provide your R codes here (if applicable)
+ncol(BirdX)
+ncol(VegY)
+
+min(ncol(BirdX), ncol(VegY))
 ```
+
 
 **QUESTION 3**: Using the first canonical variates, the standardized data, and the standardized coefficients, calculate the canonical variates for the x-variables and for the y-variables (i.e., each group of variables) and for Observation 10 of the data. You will have one value for the x-variables and one value for the y-variables using the measurements of Observation 10.
 
-**Your Answer:** The canonical variate scores for Observation 10, based on the first canonical function, are -0.0528 for the X variables (bird abundances) and -0.0269 for the Y variables (vegetation variables).
+The canonical variates were calculated by multiplying the standardized variables by the standardized coefficients. The canonical variate scores for observation 10, based on the first canonical function, are -0.0528 for the X variables (bird abundances) and -0.0269 for the Y variables (vegetation variables). Additional manual calculations matched the canonical score outputs generated by the CCA output. 
+
 
 ```{r}
-# Provide your R codes here (if applicable)
-# First canonical variate scores
-Xstar1 <- m1.cancor$scores$X[,1]
-Ystar1 <- m1.cancor$scores$Y[,1]
+# Observation 10, first canonical variate
+# Extract first canonical coefficients
+a1 <- m1.cancor$coef$X[,1]
+b1 <- m1.cancor$coef$Y[,1]
 
-# Get Observation 10
-Xstar1[10]
-Ystar1[10]
+# Standardized values for Observation 10
+x10 <- BirdX.stand[10, ]
+y10 <- VegY.stand[10, ]
+
+# Manual calculation of first canonical variate scores
+X_obs10 <- sum(x10 * a1)
+Y_obs10 <- sum(y10 * b1)
+
+X_obs10
+Y_obs10
 ```
+
+To verify, the canonical variate score for observation 10 was also calculated manually, as the sum of the standardized variables multiplied by their corresponding coefficients:
+```{r}
+sum(x10 * a1)
+Xstar[10,1]
+
+```
+Yep, they match! 
+
 
 **QUESTION 4**: What is the canonical correlation for each set of canonical variates? (i.e., the correlation between the first canonical variate for the x-variables with the first canonical variate for the y-variables, etc.).
 
-**Your Answer:** The canonical correlations for the five pairs of canonical variates are 0.739, 0.405, 0.311, 0.216, and 0.076.
+**Your Answer:** The canonical correlations for the five pairs of canonical variates are 0.739, 0.405, 0.311, 0.216, and 0.076
 
 ```{r}
-# Provide your R codes here (if applicable)
 m1.cancor$cancor
+round(m1.cancor$cancor, 3)
 ```
 
-**QUESTION 5**: Which of the canonical correlations are significantly different from 0? For each tests, show H0, H1, the p-value for the test from the R output, and you decision using your selected significance level (alpha). Note any concerns you have concerning the accuracy of these tests.
 
-**Your Answer:** The significance of the canonical correlations was evaluated using sequential approximate F-tests. For each test, the null hypothesis (H₀) states that the current canonical correlation and all subsequent canonical correlations are equal to zero, meaning there is no linear relationship between the two sets of variables for those canonical functions. The alternative hypothesis (H₁) states that at least one of the canonical correlations from that point onward is different from zero. A significance level of alpha = 0.05 was used to determine statistical significance.
+**QUESTION 5**: Which of the canonical correlations are significantly different from 0? For each tests, show H0, H1, the p-value for the test from the R output, and you decision using your selected significance level (alpha). Note any concerns you have concerning the accuracy of these tests. 
 
-For the first canonical function, the p-value is 0.0000. Since this value is less than the significance level of 0.05, we reject the null hypothesis. This indicates that the first canonical correlation is statistically significant and that there is a meaningful relationship between the bird variables and vegetation variables captured by the first pair of canonical variates.
+Canonical correlations: 
+CanVar1: 0.739
+CanVar2: 0.405
+CanVar3: 0.311
+CanVar4: 0.216
+CanVar5: 0.076
 
-For the second canonical function, the p-value is 0.1335, which is greater than 0.05. Therefore, we fail to reject the null hypothesis. This suggests that the second canonical correlation, along with all remaining ones, is not significantly different from zero and does not explain a meaningful additional relationship between the two variable sets.
+A significance level of α = 0.05 was used.
 
-For the third canonical function, the p-value is 0.6299, which is also greater than 0.05. Similarly, we fail to reject the null hypothesis, indicating that this canonical correlation is not statistically significant.
+*Test 1 (All canonical correlations)*
+H0: ρ1 = ρ2 = ρ3 = ρ4 = ρ5 = 0
+H1: At least one ρ ≠ 0
+p-value = 0.000
 
-For the fourth canonical function, the p-value is 0.9231, which is much greater than 0.05. Again, we fail to reject the null hypothesis, confirming that this canonical correlation is not significant.
+Decision:
+Reject H0. At least one canonical correlation is significantly different from 0.
 
-For the fifth canonical function, the p-value is 0.9924, which is also far greater than 0.05. Therefore, we fail to reject the null hypothesis for this function as well.
+*Test 2 (CanVar2 - CanVar5)*
+H0: ρ2 = ρ3 = ρ4 = ρ5 = 0
+H1: At least one ≠ 0
+p-value = 0.134
 
-Overall, only the first canonical correlation is statistically significant, while the remaining canonical correlations are not significantly different from zero. This means that only the first canonical function should be interpreted, as it captures the only meaningful linear relationship between the bird and vegetation variable sets.
+Decision: Fail to reject H0. The second test was not significant (p = 0.1335), indicating that no additional canonical correlations beyond the first are significantly different from zero.
 
-One important concern regarding the accuracy of these tests is that they rely on several assumptions, including multivariate normality, linear relationships among variables, and adequate sample size. If these assumptions are not met, the p-values may not be reliable. In ecological datasets, such as this one, variables often exhibit non-linear relationships, measurement error, and natural variability, which can affect the validity of the tests. Additionally, small sample sizes or multicollinearity among variables may reduce the power of the tests or lead to misleading conclusions about statistical significance.
+*Test 3 (CanVar3 - CanVar5)*
+H0: ρ3 = ρ4 = ρ5 = 0
+H1: At least one ≠ 0
+p-value = 0.630
+
+Decision: Fail to reject H0.
+
+*Test 4 (CanVar4 - CanVar5)*
+H0: ρ4 = ρ5 = 0
+H1: At least one ≠ 0
+p-value = 0.923	
+
+Decision: Fail to reject H0.
+
+*Test 5 (CanVar5)*
+H0: ρ5 = 0
+H1: ρ5 ≠ 0
+p-value = 0.992	
+
+Decision: Fail to reject H0.
+
+Only the first canonical variate (CanVar1) shows a statistically meaningful relationship. The remaining variates are not significantly different from zero, which suggests they don’t capture any additional structure between the two variable sets.
+
+Potential issues: 
+There are a few potential concerns to keep in mind when interpreting these results. First, there was suggested multicollinearity among the vegetation variables as established in Question 1, particularly between May cover and height (r ≈ 0.92) and June cover and height (r ≈ 0.88). This level of correlation suggests that these variables are capturing very similar information, which may inflate the apparent strength of the relationships. Third, CCA is explicitly designed to maximize the correlation between linear combinations of the two variable sets. Because of this, the method can produce relatively strong canonical correlations even when the underlying relationships are weak or driven by a small subset of variables. In this case, the first canonical correlation (0.739) may partly reflect this optimization process rather than a broad, evenly distributed relationship across all variables. While this is a borderline issue with this dataset, the sample size of 145 observations and 15 predictors pushes the limits of what canonical correlation analysis handles well, especially given the redundancy among variables.
+
+
 
 ```{r}
-# Provide your R codes here (if applicable)
-# test results table from your CCA output
+# Obtain the p-values
 round(m1.cancor$tests, 4)
+data.frame(
+  Test = rownames(m1.cancor$tests),
+  p_value = round(m1.cancor$tests[, ncol(m1.cancor$tests)], 4)
+)
+
 ```
+
 
 **QUESTION 6**: How many canonical variates should be retained in interpreting the relationships? Justify your choice using the all evidence provided.
 
-**Your Answer:**
+Based on all of the evidence, only the first canonical variate should be retained for interpretation. It is the only varaite that is statistically significant, while all subsequent variates are not, indicating that additional canonical relationships are not meaningfully different from zero. This is also reflected in the magnitude of the canonical correlations, which drop notably from 0.739 for the first variate to 0.405 and even lower for the remaining variates. The scatterplots support this pattern, showing a clear linear relationship for the first pair of canonical variates, while the others appear more diffuse and less structured. In addition, the redundancy results indicate that only the first variate explains a meaningful proportion of shared variance between the two variable sets, with later variates contributing very little. Taken together, these results indicate that only the first canonical variate represents a meaningful and interpretable relationship.
+
 
 ```{r}
-# Provide your R codes here (if applicable)
+# Quick summary table
+data.frame(
+  CanVar = 1:5,
+  Correlation = round(m1.cancor$cancor, 3),
+  P_value = round(m1.cancor$tests[, ncol(m1.cancor$tests)], 4),
+  Redundancy_Y_by_X = round(m1.cancor$redundancy$Redundancy_Y_by_X, 4)
+)
+
+# ---------------------------------------------
+# Scatterplots of paired canonical variates
+# ---------------------------------------------
+par(mfrow = c(2, 2), mai = c(0.8, 0.8, 0.8, 0.4), cex = 0.8)
+
+plot(m1.cancor$scores$X[,1], m1.cancor$scores$Y[,1],
+     xlab = "Xstar1", ylab = "Ystar1",
+     main = paste0("Xstar1 vs Ystar1 (cor = ",
+                   round(m1.cancor$cancor[1], 3), ")"),
+     pch = 19)
+abline(lm(m1.cancor$scores$Y[,1] ~ m1.cancor$scores$X[,1]), lty = 2)
+
+plot(m1.cancor$scores$X[,2], m1.cancor$scores$Y[,2],
+     xlab = "Xstar2", ylab = "Ystar2",
+     main = paste0("Xstar2 vs Ystar2 (cor = ",
+                   round(m1.cancor$cancor[2], 3), ")"),
+     pch = 19)
+abline(lm(m1.cancor$scores$Y[,2] ~ m1.cancor$scores$X[,2]), lty = 2)
+
+plot(m1.cancor$scores$X[,3], m1.cancor$scores$Y[,3],
+     xlab = "Xstar3", ylab = "Ystar3",
+     main = paste0("Xstar3 vs Ystar3 (cor = ",
+                   round(m1.cancor$cancor[3], 3), ")"),
+     pch = 19)
+abline(lm(m1.cancor$scores$Y[,3] ~ m1.cancor$scores$X[,3]), lty = 2)
+
+par(mfrow = c(1, 1), mai = c(1, 1, 1, 1), cex = 1)
+
 ```
 
-**QUESTION 7**: Which variables are related to their own canonical variates using simple correlations (i.e., structure for Y with Y\* and then for X with X\*)? Remember to state what correlation “cutoff” value you are using. Interpret + versus – correlations and provide a summary statement on the relationships within each variable set.
+**QUESTION 7**: Which variables are related to their own canonical variates using simple correlations (i.e., structure for Y with Y* and then for X with X*)? Remember to state what correlation “cutoff” value you are using.  Interpret + versus – correlations and provide a summary statement on the relationships within each variable set.
 
-**Your Answer:**
+We compared two cutoffs of |r| ≥ 0.40 and |r| ≥ 0.50 to identify meaningful relationships in this particular dataset, given the moderate sample size and the expectation that ecological relationships may be present but not extremely strong. However, both thresholds produced the same set of variables for the first canonical variate, so |r| ≥ 0.40 was used as the cutoff for interpretation.
 
+For the vegetation variables (Y with Y*), mayvgcov (r = −0.749), mayvght (r = −0.654), junvgcov (r = −0.792), and junvght (r = −0.654) all show strong negative correlations with the first canonical variate. This indicates that vegetation cover and height in both May and June contribute strongly and consistently to this axis. The negative direction means that higher vegetation cover and height are associated with lower canonical variate scores, while lower vegetation corresponds to higher scores. 
+
+For the bird variables (X with X*), vesp (r = −0.855) and weme (r = −0.589) show strong negative correlations, while hola (r = 0.604) shows a strong positive correlation with the first canonical variate. This suggests that vesp and weme are associated with the same end of the gradient as higher vegetation, whereas hola is associated with the opposite end (corresponding to lower vegetation).
+
+The first canonical variate appears to reflect a gradient in vegetation structure, with strong negative loadings from mayvgcov (r = −0.749), mayvght (r = −0.654), junvgcov (r = −0.792), and junvght (r = −0.654). Along this gradient, bird composition shifts accordingly: vesp (r = −0.855) and weme (r = −0.589) are associated with the high-vegetation end of the gradient, while hola (r = 0.604) is associated with the opposite end, corresponding to lower vegetation cover.
+
+
+VegY loadings:
 ```{r}
-# Provide your R codes here (if applicable)
+library(dplyr)
+library(tidyr)
+
+# Convert to long format
+Y_loadings <- m1.cancor$structure$Y.yscores %>%
+  as.data.frame() %>%
+  mutate(var = rownames(.)) %>%
+  pivot_longer(-var, names_to = "CanVar", values_to = "r")
+
+# Cutoff 0.4
+Y_cut_04 <- Y_loadings %>%
+  filter(abs(r) >= 0.4)
+
+# Cutoff 0.5
+Y_cut_05 <- Y_loadings %>%
+  filter(abs(r) >= 0.5)
+
+Y_cut_04
+Y_cut_05
+
+
 ```
 
-**QUESTION 8**: Which variables are related to the opposite canonical variates using cross correlations? (i.e., structure for Y with X\* and for X with Y\*). Remember to state what correlation “cutoff” value you are using. Interpret + versus – correlations and provide a final statement on the relationships between the variable sets for each.
-
-**Your Answer:**
-
+BirdX loadings
 ```{r}
-# Provide your R codes here (if applicable)
+# Convert to long format
+X_loadings <- m1.cancor$structure$X.xscores %>%
+  as.data.frame() %>%
+  mutate(var = rownames(.)) %>%
+  pivot_longer(-var, names_to = "CanVar", values_to = "r")
+
+# Cutoff 0.4
+X_cut_04 <- X_loadings %>%
+  filter(abs(r) >= 0.4)
+
+# Cutoff 0.5
+X_cut_05 <- X_loadings %>%
+  filter(abs(r) >= 0.5)
+
+X_cut_04
+X_cut_05
 ```
 
-**QUESTION 9**: What is the amount of variance explained (redundancy coefficients) by the canonical variates for X by Y\* and then for Y by X\*? Show these for each canonical variate and for all canonical variates combined, for each group of variables.
 
-**Your Answer:**
+**QUESTION 8**: Which variables are related to the opposite canonical variates using cross correlations? (i.e., structure for Y with X* and for X with Y*). Remember to state what correlation “cutoff” value you are using. Interpret + versus – correlations and provide a final statement on the relationships between the variable sets for each. 
+
+In keeping consistency with the previous question, a cutoff of |r| ≥ 0.40 was used to identify meaningful cross-correlations, and results were compared with a stricter cutoff of |r| ≥ 0.50 to confirm robustness. Because only the first canonical variate was retained, all interpretations are based on CanVar1.
+
+For the vegetation variables (Y with X*), all four measures showed moderate negative relationships with the bird canonical variate: May vegetation cover (r = −0.553), May vegetation height (r = −0.483), June vegetation cover (r = −0.585), and June vegetation height (r = −0.483). When applying the stricter cutoff of |r| ≥ 0.50, both May and June vegetation cover remained (r = −0.553 and −0.585), indicating that vegetation cover is the strongest and most consistent driver of this relationship. Overall, this suggests that higher vegetation cover and structure are associated with lower values of the bird canonical variate.
+
+For the bird variables (X with Y*), three species met the |r| ≥ 0.40 threshold: hola (r = 0.446), vesp (r = −0.632), and weme (r = −0.435). Under the stricter cutoff, only vesp remained (r = −0.632), indicating it has the strongest relationship with vegetation. The negative correlations for vesp and weme suggest these species are associated with more vegetated conditions, while the positive correlation for hola suggests it is associated with more open or less vegetated sites.
+
+Taken together, these cross-correlations show a clear relationship between vegetation structure and bird community composition. Sites with higher vegetation cover and height tend to be associated with certain species, particularly vesp, while other species such as hola are more associated with less vegetated environments. The consistency of results across both cutoff thresholds strengthens confidence in this interpretation.
 
 ```{r}
-# Provide your R codes here (if applicable)
+library(dplyr)
+
+# Y with X* cross correlations, CanVar1 only
+Y_cross_can1 <- data.frame(
+  var = rownames(m1.cancor$structure$Y.xscores),
+  r = m1.cancor$structure$Y.xscores[, "CanVar1"]
+)
+
+# X with Y* cross correlations, CanVar1 only
+X_cross_can1 <- data.frame(
+  var = rownames(m1.cancor$structure$X.yscores),
+  r = m1.cancor$structure$X.yscores[, "CanVar1"]
+)
+
+# Using cutoff of 0.4
+Y_cross_04 <- Y_cross_can1 %>%
+  filter(abs(r) >= 0.4)
+
+X_cross_04 <- X_cross_can1 %>%
+  filter(abs(r) >= 0.4)
+
+# Using cutoff of 0.5
+Y_cross_05 <- Y_cross_can1 %>%
+  filter(abs(r) >= 0.5)
+
+X_cross_05 <- X_cross_can1 %>%
+  filter(abs(r) >= 0.5)
+
+Y_cross_04
+X_cross_04
+
+Y_cross_05
+X_cross_05
+
+
+```
+
+
+**QUESTION 9**: What is the amount of variance explained (redundancy coefficients) by the canonical variates for X by Y* and then for Y by X*? Show these for each canonical variate and for all canonical variates combined, for each group of variables.
+
+For X explained by Y, the first canonical variate accounts for 9.80% of the variance, and then the contribution drops off quickly. CanVar2 explains 1.40%, CanVar3 1.03%, CanVar4 0.39%, and CanVar5 just 0.06%. For Y explained by X, the pattern is similar but the overall values are higher. The first canonical variate explains 22.50% of the variance, followed by 6.49% for CanVar2, and then much smaller contributions from the remaining variates at 0.90%, 0.13%, and 0.04%.
+
+When summed across all canonical variates, the total redundancy is 12.67% for X by Y* and 30.07% for Y by X*. This suggests that the canonical relationship does a better job explaining variation in the vegetation variables than in the bird variables.
+
+What stands out most is how quickly the explanatory power declines after the first variate. CanVar1 clearly accounts for the majority of the shared variance, while the remaining variates add very little. This again supports the conclusion that only the first canonical variate represents a meaningful and interpretable relationship between the two sets of variables.
+
+
+```{r}
+# Redundancy table
+redun_table
+
+# Total redundancy across all canonical variates
+colSums(m1.cancor$redundancy[, c("Redundancy_X_by_Y", "Redundancy_Y_by_X")])
 ```
 
 \
 
-## Part 3: Summary
+## Part 3: Summary 
 
-**QUESTION 10**: Based on this analysis, what is the nature of the relationship between the two sets of variables? Summarize the important results in a brief report (maximum 1 page).
+**QUESTION 10**: Based on this analysis, what is the nature of the relationship between the two sets of variables?  Summarize the important results in a brief report (maximum 1 page).
 
-**Your Answer:**
+The analysis points to a single clear relationship between bird community composition (X) and vegetation structure (Y). CCA works by finding linear combinations of variables in each set that maximize the correlation between the two groups, and in this case, that process revealed one dominant axis (vegetation structure, including density and height). The first canonical correlation was relatively strong (r = 0.739) and statistically significant (p < 0.001), while all remaining correlations were not significant, indicating that only one meaningful relationship exists between the two sets. Beyond this primary gradient, there is little evidence of additional independent relationships linking the two variable sets, suggesting that vegetation is the main factor infleuncing bird abundance patterns across sites.
+
+All four vegetation variables contribute strongly and consistently, with May and June vegetation cover (r = −0.75 and −0.79) and vegetation height (r = −0.65 for both months) showing the strongest relationships, indicating some gradient in vegetation density or structure. Together, these appear to define a gradient from dense, tall vegetation to more open conditions.
+
+Bird species vary along this same gradient, with vesp (r = −0.86) and weme (r = −0.59) associated with the high-vegetation end, suggesting a preference for denser and more structurally complex habitats, while hola (r = 0.60) is associated with more open conditions. This probably reveals ecological patterns like niche partitioning or species-specific resource needs. We're not sure what these species are, but vesp might refer to the Vesper sparrow, which tend to prefer grassland habitats. If weme refers to the Western Meadowlark, the same pattern would hold, as this species is also regarded as a grasslands species. Most other species show relatively weak relationships, indicating that their abundance was less strongly defined by vegetation structure in this dataset. 
+
+Because CCA evaluates all variables simultaneously, this pattern reflects a shared multivariate relationship rather than isolated pairwise associations. The cross-correlations support this, showing that vegetation variables align consistently with the bird canonical variate and that key bird species show the same alignment with the vegetation canonical variate. This reinforces the interpretation of a single underlying ecological gradient (vegetation structure) linking the two sets.
+
+The importance of this first axis is also reflected in the redundancy results. It explained 22.50% of the variance in vegetation and 9.80% of the variance in bird composition, while all remaining canonical variates contribute very little. This rapid decline is expected, as successive canonical variates are constructed to capture progressively weaker relationships.
+
+
 
 ```{r}
-# Provide your R codes here (if applicable)
+# Canonical correlations
+round(m1.cancor$cancor, 3)
+
+# Significance tests (Wilks lambda results)
+pvals <- data.frame(
+  Test = c("All", "2–5", "3–5", "4–5", "5"),
+  p_value = c(0.0000, 0.1335, 0.6299, 0.9231, 0.9924)
+)
+
+pvals
+
+# Redundancy summary
+round(m1.cancor$redundancy[, c("Redundancy_X_by_Y", "Redundancy_Y_by_X")], 4)
+
+colSums(m1.cancor$redundancy[, c("Redundancy_X_by_Y", "Redundancy_Y_by_X")])
 ```
+
+```{r}
+# First canonical variate loadings (clean view)
+round(m1.cancor$structure$X.xscores[, "CanVar1"], 2)
+round(m1.cancor$structure$Y.yscores[, "CanVar1"], 2)
+```
+
+
+
+
+
+
