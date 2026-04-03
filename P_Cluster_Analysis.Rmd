@@ -229,6 +229,68 @@ cor_matrix <- cor(env_num, use = "complete.obs")
 # STEP 3: View correlation matrix
 print(cor_matrix)
 
+# STEP 1: Convert correlation matrix into a long table format
+cor_df <- as.data.frame(as.table(cor_matrix))
+
+# STEP 2: Rename columns for clarity
+colnames(cor_df) <- c("Var1", "Var2", "Correlation")
+
+# STEP 3: Remove self-correlations (Var1 = Var2)
+cor_df <- cor_df[cor_df$Var1 != cor_df$Var2, ]
+
+# STEP 4: Remove duplicate pairs (A-B and B-A)
+cor_df <- cor_df[!duplicated(t(apply(cor_df[, 1:2], 1, sort))), ]
+
+# STEP 5: Keep only high correlations (absolute value > 0.8)
+high_corr_table <- cor_df[abs(cor_df$Correlation) > 0.8, ]
+
+# STEP 6: Sort by strongest correlations
+high_corr_table <- high_corr_table[order(-abs(high_corr_table$Correlation)), ]
+
+
+high_corr_table$Strength <- ifelse(
+  abs(high_corr_table$Correlation) > 0.9, "Very High",
+  ifelse(abs(high_corr_table$Correlation) > 0.8, "High", "Moderate")
+)
+
+# View results
+high_corr_table
+
+# CSV
+write.csv(high_corr_table, "redundancy_results.csv", row.names = FALSE)
+
+
+# Create a summary table manually
+redundancy_table <- data.frame(
+  Group = c("Canopy", "Impervious", "Air Temperature", "Water Temperature", "Water-Air", "Vegetation"),
+  Variables = c(
+    "canopy_50 vs canopy_100",
+    "imp_50 vs imp_100",
+    "june_air_mean, july_air_mean, aug_air_mean",
+    "june_water_mean, july_water_mean, aug_water_mean",
+    "june_water_air, july_water_air, aug_water_air",
+    "veg_abs_change, veg_percent_change"
+  ),
+  Correlation = c(
+    "0.95",
+    "0.90",
+    "> 0.85",
+    "> 0.90",
+    "> 0.85",
+    "~ 0.70"
+  ),
+  Decision = c(
+    "Keep one (e.g., canopy_50)",
+    "Keep one (e.g., imp_50)",
+    "Keep one month (e.g., July)",
+    "Keep one variable",
+    "Keep one variable",
+    "Keep 1–2 variables"
+  )
+)
+
+redundancy_table
+
 ```
  
  
@@ -248,8 +310,157 @@ Red (close to -1) → strong negative correlation
 White/light → weak or no correlation
 
 
+```{r}
+#Step 5: Selecting different predicore variable
+env_final <- data[, c(
+  "log_area",          # size (better than area)
+  "canopy_50",         # shade
+  "imp_50",            # urban
+  "july_air_mean",     # temperature
+  "july_water_mean",   # water condition
+  "july_water_air",    # evaporation signal
+  "veg_mean_cover"     # vegetation
+)]
+
+# Remove rows with missing values
+# Clustering cannot handle NA values
+
+env_final <- na.omit(env_final)
+
+
+# Standardize variables so they are on the same scale
+# This prevents variables with large values from dominating the analysis
+env_scaled_final <- scale(env_final)
+
+```
+
+
+```{r}
+# Step 6: Calculate Euclidean distance between ponds
+# This measures how similar or different ponds are across all variables
+
+dist_matrix <- dist(env_scaled_final)
+```
+
+
+```{r}
+# step 7:Perform hierarchical clustering using Ward’s method
+# Ward’s method groups ponds to minimize within-cluster variance
+
+hc <- hclust(dist_matrix, method = "ward.D2")
+```
+
+
+```{r}
+# Visualize how ponds are grouped based on environmental similarity
+
+plot(hc,
+     labels = data$pond_id,   # Label each point with pond ID
+     main = "Dendrogram (Reduced Variables)",
+     xlab = "",
+     sub = "")
+```
+
+
+```{r}
+# STEP 7: DETERMINE NUMBER OF CLUSTERS
+
+fviz_nbclust(
+  env_scaled_final,
+  kmeans,
+  method = "wss",
+  k.max = 10   # run Within-Cluster Sum of Squares to determine the number of clusters.
+)
+
+```
+
+
+```{r}
+# Choose number of clusters 
+
+clusters <- cutree(hc, k = 5)
+
+# Add cluster membership back to original dataset
+# This allows comparison with water loss and other variables
+
+data$Cluster <- as.factor(clusters)
+
+# View cluster assignment for each pond
+data[, c("pond_id", "Cluster")]
+```
+
+
+```{r}
+# Assign pond names as row names for labeling
+rownames(env_scaled_final) <- data$pond_id
+
+# Plot clusters in 2D space
+# Points are labeled with pond IDs
+
+clusters_named <- factor(clusters,
+                         levels = c(1, 2, 3, 4, 5),
+                         labels = c(
+                           "1 - Warm, highly exposed ponds",
+                           "2 - Variable water condition ponds",
+                           "3 - Warm, exposed ponds",
+                           "4 - Intermediate condition ponds",
+                           "5 - Cooler, shaded ponds"
+                         ))
+
+fviz_cluster(
+  list(data = env_scaled_final, cluster = clusters_named),
+  geom = "text",
+  repel = TRUE,
+  labelsize = 8,
+  ggtheme = theme_minimal(),
+  show.clust.cent = FALSE
+)
+```
 
 
 
+```{r}
+# Assign pond names as row names
+rownames(env_scaled_clean) <- data$pond_id
+
+clusters_named <- factor(clusters,
+                         levels = c(1, 2, 3),
+                         labels = c(
+                           "1 - Cooler / Shaded ponds",
+                           "2 - Warmer / Exposed ponds",
+                           "3 - Intermediate ponds"
+                         ))
+
+fviz_cluster(
+  list(data = env_scaled_clean, cluster = clusters_named),
+  geom = "text",
+  repel = TRUE,
+  labelsize = 8,
+  ggtheme = theme_minimal(),
+  show.clust.cent = FALSE
+)
+```
 
 
+```{r}
+# Calculate mean water loss (z_loss_rate) for each cluster
+# This helps interpret how drying differs across clusters
+
+aggregate(data$z_loss_rate,
+          by = list(Cluster = data$Cluster),
+          FUN = mean)
+
+# Visualize distribution of water loss across clusters
+# This shows variation and overlap in drying behavior
+
+boxplot(z_loss_rate ~ Cluster,
+        data = data,
+        col = "lightblue",
+        main = "Z Loss Rate by Cluster",
+        xlab = "Cluster",
+        ylab = "Z Loss Rate")
+```
+*interpretation* 
+0 = average drying
+positive (+) = faster drying
+negative (−) = slower drying
