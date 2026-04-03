@@ -1,0 +1,153 @@
+
+```{r}
+metrics_wide_2 <- read.csv("metrics_wide_updated.csv")
+colnames(metrics_wide_2)
+```
+There are also multiples of the same variable (imp_50 and imp_100, for example). Many of the temperature variables are also redundant, since they measure multiple timescales. Same with the hydrology variables. 
+
+#Pre-screening for PCA: Selecting optimal variables
+Variable Selection and Redundancy Filtering
+
+To reduce dimensionality while avoiding redundancy, candidate predictor variables were first screened using pairwise correlation analysis. Strong collinearity was observed among several groups of variables, particularly within shade metrics (e.g., mean shade fraction, duration, and high-shade fraction across months; r > 0.9), as well as among water temperature variables and their associated summaries. In these cases, only a single representative variable was retained to prevent overrepresentation of the same underlying process. For example, July mean shade fraction (july_msf) was selected as the most representative shade metric based on both its strong correlation with drying responses and its redundancy with other shade indices. Similarly, air-based thermal metrics were prioritized over water temperature variables, as they better reflect external thermal forcing rather than downstream responses already influenced by shading and pond conditions.
+
+Selection Across Distinct Ecological Processes
+
+Final variable selection aimed to capture a range of complementary ecological mechanisms hypothesized to influence pond drying dynamics, while prioritizing peak summer (July) conditions. The selected variables included canopy cover within a 50 m buffer (canopy_50), representing structural shading potential; average hours from daily minimum to maximum July air temperature (av_hrs_air_july_mintomax), capturing thermal dynamics and energy accumulation; July mean shade fraction (july_msf), representing realized shading conditions; percent vegetation change over the season (veg_percent_change), reflecting within-pond vegetation growth and associated evapotranspiration feedbacks; and maximum pond depth (depth_1), representing basin storage capacity. Together, these variables describe interacting gradients of structural, thermal, biological, and physical controls on water loss. Variables with weak or inconsistent relationships to drying metrics (e.g., impervious surface cover) were excluded from the final PCA to maintain interpretability and reduce noise. This approach ensured that each variable contributed unique ecological information while minimizing statistical redundancy within the PCA.
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+cor_results <- metrics_wide_2 %>%
+  select(where(is.numeric)) %>%                 # only numeric columns
+  summarise(across(
+    everything(),
+    ~ cor(.x, z_loss_rate, use = "complete.obs")
+  )) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "variable",
+    values_to = "correlation"
+  ) %>%
+  arrange(desc(abs(correlation)))
+
+cor_results
+```
+Removes self-correlations
+```{r}
+cor_results <- cor_results %>%
+  filter(variable != "z_loss_rate") %>%
+  filter(!variable %in% c(
+    "daily_loss_est",
+    "total_depth_loss_cm",
+    "total_volume_lost_m3",
+    "mean_daily_volume_lost_m3",
+    "z_total_loss"
+  ))
+```
+
+For n = 15, this is reasonable. 
+```{r}
+cor_results %>%
+  filter(abs(correlation) > 0.3)
+```
+
+The best candidates are: 
+
+*1 canopy_50 -0.6218651622*
+2 canopy_100 -0.5556123752
+*3 av_hrs_air_july_mintomax -0.4721670994*
+4 av_hrs_water_june_mintomax 0.4397794399
+5 june_msf -0.4339376338
+6 june_water_max 0.4281727113
+*7 july_msf -0.4269632265*
+8 aug_msf -0.4137955009
+9 june_msd -0.4072703122
+10 july_msd -0.3822968795
+11 aug_hsf -0.3613269188
+12 june_hsf -0.3573546417
+13 aug_msd -0.3569303833
+*14 july_water_max 0.3467321885*
+15 june_water_mean 0.3437414622
+16 july_hsf -0.3370166634
+17 aug_air_mean 0.3130545396
+18 aug_water_max 0.3059846662
+19 aug_water_range 0.2686881424
+20 june_water_range 0.2552782046
+21 july_air_mean 0.2488384938
+22 july_water_range 0.2473730480
+23 aug_sei 0.2441014205
+*24 depth_1 -0.2302927097*
+*25 mean_season_ph -0.2263270432*
+26 aug_air_range 0.2209666138
+27 aug_air_max 0.2150696783
+28 july_water_mean 0.2132463814
+29 aug_water_mean 0.2094545895
+30 june_air_mean 0.2042526465
+31 june_water_air 0.2024702064
+32 av_hrs_water_aug_mintomax -0.1941395156
+33 july_air_max 0.1672761195
+34 aug_air_min -0.1558396730
+*35 storage_proxy_m3 -0.1414021171*
+36 july_water_air 0.1386454437
+37 aug_scp 0.1374306531
+38 july_sei 0.1290676576
+39 july_air_range 0.1242860037
+*40 veg_percent_change 0.1180194797*
+41 june_air_min 0.1141784789
+42 june_water_min 0.1141489822
+
+“Impervious surface cover at both 50 m and 100 m buffers did not contribute to dominant PCA gradients. Inclusion of these variables reduced variance explained by the leading components and introduced mixed loadings across secondary axes, without improving interpretability. This suggests that local structural and microclimatic factors, rather than surrounding urban intensity, primarily govern variation in pond drying dynamics at this spatial scale.”
+
+*Final set:* 
+canopy_50
+av_hrs_air_july_mintomax
+july_msf
+veg_percent_change
+depth_1
+
+*Justification of Final Predictor Variables*
+
+To construct a parsimonious and interpretable PCA given the sample size of 15, variables were selected to represent distinct ecological mechanisms influencing pond drying, while minimizing redundancy among predictors. Each retained variable captures a unique component of the system, supported by correlation screening and ecological relevance.
+
+canopy_50 was included as a measure of structural shading potential surrounding each pond. Canopy cover strongly influences incoming solar radiation, mediates microclimate, and indirectly affects both water temperature and evaporation rates. Although correlated with shade metrics, canopy represents the physical capacity for shading rather than realized conditions, justifying its inclusion as a structural variable.
+
+av_hrs_air_july_mintomax captures daily thermal dynamics during peak summer conditions, specifically the duration of warming from minimum to maximum air temperature. Unlike absolute temperature metrics, this variable reflects the rate and persistence of energy accumulation within the system. It was prioritized over water temperature variables to avoid incorporating downstream responses that are already influenced by shading and pond-specific conditions.
+
+july_msf (July mean shade fraction) was selected as the representative shade metric following redundancy analysis, which revealed near-perfect collinearity among alternative shade indices. This variable directly quantifies the proportion of time pond surfaces remain shaded during peak summer, representing realized shading conditions that influence thermal buffering and evaporative demand.
+
+veg_percent_change was included to represent seasonal vegetation dynamics within each pond. Vegetation plays a dual role by contributing to shading and driving evapotranspiration, thereby influencing water loss through both physical and biological pathways. The use of percent change, rather than static cover, captures temporal dynamics in vegetation growth that align with cumulative drying patterns.
+
+depth_1 was retained as a measure of basin storage capacity, representing a key physical constraint on water loss. Deeper ponds can buffer against short-term evaporative losses and exhibit slower rates of drawdown, making depth an essential variable for distinguishing between rapid and gradual drying systems.
+
+*Justification for Prioritizing July-Based Metrics*
+
+Variables derived from July conditions were prioritized to capture peak seasonal dynamics in pond drying processes. July represents the period of maximum solar radiation, longest photoperiod, and highest atmospheric demand, resulting in the strongest coupling between thermal conditions, evaporative loss, and biological activity. During this time, differences among ponds are most pronounced, as structural shading, vegetation growth, and basin characteristics interact under sustained thermal stress. Earlier-season variables (e.g., June) may reflect transitional or lagged conditions, while late-season variables (e.g., August) increasingly incorporate cumulative effects of drying, including reduced water volume, vegetation expansion, and episodic rainfall inputs. By focusing on July, the analysis targets the period when environmental gradients are most directly linked to underlying mechanisms rather than downstream outcomes, allowing for clearer interpretation of drivers influencing variation in drying rates across ponds.
+
+This is particularly relevant in urban pond systems, where shallow water bodies respond rapidly to atmospheric forcing, amplifying mid-summer differences in thermal exposure and water loss.
+
+This frames July as peak forcing, not just a midpoint, and separates drivers (July) from outcomes (August).
+
+*Synthesis*
+
+Together, these variables capture complementary gradients of structural shading (canopy_50), realized shading (july_msf), thermal dynamics (av_hrs_air_july_mintomax), biological feedbacks (veg_percent_change), and physical storage capacity (depth_1). This combination ensures that the PCA reflects interacting ecological processes rather than redundant representations of a single mechanism, providing a robust framework for interpreting variation in pond drying dynamics.
+
+You’ve enforced:
+
+one variable per mechanism
+removal of redundant shade metrics
+removal of weak variables
+removal of mixed-scale predictors
+
+
+
+
+
+
+
+
+
+
+
+
+
