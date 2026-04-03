@@ -59,7 +59,7 @@ metrics_wide
 
 ```{r}
 
-#install.packages("janitor")
+install.packages("janitor")
 library(janitor)
 
 metrics_wide <- clean_names(metrics_wide)

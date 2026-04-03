@@ -1,0 +1,255 @@
+---
+title: "Cluster Analysis - Project"
+author: "Sandra"
+date: "2026-04-03"
+output: html_document
+---
+
+
+
+*WITH ALL PREDICTORS VARIABLES*
+
+```{r}
+# Load required libraries
+library(tidyverse)   # For data manipulation
+library(cluster)     # For clustering methods
+library(factoextra)  # For visualization of clustering
+
+# Load your dataset
+data <- read.csv("metrics_wide.csv")
+
+# Preview the data
+head(data)
+```
+
+```{r}
+# STEP 1: SELECT ENVIRONMENTAL VARIABLES ONLY
+# Remove:
+# - pond_id (identifier, not numeric for analysis)
+# - ALL water loss variables (these are response variables)
+
+env_data <- data %>%
+  select(
+    -pond_id,
+    -daily_loss_est,
+    -total_depth_loss_cm,
+    -total_volume_lost_m3,
+    -mean_daily_volume_lost_m3,
+    -z_loss_rate,
+    -z_total_loss,
+    -slope_per_day,
+    -slope_per_week,
+    -slope_per_day_log
+  )
+
+# Check structure of selected variables
+str(env_data)
+```
+```{r}
+# STEP 2: STANDARDIZE VARIABLES
+# This puts all variables on the same scale (mean = 0, sd = 1)
+# Important because variables have different units (°C, %, etc.)
+
+env_scaled <- scale(env_data)
+
+```
+
+
+```{r}
+# STEP 3: CREATE DISTANCE MATRIX
+# Calculates how different each pond is from others (measure that similarity)
+# Euclidean distance = most common for continuous data
+
+dist_matrix <- dist(env_scaled, method = "euclidean")
+
+```
+
+
+```{r}
+# STEP 4: RUN HIERARCHICAL CLUSTERING
+# Ward’s method groups ponds to minimize within-cluster variation
+
+hc <- hclust(dist_matrix, method = "ward.D2")
+
+```
+
+
+```{r}
+# STEP 5: PLOT DENDROGRAM
+# This shows how ponds are grouped based on similarity
+
+plot(hc,
+     labels = data$pond_id,   # Use pond names as labels
+     main = "Dendrogram of Urban Ponds",
+     xlab = "",
+     sub = "")
+
+```
+*Interpretation* FOR VISUAL GROUPING
+
+The dendrogram shows how the ponds group together based on their overall environmental similarity. Each pond is represented at the bottom of the plot, and the lines connect ponds that are most similar to each other. The vertical axis (height) represents how different the ponds are: ponds that are joined at lower heights are more similar, while those that are connected at higher heights are more different. For example, ponds such as BGS and MCC, and BOO and CHS, are linked at very low heights, indicating that they share very similar environmental conditions. As we move up the dendrogram, these smaller groups are gradually combined into larger clusters, reflecting increasing differences among ponds.
+
+When the dendrogram is cut at an appropriate height, three main clusters of ponds can be identified. The first cluster (VAN, TRT, BGS, and MCC) groups together ponds that are most similar to each other and likely share similar environmental characteristics. The second cluster (AVL, BGL, RUP, BOO, and CHS) forms a separate group, indicating a different set of environmental conditions. The third cluster (JCO, GVI, SCT, QED, CSN, and MSP) is distinct from the other two and includes ponds that are more similar to each other than to ponds in the other clusters. The fact that these three clusters only merge at relatively high heights suggests that they are meaningfully different from one another.
+
+Overall, the dendrogram demonstrates that the ponds are not randomly distributed but instead form clear groups based on shared environmental characteristics. This supports the idea that environmental conditions, such as temperature, shading, and other site-specific factors, structure the ponds into distinct groups. 
+
+```{r}
+# STEP 6: DETERMINE NUMBER OF CLUSTERS
+# This helps decide how many groups (k) to use
+
+sum(is.na(env_data)) # Checking for missing values
+
+colSums(is.na(env_data)) # Where the missing values are
+
+env_data_clean <- na.omit(env_data) # Ommit the Na's
+
+env_scaled_clean <- scale(env_data_clean) # standaradize the data
+
+fviz_nbclust(
+  env_scaled_clean,
+  kmeans,
+  method = "wss",
+  k.max = 8   # run Within-Cluster Sum of Squares to determine the number of clusters.
+)
+
+```
+
+*Interpretation* STATISTICAL SUPPORT THE VISUAL GROUPING
+
+The optimal number of clusters was determined using the elbow method based on within-cluster sum of squares (WSS). Although a substantial reduction in WSS occurs between k = 1 and k = 2, the rate of decrease remains relatively steep between k = 2 and k = 3. The curve begins to level off after k = 3, indicating that three clusters provide a more appropriate balance between model simplicity and explanatory power.
+
+
+```{r}
+# STEP 7: CUT TREE INTO CLUSTERS
+# # clusters were choosen base on WSS
+
+clusters <- cutree(hc, k = 3)
+```
+
+
+
+```{r}
+# STEP 8: ADD CLUSTERS BACK TO DATA
+# This allows comparison with other variables (e.g., water loss)
+
+data$Cluster <- as.factor(clusters)
+
+# View pond + cluster assignment
+data[, c("pond_id", "Cluster")]
+```
+
+
+```{r}
+
+# STEP 9: VISUALIZE CLUSTERS
+# This gives a simplified 2D plot of clusters
+
+env_scaled_clean <- env_scaled[, apply(env_scaled, 2, function(x) all(is.finite(x)))]
+
+# Assign pond names as row names
+rownames(env_scaled_clean) <- data$pond_id
+
+clusters_named <- factor(clusters,
+                         levels = c(1, 2, 3),
+                         labels = c(
+                           "1 - Cooler / Shaded ponds",
+                           "2 - Warmer / Exposed ponds",
+                           "3 - Intermediate ponds"
+                         ))
+
+fviz_cluster(
+  list(data = env_scaled_clean, cluster = clusters_named),
+  geom = "text",
+  repel = TRUE,
+  labelsize = 8,
+  ggtheme = theme_minimal(),
+  show.clust.cent = FALSE
+)
+```
+*Interpretation*
+
+Hierarchical clustering of urban ponds, visualized in reduced dimensional space, revealed three distinct groups structured along two primary environmental gradients. The first axis (Dim1), explaining 34.1% of the variation, represents the dominant gradient separating ponds from lower values on the left to higher values on the right. Ponds in Cluster 1 (AVL, BGL, BOO, CHS, and RUP) are positioned on the negative side of Dim1, indicating that they share similar environmental conditions that likely correspond to cooler temperatures, greater canopy cover, and reduced urban exposure. In contrast, Cluster 3 (TRT, VAN, BGS, and MCC) occupies the positive end of Dim1, suggesting that these ponds are characterized by warmer conditions, increased exposure, and potentially greater influence of surrounding urban infrastructure. The clear separation between these two clusters along Dim1 highlights this axis as the primary environmental gradient structuring pond variability across the study area.
+
+The second axis (Dim2), explaining 19% of the variation, further differentiates ponds based on a secondary set of environmental conditions. Cluster 3 (CSN, MSP, QED, JCO, GVI, and SCT) is primarily distributed along the lower portion of Dim2, forming a distinct grouping that is not simply intermediate between Clusters 1 and 2 but instead reflects a separate dimension of environmental variation. This cluster likely represents ponds with mixed or transitional conditions, potentially influenced by factors such as variability in water–air interactions, seasonal dynamics, vegetation changes, or hydrological processes. Within this cluster, ponds such as MSP and CSN exhibit more extreme positions along Dim2, indicating stronger expression of these secondary conditions, while others (e.g., GVI and SCT) are positioned closer to the center, suggesting moderate characteristics.
+
+Overall, the spatial arrangement of ponds in this cluster plot demonstrates that urban pond environments are not randomly distributed but are instead structured along multiple environmental gradients, with Dim1 capturing a primary contrast between shaded and exposed systems and Dim2 representing additional variability related to more complex or transitional conditions.
+
+
+
+```{r}
+# STEP 10: COMPARE CLUSTERS WITH WATER LOSS
+# This checks if clusters differ in drying behavior
+
+aggregate(data$z_loss_rate,
+          by = list(Cluster = data$Cluster),
+          FUN = mean)
+
+# Shows distribution of water loss across clusters
+
+boxplot(z_loss_rate ~ Cluster,
+        data = data,
+        col = "lightblue",
+        main = "Z Loss Rate by Cluster",
+        xlab = "Cluster",
+        ylab = "Z Loss Rate")
+```
+
+*Interpretation*
+
+0 = average drying
+- = slower drying
++ = faster drying
+
+Comparison of standardized water loss rates (z_loss_rate) across clusters revealed systematic but moderate differences in drying behavior among pond groups. Cluster 1, interpreted as cooler and more shaded ponds, had a mean z_loss_rate of -0.67, indicating that these ponds experienced below-average water loss relative to the overall dataset. This is supported by the distribution shown in the boxplot, where most values for Cluster 1 fall below zero with a relatively narrow range, suggesting more consistent and slower drying rates. These patterns indicate that environmental conditions associated with this cluster—likely including greater canopy cover, reduced solar exposure, and lower temperatures, contribute to reduced evaporation and slower water decline. In contrast, Cluster 2, representing warmer and more exposed ponds, exhibited a mean z_loss_rate of 0.55, indicating above-average drying rates. The boxplot further shows a higher median and a wider spread of values for this cluster, suggesting not only faster drying but also greater variability in water loss. This variability likely reflects the influence of multiple interacting factors, such as temperature fluctuations, exposure, and site-specific conditions, which can amplify drying processes. Cluster 3, characterized as intermediate or mixed-condition ponds, had a mean z_loss_rate of 0.19, reflecting slightly above-average but moderate drying. The distribution of values for this cluster is more centered and less extreme than Cluster 2, indicating moderate variability and supporting its interpretation as representing transitional environmental conditions.
+
+Taken together, these results indicate that environmental clustering captures broad trends in water loss, with cooler, shaded ponds tending to dry more slowly and warmer, exposed ponds tending to dry more rapidly. However, the magnitude of the differences among clusters is relatively modest, and there is substantial overlap in the distributions of z_loss_rate across clusters, as shown in the boxplot. This overlap suggests that while environmental conditions influence drying behavior, they do not produce clearly separated drying categories. Instead, water loss varies along a continuous environmental gradient, likely driven by multiple interacting factors such as temperature, shading, vegetation dynamics, and hydrological variability. This supports the interpretation that urban pond drying is not governed by discrete pond types but by gradual changes in environmental conditions across the landscape.
+ 
+*Simple meaning * Ponds can be grouped based on things like temperature and shade, but these groups don’t clearly determine how fast they dry. Instead, drying changes gradually and is affected by multiple factors working together.
+ 
+ 
+ 
+*REDUNCDANY CHECK* - A redundancy check helps avoid using variables that are basically saying the same thing.
+
+```{r}
+#STEP 1: Select environmental dataset (numeric variables only)
+env_num <- env_data   
+
+```
+ 
+ 
+ 
+```{r}
+# STEP 2: Compute correlation matrix
+# use = "complete.obs" ignores rows with missing values
+cor_matrix <- cor(env_num, use = "complete.obs")
+```
+ 
+ 
+```{r}
+# STEP 3: View correlation matrix
+print(cor_matrix)
+
+```
+ 
+ 
+```{r}
+# STEP 4: Visualize correlations (helps identify redundancy easily)
+library(corrplot)
+
+corrplot(cor_matrix,
+         method = "color",   # colored heatmap
+         tl.cex = 0.4)       
+
+
+```
+ *Interpretation*
+Blue (close to 1) → strong positive correlation
+Red (close to -1) → strong negative correlation
+White/light → weak or no correlation
+
+
+
+
+
+
+
