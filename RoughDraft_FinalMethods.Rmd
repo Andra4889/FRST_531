@@ -3,8 +3,9 @@ title: "PondAnalysis, PCA_MDA_Cluster"
 author: "Brandon Weigand"
 date: "2026-04-03"
 output:
-  word_document: default
   html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r}
@@ -662,9 +663,7 @@ legend("topright",
 
 #Interpretation
 
-The dendrogram suggests the presence of approximately three main clusters at higher levels of the hierarchy, with several smaller sub-clusters nested within them. These clusters are formed based on similarities in the selected environmental variables, including canopy cover, temperature variability, shading, vegetation change, and depth. At lower linkage heights, tight groupings indicate ponds with very similar environmental conditions, while at higher heights, these groups merge into broader clusters representing increasing dissimilarity. However, the transitions between clusters are gradual, with no clear, distinct breaks separating them. This indicates that the clustering structure is not strongly discrete but instead reflects a continuum of environmental variation.
 
-This pattern is important for addressing the research question, as it suggests that urban ponds do not fall into clearly defined environmental categories. Rather than forming sharply separated groups, the clusters represent points along continuous environmental gradients. Consequently, the factors influencing pond drying—such as temperature, shading, and vegetation—vary progressively across sites rather than operating as strict thresholds. In relation to the hypothesis, the results provide partial support: while environmental variables do structure the clustering, they do not produce exclusive groups of ponds with similar drying outcomes. Instead, ponds with different drying behaviours are likely influenced by overlapping environmental conditions, indicating that pond drying is driven by complex, interacting factors that operate along a gradient rather than within distinct environmental regimes.
 
 
 ```{r}
@@ -726,7 +725,7 @@ aggregate(metrics_wide_2$z_loss_rate,
           by = list(Cluster = metrics_wide_2$Cluster3),
           function(x) c(mean = mean(x), sd = sd(x)))
 
-boxplot(z_loss_rate ~ factor(Cluster4,
+boxplot(z_loss_rate ~ factor(Cluster3,
                              levels = c(1, 2, 3),
                              labels = c("Cluster 1", "Cluster 2", "Cluster 3")),
         data = metrics_wide_2,
@@ -735,14 +734,14 @@ boxplot(z_loss_rate ~ factor(Cluster4,
         xlab = "Cluster",
         ylab = "z_loss_rate")
 ```
-*Interpretation
+#Interpretation
 
 
-*Final intrepation for cluster analysis
+#Final intrepation for cluster analysis
 
-*How this fit with the PCA and MDA results - 
+#How this fit with the PCA and MDA results - 
 
-* How this answers the research question and hypothesis.
+#How this answers the research question and hypothesis.
 
 
 #########

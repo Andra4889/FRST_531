@@ -6,7 +6,6 @@ output: html_document
 ---
 
 
-
 *WITH ALL PREDICTORS VARIABLES*
 
 ```{r}
@@ -16,7 +15,7 @@ library(cluster)     # For clustering methods
 library(factoextra)  # For visualization of clustering
 
 # Load your dataset
-data <- read.csv("metrics_wide.csv")
+data <- read.csv("metrics_wide_updated.csv")
 
 # Preview the data
 head(data)
@@ -39,7 +38,8 @@ env_data <- data %>%
     -z_total_loss,
     -slope_per_day,
     -slope_per_week,
-    -slope_per_day_log
+    -slope_per_day_log,
+    -drought_class
   )
 
 # Check structure of selected variables
@@ -51,7 +51,6 @@ str(env_data)
 # Important because variables have different units (°C, %, etc.)
 
 env_scaled <- scale(env_data)
-
 ```
 
 
@@ -418,30 +417,6 @@ fviz_cluster(
 ```
 
 
-
-```{r}
-# Assign pond names as row names
-rownames(env_scaled_clean) <- data$pond_id
-
-clusters_named <- factor(clusters,
-                         levels = c(1, 2, 3),
-                         labels = c(
-                           "1 - Cooler / Shaded ponds",
-                           "2 - Warmer / Exposed ponds",
-                           "3 - Intermediate ponds"
-                         ))
-
-fviz_cluster(
-  list(data = env_scaled_clean, cluster = clusters_named),
-  geom = "text",
-  repel = TRUE,
-  labelsize = 8,
-  ggtheme = theme_minimal(),
-  show.clust.cent = FALSE
-)
-```
-
-
 ```{r}
 # Calculate mean water loss (z_loss_rate) for each cluster
 # This helps interpret how drying differs across clusters
@@ -460,7 +435,36 @@ boxplot(z_loss_rate ~ Cluster,
         xlab = "Cluster",
         ylab = "Z Loss Rate")
 ```
+
 *interpretation* 
 0 = average drying
 positive (+) = faster drying
 negative (−) = slower drying
+
+
+
+*PCA Variables*
+
+```{r}
+library(factoextra)
+
+# Clean scaled data
+scaled_clean <- selected_scaled[, apply(selected_scaled, 2, function(x) all(is.finite(x)))]
+
+# Add pond names
+rownames(scaled_clean) <- metrics_wide_2$pond_id
+
+# Use your existing clusters
+clusters_named <- factor(metrics_wide_2$Cluster3)
+
+# Plot
+fviz_cluster(
+  list(data = scaled_clean, cluster = clusters_named),
+  geom = "text",
+  repel = TRUE,
+  labelsize = 5,
+  ggtheme = theme_minimal(),
+  show.clust.cent = FALSE
+)
+```
+
