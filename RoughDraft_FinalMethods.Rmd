@@ -589,8 +589,160 @@ CLUSTER ANALYSIS
 
 ########
 
+*Clustering Ponds Based on Environmental Conditions/Gradient*
+
+To further investigate the environmental gradients influencing pond drying, cluster analysis was conducted using the selected predictor variables. This analysis builds on the variable selection process, which identified a reduced set of key environmental factors representing shading, thermal conditions, and urbanization, while minimizing redundancy and ensuring interpretability.
+
+The cluster analysis was designed to directly address the leading research question: which environmental gradients differentiate ponds that dry out from those that remain stable or receive supplemental water? In addition, it responds to the secondary question of whether ponds form distinct environmental groupings or instead fall along a continuous gradient of conditions.
+
+By grouping ponds based on similarities in the selected predictor variables, the analysis provides a way to identify whether discrete environmental “types” of ponds exist (e.g., highly urban and exposed vs. shaded and cooler), or whether variation in pond conditions and drying rates is more gradual. This approach complements earlier analyses (e.g., PCA and redundancy analysis) by translating continuous environmental gradients into potential group structures that can be more easily interpreted and compared.
+
+Cluster analysis also allows for evaluation of the hypothesis that ponds with higher rates of water loss are characterized by warmer temperatures, reduced shading, and greater exposure to urban conditions. By comparing drying rates across clusters, it becomes possible to assess whether these conditions form distinct groups or whether drying behaviour varies continuously across environmental gradients.
 
 
+Data preparation
+```{r}
+# Selecting already chosen predictor variables
+selected_vars <- metrics_wide_2[, c(
+  "canopy_50",
+    "av_hrs_air_july_mintomax",
+    "july_msf",
+    "veg_percent_change",
+    "depth_1"
+)]
+
+# Standardize variables
+selected_scaled <- scale(selected_vars)
+```
+
+Running cluster analysis
+```{r}
+# create distance matrix
+dist_matrix <- dist(selected_scaled , method = "euclidean")
+```
+
+
+```{r}
+# Hierarchical clustering (Ward’s method)
+hc <- hclust(dist_matrix, method = "ward.D2")
+```
+
+
+```{r}
+library(dendextend)
+
+# Convert to dendrogram
+dend <- as.dendrogram(hc)
+
+# FIX labels to use pond names
+labels(dend) <- metrics_wide_2$pond_id[order.dendrogram(dend)]
+
+# Create named drought class vector
+drought_class <- metrics_wide_2$drought_class
+names(drought_class) <- metrics_wide_2$pond_id
+
+# Assign colors (your exact palette)
+labels_colors(dend) <- ifelse(drought_class[labels(dend)] == "dryout", "#F8766D",
+                        ifelse(drought_class[labels(dend)] == "refill", "#00BA38",
+                               "#619CFF"))
+# Plot
+plot(dend,
+     main = "Dendrogram of Urban Ponds",
+     xlab = "",
+     sub = "",
+     ylab = "Height")
+
+# Legend
+legend("topright",
+       legend = c("dryout", "refill", "stable"),
+       fill = c("#F8766D", "#00BA38", "#619CFF"),
+       border = NA,
+       bty = "n")
+```
+
+#Interpretation
+
+The dendrogram suggests the presence of approximately three main clusters at higher levels of the hierarchy, with several smaller sub-clusters nested within them. These clusters are formed based on similarities in the selected environmental variables, including canopy cover, temperature variability, shading, vegetation change, and depth. At lower linkage heights, tight groupings indicate ponds with very similar environmental conditions, while at higher heights, these groups merge into broader clusters representing increasing dissimilarity. However, the transitions between clusters are gradual, with no clear, distinct breaks separating them. This indicates that the clustering structure is not strongly discrete but instead reflects a continuum of environmental variation.
+
+This pattern is important for addressing the research question, as it suggests that urban ponds do not fall into clearly defined environmental categories. Rather than forming sharply separated groups, the clusters represent points along continuous environmental gradients. Consequently, the factors influencing pond drying—such as temperature, shading, and vegetation—vary progressively across sites rather than operating as strict thresholds. In relation to the hypothesis, the results provide partial support: while environmental variables do structure the clustering, they do not produce exclusive groups of ponds with similar drying outcomes. Instead, ponds with different drying behaviours are likely influenced by overlapping environmental conditions, indicating that pond drying is driven by complex, interacting factors that operate along a gradient rather than within distinct environmental regimes.
+
+
+```{r}
+# Compute WSS for different k
+wss <- numeric(10)
+
+for (k in 1:10) {
+  kmeans_result <- kmeans(selected_scaled, centers = k, nstart = 25)
+  wss[k] <- kmeans_result$tot.withinss
+}
+
+# Plot elbow curve
+plot(1:10, wss,
+     type = "b",
+     pch = 19,
+     xlab = "Number of clusters (k)",
+     ylab = "Total Within-Cluster Sum of Squares (WSS)",
+     main = "Elbow Method for Optimal Clusters")
+```
+
+*Interpretation
+
+
+```{r}
+# Cut dendrogram into 4 clusters
+metrics_wide_2$Cluster3 <- cutree(hc, k = 3)
+
+library(factoextra)
+
+# Clean scaled data
+scaled_clean <- selected_scaled[, apply(selected_scaled, 2, function(x) all(is.finite(x)))]
+
+# Add pond names
+rownames(scaled_clean) <- metrics_wide_2$pond_id
+
+# Use your existing clusters
+clusters_named <- factor(metrics_wide_2$Cluster3)
+
+# Plot
+fviz_cluster(
+  list(data = scaled_clean, cluster = clusters_named),
+  geom = "text",
+  repel = TRUE,
+  labelsize = 5,
+  ggtheme = theme_minimal(),
+  show.clust.cent = FALSE
+)
+```
+*Comparing Clusters with Water loss (Z_loss_rate)*
+
+```{r}
+# Mean water loss per cluster
+aggregate(metrics_wide_2$z_loss_rate,
+          by = list(Cluster = metrics_wide_2$Cluster3),
+          mean)
+
+# Mean + SD
+aggregate(metrics_wide_2$z_loss_rate,
+          by = list(Cluster = metrics_wide_2$Cluster3),
+          function(x) c(mean = mean(x), sd = sd(x)))
+
+boxplot(z_loss_rate ~ factor(Cluster4,
+                             levels = c(1, 2, 3),
+                             labels = c("Cluster 1", "Cluster 2", "Cluster 3")),
+        data = metrics_wide_2,
+        col = c("#F8766D", "#00BA38", "#619CFF"),
+        main = "Water Loss (z_loss_rate) Across 4 Clusters",
+        xlab = "Cluster",
+        ylab = "z_loss_rate")
+```
+*Interpretation
+
+
+*Final intrepation for cluster analysis
+
+*How this fit with the PCA and MDA results - 
+
+* How this answers the research question and hypothesis.
 
 
 #########
