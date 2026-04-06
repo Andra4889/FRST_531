@@ -696,45 +696,46 @@ Overall, the MDA results support the presence of structured environmental gradie
 When considered alongside regression results, this suggests that shading-related processes are the dominant drivers of drying rate, whereas capacity and system-level characteristics influence broader differences in drought outcomes without directly controlling drying intensity. Together, these results reinforce that pond drying dynamics are best understood as a continuous, multivariate process shaped by interacting environmental gradients, rather than as a set of discrete ecological states.
 
 
-
-##########
-
-# Total Synthesis Interpretation for Management 
-
-#########
-
-The results indicate that ponds do not fall into discrete functional categories, but instead occupy positions along continuous environmental gradients defined by interacting structural, hydrological, and climatic factors. This supports earlier analyses suggesting that multiple environmental configurations can contribute to drying dynamics. However, the present findings refine this interpretation by demonstrating that these gradients do not contribute equally to different aspects of pond behavior.
-
-Regression of PCA scores shows that variation in drying rate is primarily governed by a dominant gradient associated with structural and realized shading, as captured by PC1. Ponds with greater canopy cover and higher midsummer shade persistence consistently exhibit slower rates of water loss, indicating that solar exposure is the primary control on drying intensity. In contrast, other gradients related to basin capacity, vegetation dynamics, and thermal timing, while ecologically meaningful, do not independently explain variation in drying rate.
-
-At the same time, discriminant analysis suggests that these secondary gradients contribute to broader differences in drought outcomes. In particular, variation along PC2, representing basin capacity, vegetation feedbacks, and thermal structure, is more strongly associated with differences among dryout, refill, and stable ponds. This indicates that while shading governs how quickly ponds lose water, system-level characteristics influence how ponds respond to drying overall.
-
-Taken together, these results suggest that pond dynamics are structured by a shared underlying mechanism, with additional dimensions shaping system response. Ponds should therefore not be treated as entirely independent systems requiring fully individualized management strategies. Instead, they can be understood as variations along a common environmental continuum, where general controls apply broadly, but local conditions influence outcomes.
-
-From a management perspective, this supports a tiered approach. At the system level, efforts should focus on reducing solar exposure, as structural and realized shading emerge as the most consistent predictors of slower drying rates. Increasing canopy cover or enhancing shading around ponds is therefore likely to be the most effective strategy for moderating water loss under current climatic conditions.
-
-At the same time, pond-specific characteristics such as depth, vegetation dynamics, and thermal behavior influence how individual systems respond within this broader framework. Deeper ponds and those exhibiting different vegetation trajectories may be more likely to persist or transition between states, even if they experience similar exposure conditions. Vegetation, in particular, should not be assumed to be uniformly protective, as increased vegetation change appears to be associated with more exposed and dynamically drying systems rather than buffering against water loss.
-
-Accordingly, effective management should combine system-wide strategies targeting dominant controls on energy exposure with targeted, site-specific adjustments that account for basin capacity, vegetation behavior, and local thermal conditions. This approach recognizes that while the rate of drying is largely governed by a common mechanism, the ecological consequences and persistence of individual ponds depend on how these additional factors interact within each system.
-
-#########
+######## 
 
 CLUSTER ANALYSIS
 
-########
+######## 
 
 *Clustering Ponds Based on Environmental Conditions/Gradient*
 
-To further investigate the environmental gradients influencing pond drying, cluster analysis was conducted using the selected predictor variables. This analysis builds on the variable selection process, which identified a reduced set of key environmental factors representing shading, thermal conditions, and urbanization, while minimizing redundancy and ensuring interpretability.
+To further investigate the environmental gradients influencing pond
+drying, hierarchical cluster analysis using Ward’s method was conducted
+using the selected predictor variables. This analysis builds on the
+variable selection process, which identified a reduced set of key
+environmental factors representing shading, thermal conditions, and
+urbanization, while minimizing redundancy and ensuring interpretability.
 
-The cluster analysis was designed to directly address the leading research question: which environmental gradients differentiate ponds that dry out from those that remain stable or receive supplemental water? In addition, it responds to the secondary question of whether ponds form distinct environmental groupings or instead fall along a continuous gradient of conditions.
+The cluster analysis was designed to directly address the leading
+research question: which environmental gradients differentiate ponds
+that dry out from those that remain stable or receive supplemental
+water? In addition, it responds to the secondary question of whether
+ponds form distinct environmental groupings or instead fall along a
+continuous gradient of conditions.
 
-By grouping ponds based on similarities in the selected predictor variables, the analysis provides a way to identify whether discrete environmental “types” of ponds exist (e.g., highly urban and exposed vs. shaded and cooler), or whether variation in pond conditions and drying rates is more gradual. This approach complements earlier analyses (e.g., PCA and redundancy analysis) by translating continuous environmental gradients into potential group structures that can be more easily interpreted and compared.
+By grouping ponds based on similarities in the selected predictor
+variables, the analysis provides a way to identify whether discrete
+environmental “types” of ponds exist (e.g., highly urban and exposed vs.
+shaded and cooler), or whether variation in pond conditions and drying
+rates is more gradual. This approach complements earlier analyses (e.g.,
+PCA and redundancy analysis) by translating continuous environmental
+gradients into potential group structures that can be more easily
+interpreted and compared.
 
-Cluster analysis also allows for evaluation of the hypothesis that ponds with higher rates of water loss are characterized by warmer temperatures, reduced shading, and greater exposure to urban conditions. By comparing drying rates across clusters, it becomes possible to assess whether these conditions form distinct groups or whether drying behaviour varies continuously across environmental gradients.
-
+Cluster analysis also allows for evaluation of the hypothesis that ponds
+with higher rates of water loss are characterized by warmer
+temperatures, reduced shading, and greater exposure to urban conditions.
+By comparing drying rates across clusters, it becomes possible to assess
+whether these conditions form distinct groups or whether drying
+behaviour varies continuously across environmental gradients.
 
 Data preparation
+
 ```{r}
 # Selecting already chosen predictor variables
 selected_vars <- metrics_wide_2[, c(
@@ -755,12 +756,10 @@ Running cluster analysis
 dist_matrix <- dist(selected_scaled , method = "euclidean")
 ```
 
-
 ```{r}
 # Hierarchical clustering (Ward’s method)
 hc <- hclust(dist_matrix, method = "ward.D2")
 ```
-
 
 ```{r}
 library(dendextend)
@@ -796,8 +795,36 @@ legend("topright",
 
 #Interpretation
 
+The hierarchical cluster analysis using Ward’s method revealed three
+primary clusters of ponds based on similarities in environmental
+conditions. At a cut height of approximately 5–6, the dendrogram
+separates the ponds into three main groups. The first cluster consists
+of a single pond (VAN), which joins the rest of the dendrogram at a high
+dissimilarity level, indicating that it is environmentally distinct from
+all other ponds. The second cluster includes BGL, RUP, AVL, SCT, BOO,
+CHS, GVI, and QED, and represents a group of ponds with moderate
+similarity across the selected environmental variables. The third
+cluster contains BGS, MCC, TRT, MSP, CSN, and JCO, which are more
+tightly grouped at lower heights, indicating greater similarity among
+these ponds.
 
+Across the dendrogram, drought classes (dryout, refill, stable) are
+distributed across all clusters rather than forming distinct groupings.
+Ponds with different drying outcomes are often grouped together,
+indicating that similar environmental conditions can correspond to
+different drying behaviours.
 
+This lack of clear separation from the dendrogram support earlier
+findings from PCA, regression, and discriminant analysis, showing that
+ponds are structured along continuous environmental gradients rather
+than forming distinct types. While the cluster analysis identifies
+groupings in environmental space, these groupings represent positions
+along gradients of shading, thermal dynamics, vegetation feedbacks, and
+basin capacity, rather than fixed ecological states. Overall, while
+three clusters can be identified, the dendrogram does not show clear
+separation of ponds based on drought class, suggesting that
+environmental variation is gradual rather than divided into distinct
+categories.
 
 ```{r}
 # Compute WSS for different k
@@ -817,34 +844,53 @@ plot(1:10, wss,
      main = "Elbow Method for Optimal Clusters")
 ```
 
-*Interpretation
+#Interpretation
 
+The elbow method was used to evaluate the optimal number of clusters for
+grouping ponds based on environmental conditions, with the aim of
+assessing whether ponds form distinct patterns or fall along a
+continuous gradient of conditions. The total within-cluster sum of
+squares (WSS) was calculated for values of k ranging from 1 to 10. The
+results show a sharp decrease in WSS from k = 1 to k = 4, indicating
+that increasing the number of clusters substantially improves the
+grouping of ponds within this range. Beyond k = 4, the rate of decrease
+becomes more gradual, suggesting diminishing returns in reducing
+within-cluster variation. This pattern indicates that the elbow occurs
+around k = 4. However, the transition is relatively smooth rather than
+sharply defined, suggesting that there is no single, clearly optimal
+number of clusters based on WSS alone.
+
+*Justification for Selecting k = 3 Clusters*
+
+Although the elbow method suggests k = 4 as a potential optimal number
+of clusters, this solution did not produce groupings that were
+ecologically meaningful in the context of the study. Specifically, the
+four-cluster solution resulted in over-partitioning of ponds into
+smaller groups that did not clearly correspond to differences in
+environmental gradients or drying behaviour. In contrast, the dendrogram
+revealed a clear and interpretable separation into three primary
+clusters, capturing the dominant structure of environmental similarity
+among ponds. These three clusters align more closely with the study’s
+objective of identifying environmental gradients that differentiate
+drying behaviour, while maintaining interpretability in terms of
+shading, thermal dynamics, vegetation feedbacks, and basin capacity.
+
+Importantly, the three-cluster solution also supports the broader
+research question of whether ponds form distinct groups or fall along a
+continuum. The clusters identified at k = 3 show substantial overlap in
+drought classes, indicating that ponds with different rates of water
+loss are not cleanly separated into discrete categories. Instead, this
+pattern reinforces the interpretation that pond drying dynamics are
+structured along continuous environmental gradients. Therefore, k = 3
+was selected as the most appropriate number of clusters, balancing
+statistical evidence with ecological relevance and consistency with the
+overall analytical framework.
 
 ```{r}
-# Cut dendrogram into 4 clusters
+# Cut dendrogram into 3 clusters
 metrics_wide_2$Cluster3 <- cutree(hc, k = 3)
-
-library(factoextra)
-
-# Clean scaled data
-scaled_clean <- selected_scaled[, apply(selected_scaled, 2, function(x) all(is.finite(x)))]
-
-# Add pond names
-rownames(scaled_clean) <- metrics_wide_2$pond_id
-
-# Use your existing clusters
-clusters_named <- factor(metrics_wide_2$Cluster3)
-
-# Plot
-fviz_cluster(
-  list(data = scaled_clean, cluster = clusters_named),
-  geom = "text",
-  repel = TRUE,
-  labelsize = 5,
-  ggtheme = theme_minimal(),
-  show.clust.cent = FALSE
-)
 ```
+
 *Comparing Clusters with Water loss (Z_loss_rate)*
 
 ```{r}
@@ -863,18 +909,54 @@ boxplot(z_loss_rate ~ factor(Cluster3,
                              labels = c("Cluster 1", "Cluster 2", "Cluster 3")),
         data = metrics_wide_2,
         col = c("#F8766D", "#00BA38", "#619CFF"),
-        main = "Water Loss (z_loss_rate) Across 4 Clusters",
+        main = "Water Loss (z_loss_rate) Across Clusters",
         xlab = "Cluster",
         ylab = "z_loss_rate")
 ```
-#Interpretation
+
+#Interpretation of Water Loss Across Clusters
+
+0 = average drying
+positive (+) = faster drying
+negative (−) = slower drying
+
+The average standardized water loss rate (z_loss_rate) varies across the three clusters, indicating differences in drying behaviour among groups. Cluster 1 has a negative mean value (-0.75), indicating that ponds in this cluster tend to experience lower-than-average water loss rates and therefore represent slower-drying systems. In contrast, Cluster 2 (mean = 0.26) and Cluster 3 (mean = 0.43) both exhibit positive mean values, indicating higher-than-average water loss rates. Among these, Cluster 3 shows the highest mean water loss, suggesting that ponds in this group are associated with more rapid drying conditions. However, the differences between Cluster 2 and Cluster 3 are relatively modest, indicating that while both clusters represent faster-drying systems, they may differ in degree rather than in fundamentally distinct drying behaviour.
+
+The boxplot further illustrates the distribution of water loss within each cluster, highlighting both central tendency and variability. Cluster 1 shows consistently low values of z_loss_rate, with most observations falling below zero, indicating relatively uniform slow-drying conditions. Cluster 2 exhibits a wider spread of values, ranging from negative to strongly positive, suggesting greater variability in drying behaviour within this group. This indicates that ponds in Cluster 2 may experience a broader range of environmental conditions, leading to both moderate and high rates of water loss. Cluster 3 appears to have consistently positive values with minimal spread, indicating that ponds in this cluster tend to experience uniformly higher water loss rates. Overall, the boxplot shows that while clusters differ in average drying behaviour, there is still some overlap in values, particularly between Clusters 1 and 2, reinforcing that drying dynamics are not strictly separated into discrete categories.
+
+*Integrated Interpretation of Cluster Analysis in Relation to PCA and MDA*
+
+Together, the clustering results and associated water loss patterns indicate that ponds can be broadly grouped into three categories based on environmental similarity and drying behaviour: slower-drying systems (Cluster 1), intermediate and variable systems (Cluster 2), and more consistently faster-drying systems (Cluster 3). These groupings reflect general differences in environmental conditions and their influence on water loss rates, with Cluster 1 characterized by lower-than-average drying, Cluster 2 showing moderate and variable behaviour, and Cluster 3 associated with consistently higher rates of water loss. However, these clusters do not represent sharply defined ecological types. The observed overlap in water loss values across clusters, along with the gradual transitions between them, indicates that pond behaviour is not separated into discrete categories. Instead, ponds occupy positions along a continuous spectrum of environmental conditions and drying responses. The clustering therefore captures broad patterns in the data while highlighting the absence of strict boundaries between pond types.
+
+These findings are strongly consistent with the results of the PCA and MDA analyses, which also demonstrate that pond dynamics are structured along continuous environmental gradients rather than discrete groupings. PCA identified shading and solar exposure (PC1) as the dominant gradient controlling variation in drying rates, with more shaded ponds drying more slowly and more exposed ponds drying more rapidly. In contrast, MDA showed only partial separation among drought classes (dryout, refill, stable), indicating that these categories do not occupy entirely distinct regions of environmental space. The cluster analysis complements these results by showing that, although ponds can be grouped based on overall environmental similarity, these groupings do not align cleanly with drying outcomes or drought classifications.
+
+Instead, the clusters represent different regions along underlying environmental gradients defined by shading, thermal dynamics, vegetation feedbacks, and basin capacity. The lack of clear separation among clusters reinforces the interpretation that multiple interacting processes shape pond behaviour, and that similar environmental conditions can lead to different drying outcomes. Overall, this integrated analysis supports the conclusion that urban pond drying dynamics are best understood as a continuous, multivariate process, where environmental gradients influence drying behaviour in a gradual and overlapping manner rather than producing distinct ecological types.
 
 
-#Final intrepation for cluster analysis
+##########
 
-#How this fit with the PCA and MDA results - 
+#DISCUSSION
+Synthesis of Techniques
 
+#########
 
+The combined analyses indicate that urban ponds do not form discrete functional types, but instead occupy positions along continuous environmental gradients shaped by interacting structural, thermal, and hydrological conditions. While dryout, stable, and refill classifications describe observed outcomes, these categories overlap substantially in environmental space, indicating that similar environmental configurations can produce different hydrologic responses depending on how multiple factors interact .
+
+Principal Component Analysis (PCA) identified a dominant gradient associated with structural and realized shading (PC1), which emerged as the primary control on drying intensity. Regression of PCA scores shows that ponds with greater canopy cover and higher midsummer shade persistence consistently exhibit slower rates of water loss, while more exposed systems dry more rapidly. This establishes solar exposure as the central mechanism governing the rate at which ponds lose water across the study system.
+
+In contrast, secondary gradients, particularly those associated with basin capacity, vegetation dynamics, and thermal timing (PC2), do not independently explain variation in drying rate but instead influence broader system behavior. Discriminant analysis indicates that these gradients are more strongly associated with differences among dryout, stable, and refill ponds, suggesting that while exposure determines how quickly water is lost, system-level characteristics influence how that loss translates into overall outcomes, such as persistence, seasonal stability, or complete dry out.
+
+Cluster analysis further supports this interpretation by identifying broad groupings of slower-drying, intermediate, and faster-drying systems, while also demonstrating substantial overlap among hydrologic classes within these clusters. Ponds classified as dryout, stable, and refill are distributed across similar regions of environmental space rather than forming distinct groupings, reinforcing that drying dynamics are structured along continuous gradients rather than discrete categories. The clusters therefore reflect general regions of environmental similarity, rather than fixed ecological types.
+
+Together, these results indicate that pond drying is governed by a shared underlying mechanism, solar exposure and shading, with additional environmental dimensions shaping variability in system response. This supports a gradient-based interpretation in which all ponds are subject to the same fundamental controls, but differ in how those controls interact with basin structure, vegetation dynamics, and thermal behavior to produce different outcomes. Within this framework, observed pond classes reflect positions along a continuum of drying vulnerability rather than fundamentally distinct system types.
+
+*Management Implications*
+
+From a management perspective, these findings support a tiered, process-based approach that distinguishes between dominant system-wide controls and secondary, site-specific modifiers. At the system level, efforts should prioritize reducing solar exposure, as structural and realized shading consistently emerge as the strongest predictors of reduced drying rates. Increasing canopy cover, preserving surrounding vegetation, or enhancing shading around ponds are therefore likely to be the most effective strategies for moderating water loss under current climatic conditions.
+
+At the same time, pond-specific characteristics such as depth, vegetation dynamics, and thermal behavior influence how individual systems respond within this broader framework. Deeper ponds may be more resistant to complete dry out despite similar exposure conditions, while vegetation dynamics appear to play a more complex role, with increased vegetation change associated with more exposed and dynamically drying systems rather than consistently buffering against water loss. These factors help explain why ponds with similar positions along the primary exposure gradient may still differ in whether they dry out, remain stable, or require supplemental inputs.
+
+Accordingly, effective management should integrate system-wide strategies targeting dominant controls on solar exposure with targeted, site-specific adjustments that account for basin capacity, vegetation behavior, and local thermal conditions. This approach recognizes that while drying rate is largely governed by a common mechanism, variation in outcomes reflects the interaction of multiple environmental factors operating within each system.
 
 
 #########
