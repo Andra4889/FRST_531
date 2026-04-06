@@ -7,9 +7,43 @@ output:
   word_document: default
 ---
 
+To-do: 
+
+Limitations for each section (Sandra & Brandon's respective stats sections)
+Risk & ranking section (Brandon)
+Conclusion (Sandra)
+Edits and cuts (Sandra & Brandon)
+Discussion (Recap of everything, limits)
+Next steps section (Brandon)
+Introduction and references (Brandon)
+
+
+Presentation:
+
+Sandra: 
+- Cluster 
+- Introduction (reasoning and research questions)
+- PCA score regression 
+- Discussion & Summary & Management Implications
+- Pond risk section, dryout ponds section & final rankings (starting at "Pond-Specific Deficit Interpretation (Dryout Ponds)" to final interpretations of the risk ranking)
+
+Brandon:
+- variables and data cleaning (introduction)
+- site selection 
+- PCA
+- MDA
+- Pond risk axes intro and explanation, refill ponds section 
+- Final conclusion
+
+
+
+
+
+
+
 #######
 
-INTRODUCTION
+/ INTRODUCTION
 Research Question & Motivation
 
 #######
@@ -933,31 +967,6 @@ These findings are strongly consistent with the results of the PCA and MDA analy
 Instead, the clusters represent different regions along underlying environmental gradients defined by shading, thermal dynamics, vegetation feedbacks, and basin capacity. The lack of clear separation among clusters reinforces the interpretation that multiple interacting processes shape pond behaviour, and that similar environmental conditions can lead to different drying outcomes. Overall, this integrated analysis supports the conclusion that urban pond drying dynamics are best understood as a continuous, multivariate process, where environmental gradients influence drying behaviour in a gradual and overlapping manner rather than producing distinct ecological types.
 
 
-##########
-
-#DISCUSSION
-Synthesis of Techniques
-
-#########
-
-The combined analyses indicate that urban ponds do not form discrete functional types, but instead occupy positions along continuous environmental gradients shaped by interacting structural, thermal, and hydrological conditions. While dryout, stable, and refill classifications describe observed outcomes, these categories overlap substantially in environmental space, indicating that similar environmental configurations can produce different hydrologic responses depending on how multiple factors interact .
-
-Principal Component Analysis (PCA) identified a dominant gradient associated with structural and realized shading (PC1), which emerged as the primary control on drying intensity. Regression of PCA scores shows that ponds with greater canopy cover and higher midsummer shade persistence consistently exhibit slower rates of water loss, while more exposed systems dry more rapidly. This establishes solar exposure as the central mechanism governing the rate at which ponds lose water across the study system.
-
-In contrast, secondary gradients, particularly those associated with basin capacity, vegetation dynamics, and thermal timing (PC2), do not independently explain variation in drying rate but instead influence broader system behavior. Discriminant analysis indicates that these gradients are more strongly associated with differences among dryout, stable, and refill ponds, suggesting that while exposure determines how quickly water is lost, system-level characteristics influence how that loss translates into overall outcomes, such as persistence, seasonal stability, or complete dry out.
-
-Cluster analysis further supports this interpretation by identifying broad groupings of slower-drying, intermediate, and faster-drying systems, while also demonstrating substantial overlap among hydrologic classes within these clusters. Ponds classified as dryout, stable, and refill are distributed across similar regions of environmental space rather than forming distinct groupings, reinforcing that drying dynamics are structured along continuous gradients rather than discrete categories. The clusters therefore reflect general regions of environmental similarity, rather than fixed ecological types.
-
-Together, these results indicate that pond drying is governed by a shared underlying mechanism, solar exposure and shading, with additional environmental dimensions shaping variability in system response. This supports a gradient-based interpretation in which all ponds are subject to the same fundamental controls, but differ in how those controls interact with basin structure, vegetation dynamics, and thermal behavior to produce different outcomes. Within this framework, observed pond classes reflect positions along a continuum of drying vulnerability rather than fundamentally distinct system types.
-
-*Management Implications*
-
-From a management perspective, these findings support a tiered, process-based approach that distinguishes between dominant system-wide controls and secondary, site-specific modifiers. At the system level, efforts should prioritize reducing solar exposure, as structural and realized shading consistently emerge as the strongest predictors of reduced drying rates. Increasing canopy cover, preserving surrounding vegetation, or enhancing shading around ponds are therefore likely to be the most effective strategies for moderating water loss under current climatic conditions.
-
-At the same time, pond-specific characteristics such as depth, vegetation dynamics, and thermal behavior influence how individual systems respond within this broader framework. Deeper ponds may be more resistant to complete dry out despite similar exposure conditions, while vegetation dynamics appear to play a more complex role, with increased vegetation change associated with more exposed and dynamically drying systems rather than consistently buffering against water loss. These factors help explain why ponds with similar positions along the primary exposure gradient may still differ in whether they dry out, remain stable, or require supplemental inputs.
-
-Accordingly, effective management should integrate system-wide strategies targeting dominant controls on solar exposure with targeted, site-specific adjustments that account for basin capacity, vegetation behavior, and local thermal conditions. This approach recognizes that while drying rate is largely governed by a common mechanism, variation in outcomes reflects the interaction of multiple environmental factors operating within each system.
-
 
 #########
 
@@ -1379,7 +1388,7 @@ SCT (stable) – deficit 1.53
 BGL (refill) – deficit 1.21
 AVL (stable) – lowest deficit (0.00), lowest predicted loss (-1.09)
 
-*Final Interpretation*
+*Final Interpretation of Ranking System*
 
 The ranking reveals that dryout risk is not confined to ponds that currently dry, but instead spans all drought classes along a continuous environmental gradient. Notably, the highest-risk pond (VAN) is classified as stable, while two refill ponds (BGS and MCC) rank above all observed dryout systems. This indicates that current pond states do not always reflect underlying environmental vulnerability, and that management interventions or short-term conditions may mask latent drying risk.
 
@@ -1392,12 +1401,37 @@ Overall, these results confirm that pond drying operates along a shared exposure
 ###########
 
 #DISCUSSION
-Limitations, sensitivity to assumptions, and next steps
+Synthesis of Techniques
 
-###########
+#########
+
+The combined analyses indicate that urban ponds do not form discrete functional types, but instead occupy positions along continuous environmental gradients shaped by interacting structural, thermal, and hydrological conditions. While dryout, stable, and refill classifications describe observed outcomes, these categories overlap substantially in environmental space, indicating that similar environmental configurations can produce different hydrologic responses depending on how multiple factors interact .
+
+Principal Component Analysis (PCA) identified a dominant gradient associated with structural and realized shading (PC1), which emerged as the primary control on drying intensity. Regression of PCA scores shows that ponds with greater canopy cover and higher midsummer shade persistence consistently exhibit slower rates of water loss, while more exposed systems dry more rapidly. This establishes solar exposure as the central mechanism governing the rate at which ponds lose water across the study system.
+
+In contrast, secondary gradients, particularly those associated with basin capacity, vegetation dynamics, and thermal timing (PC2), do not independently explain variation in drying rate but instead influence broader system behavior. Discriminant analysis indicates that these gradients are more strongly associated with differences among dryout, stable, and refill ponds, suggesting that while exposure determines how quickly water is lost, system-level characteristics influence how that loss translates into overall outcomes, such as persistence, seasonal stability, or complete dry out.
+
+Cluster analysis further supports this interpretation by identifying broad groupings of slower-drying, intermediate, and faster-drying systems, while also demonstrating substantial overlap among hydrologic classes within these clusters. Ponds classified as dryout, stable, and refill are distributed across similar regions of environmental space rather than forming distinct groupings, reinforcing that drying dynamics are structured along continuous gradients rather than discrete categories. The clusters therefore reflect general regions of environmental similarity, rather than fixed ecological types.
+
+Together, these results indicate that pond drying is governed by a shared underlying mechanism, solar exposure and shading, with additional environmental dimensions shaping variability in system response. This supports a gradient-based interpretation in which all ponds are subject to the same fundamental controls, but differ in how those controls interact with basin structure, vegetation dynamics, and thermal behavior to produce different outcomes. Within this framework, observed pond classes reflect positions along a continuum of drying vulnerability rather than fundamentally distinct system types.
+
+*Management Implications*
+
+From a management perspective, these findings support a tiered, process-based approach that distinguishes between dominant system-wide controls and secondary, site-specific modifiers. At the system level, efforts should prioritize reducing solar exposure, as structural and realized shading consistently emerge as the strongest predictors of reduced drying rates. Increasing canopy cover, preserving surrounding vegetation, or enhancing shading around ponds are therefore likely to be the most effective strategies for moderating water loss under current climatic conditions.
+
+At the same time, pond-specific characteristics such as depth, vegetation dynamics, and thermal behavior influence how individual systems respond within this broader framework. Deeper ponds may be more resistant to complete dry out despite similar exposure conditions, while vegetation dynamics appear to play a more complex role, with increased vegetation change associated with more exposed and dynamically drying systems rather than consistently buffering against water loss. These factors help explain why ponds with similar positions along the primary exposure gradient may still differ in whether they dry out, remain stable, or require supplemental inputs.
+
+Accordingly, effective management should integrate system-wide strategies targeting dominant controls on solar exposure with targeted, site-specific adjustments that account for basin capacity, vegetation behavior, and local thermal conditions. This approach recognizes that while drying rate is largely governed by a common mechanism, variation in outcomes reflects the interaction of multiple environmental factors operating within each system.
+
+*Incorporate risk systems, merge everything together in more detail here*
 
 
+***Describe next steps***
 
+- PCA
+- Regression
+- Cluster
+- MDA
 
 
 ###########
@@ -1406,11 +1440,7 @@ Limitations, sensitivity to assumptions, and next steps
 
 ###########
 
-
-
-
-
-
+*short, 2-paragraph outline*
 
 
 
@@ -1421,6 +1451,8 @@ Limitations, sensitivity to assumptions, and next steps
 #REFERENCES
 
 ############
+
+
 
 
 
@@ -1614,16 +1646,3 @@ cor(scores_no_imp$PC2, scores_with_imp$PC2)
 All exploratory testing and iterative refinement converged on a final set of variables that balance ecological interpretability with statistical independence. Early stages of variable selection revealed that many candidate predictors were either redundant, overly correlated, or reflective of downstream responses rather than independent drivers. Through successive removal of thermal outcome variables, consolidation of shade metrics, and refinement of vegetation and growth indicators, the analysis shifted toward representing distinct ecological mechanisms rather than overlapping signals. Additional exploratory configurations, including the incorporation of storage proxies and alternative thermal and vegetation variables, further highlighted the importance of separating structural capacity, environmental forcing, and biological response.
 
 The final selection of canopy_50, av_hrs_air_july_mintomax, july_msf, veg_percent_change, and depth_1 reflects this process, with each variable contributing uniquely to the representation of landscape structure, thermal dynamics, realized shading, seasonal biological change, and physical storage capacity. By emphasizing July-based metrics, the model isolates peak environmental forcing while avoiding late-season feedback effects, ensuring that the PCA captures underlying drivers of drying rather than cumulative outcomes. Together, this variable set provides a parsimonious yet mechanistically grounded framework for interpreting variation in pond drying dynamics across sites, with minimal redundancy and clear ecological meaning.
-
-
-
-
-
-
-
-
-
-
-
-
-
