@@ -6,6 +6,9 @@ output:
   html_document: default
   pdf_document: default
   word_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r}
@@ -13,595 +16,46 @@ metrics_wide_2 <- read.csv("metrics_wide_final.csv")
 colnames(metrics_wide_2)
 ```
 
-
-########
-
-# PCA Variable Selection
-
-#######
-
-*Multi-Criteria Variable Selection*
-
-Variable selection was guided by a combination of statistical, ecological, and practical considerations. The relatively small sample size (n = 15 ponds) imposed a strict limit on the number of variables that could be included in the PCA without overfitting, necessitating a reduction to a small set of representative predictors. This constraint was particularly important given the large initial pool of 72 variables derived from extensive field measurements and spatial analyses, each reflecting hypothesized drivers of pond drying such as shading, thermal dynamics, vegetation, and hydrological context.
-
-To address this, variables were selected to represent distinct ecological processes while minimizing redundancy. Many candidate variables were strongly correlated, reflecting the inherently covarying nature of urban pond systems, where shading, temperature, and vegetation dynamics are tightly linked. Correlation screening and iterative testing were therefore used to identify and remove collinear variables, retaining only those that captured unique aspects of system behaviour. Although PCA is well-suited to handling correlated predictors, this pre-selection step ensured that resulting components remained interpretable and not dominated by clusters of redundant variables.
-
-Additional guidance was drawn from complementary analyses, including clustering and exploratory classification approaches, which helped clarify dominant gradients and reinforce the importance of certain variables over others. Finally, variable selection was informed by the applied context of the study, developed in collaboration with the Vancouver Board of Parks and Recreation, with an emphasis on identifying drivers that are both ecologically meaningful and relevant for urban pond management. Together, these considerations ensured that the final variable set reflects a balance between statistical robustness, ecological realism, and practical applicability.
-
-Because the following are response variables, they will not be considered in the PCA:
-- daily_loss_est
-- total_depth_loss_cm
-- total_volume_lost_m3
-- mean_daily_volume_lost_m3
-- z_loss_rate
-- z_total_loss
-
-*Final set:* 
-canopy_50
-av_hrs_air_july_mintomax
-july_msf
-veg_percent_change
-depth_1
-
-Process	Variables:
-- Structural shading:	canopy_50
-- Thermal dynamics:	av_hrs_air_july_mintomax
-- Realized shade:	july_msf
-- Vegetation feedback:	veg_percent_change
-- Basin constraint:	depth_1
-
-canopy → structure
-thermal timing → energy dynamics
-shade → realized conditions
-vegetation → feedback
-depth → constraint
-
-*Justification of Final Predictor Variables*
-
-To construct a parsimonious and interpretable PCA given the sample size of 15, variables were selected to represent distinct ecological mechanisms influencing pond drying, while minimizing redundancy among predictors. Each retained variable captures a unique component of the system, supported by correlation screening and ecological relevance.
-
-*canopy_50* was included as a measure of structural shading potential surrounding each pond. Canopy cover strongly influences incoming solar radiation, mediates microclimate, and indirectly affects both water temperature and evaporation rates. Although correlated with shade metrics, canopy represents the physical capacity for shading rather than realized conditions, justifying its inclusion as a structural variable.
-
-Reflects the percentage of canopy cover present within a 50 meter buffer drawn around each pond in ArcGIS. The R package “landscapemetrics” was used for this. Pixels within these buffers are about 4.8 square meter resolution (which is why the picture here looks blocky). The landscapemetrics package uses a landcover map from the City of Vancouver (2022) to identify landscape composition within the buffers. Other landscape classes (like grass, water, and sand) were also computed, but are not considered here. 
-
-*av_hrs_air_july_mintomax* captures daily thermal dynamics during peak summer conditions, specifically the duration of warming from minimum to maximum air temperature. Unlike absolute temperature metrics, this variable reflects the rate and persistence of energy accumulation within the system. It was prioritized over water temperature variables to avoid incorporating downstream responses that are already influenced by shading and pond-specific conditions.
-
-Represents thermal magnitude and thermal timing. Average number of hours required for air temperature to increase from the daily minimum to the daily maximum during each month for each pond. Units: hours. Represents the average daily warming duration of near-pond air conditions per month. Higher values mean air temperature typically took longer to warm from its daily low to its daily high. = mean(hours_min_to_max for cleaned July daily air temperature records, per pond).
-
-This variable was calculated in two steps. First, for each pond and date, only cleaned air temperature observations (value_clean) were retained. The first occurrence of the daily minimum air temperature was identified, and then the first occurrence of the daily maximum after that minimum was located. The elapsed time between those two points was calculated in hours as hours_min_to_max. Second, these daily values were averaged across all June days for each pond. This means the metric is based on daily min to max timing, not on a single monthly temperature curve. This produces a monthly summary of daily warming duration, rather than a raw monthly temperature average. Because the code uses the first occurrence of the daily minimum and the first occurrence of the daily maximum after that, this metric is intentionally conservative and ordered in time. It avoids nonsensical negative durations and ensures that warming is measured in the expected daily direction. Because it relies on cleaned logger observations, it is less affected by anomalous spikes or abrupt artifacts. A pond could have moderate average air temperatures, but a very long warming period, which would suggest a slower daily heating trajectory. These values represent the average number of hours it took, on each day, for air temperature to go from its first daily minimum to its first daily maximum after that point
-
-This variable does not represent:
-- average daily temperature range
-- average monthly temperature
-- time from midnight to the daily maximum
-
-*july_msf* (July mean shade fraction) was selected as the representative shade metric following redundancy analysis, which revealed near-perfect collinearity among alternative shade indices. This variable directly quantifies the proportion of time pond surfaces remain shaded during peak summer, representing realized shading conditions that influence thermal buffering and evaporative demand.
-
-Average fraction of time that each pond pixel is shaded during each month. Units: proportion (0–1). Represents the temporal persistence of shading at the pixel level. Higher values indicate that locations within the pond remain shaded for a greater proportion of the day. = mean(pixel-level proportion of shaded time across all time steps, aggregated to pond, per month). This metric is calculated by determining, for each pixel, the proportion of modeled time steps during which it is shaded. These pixel-level values are then averaged across the pond surface. Monthly values reflect how consistently shading is maintained over time, rather than how much area is shaded at any single moment.
-
-*veg_percent_change* was included to represent seasonal vegetation dynamics within each pond. Vegetation plays a dual role by contributing to shading and driving evapotranspiration, thereby influencing water loss through both physical and biological pathways. The use of percent change, rather than static cover, captures temporal dynamics in vegetation growth that align with cumulative drying patterns.
-
-Relative change in vegetation cover (%) over the season, expressed as a percentage of the initial cover:
- (final − initial) / initial × 100.
-
-*depth_1* was retained as a measure of basin storage capacity using the depth (cm) measured at the start of the season, representing a key physical constraint on water loss. Deeper ponds can buffer against short-term evaporative losses and exhibit slower rates of drawdown, making depth an essential variable for distinguishing between rapid and gradual drying systems. The meter stick measurements (in cm) at each sampling interval.
-
-######
-
-*Justification for Prioritizing July-Based Metrics*
-
-Variables derived from July conditions were prioritized to capture peak seasonal dynamics in pond drying processes. July represents the period of maximum solar radiation, longest photoperiod, and highest atmospheric demand, resulting in the strongest coupling between thermal conditions, evaporative loss, and biological activity. During this time, differences among ponds are most pronounced, as structural shading, vegetation growth, and basin characteristics interact under sustained thermal stress. Earlier-season variables (e.g., June) may reflect transitional or lagged conditions, while late-season variables (e.g., August) increasingly incorporate cumulative effects of drying, including reduced water volume, vegetation expansion, and episodic rainfall inputs. By focusing on July, the analysis targets the period when environmental gradients are most directly linked to underlying mechanisms rather than downstream outcomes, allowing for clearer interpretation of drivers influencing variation in drying rates across ponds.
-
-This is particularly relevant in urban pond systems, where shallow water bodies respond rapidly to atmospheric forcing, amplifying mid-summer differences in thermal exposure and water loss.
-
-This frames July as peak forcing, not just a midpoint, and separates drivers (July) from outcomes (August).
-
-*Synthesis*
-
-Together, these variables capture complementary gradients of structural shading (canopy_50), realized shading (july_msf), thermal dynamics (av_hrs_air_july_mintomax), biological feedbacks (veg_percent_change), and physical storage capacity (depth_1). This combination ensures that the PCA reflects interacting ecological processes rather than redundant representations of a single mechanism, providing a robust framework for interpreting variation in pond drying dynamics.
-
-These chosen variables reflect:
-- one variable per mechanism
-- removal of redundant shade metrics
-- removal of weak variables
-- removal of mixed-scale predictors
-
-Correlation check:
-```{r}
-cor_matrix5 <- cor(
-  metrics_wide_2[, c(
-    "canopy_50",
-    "av_hrs_air_july_mintomax",
-    "july_msf",
-    "veg_percent_change",
-    "depth_1"
-  )],
-  use = "complete.obs"
-)
-
-round(cor_matrix5, 2)
-```
-The selected predictor set shows low to moderate correlations overall, with no pairwise relationships exceeding r = 0.6. This indicates that multicollinearity is not a major concern and supports the inclusion of all five variables in the PCA. The strongest relationship occurs between canopy cover and July MSF (r = 0.57), suggesting a shared underlying shading signal. However, this correlation is not strong enough to justify removing one of the variables, as they represent conceptually distinct processes: canopy cover reflects structural shading potential, while MSF captures realized shading under seasonal solar conditions.
-
-The remaining variables exhibit relatively weak correlations, reinforcing their roles as independent drivers. Vegetation percent change is moderately negatively associated with canopy, shading, and thermal variables, suggesting that ponds with greater vegetation change tend to be more exposed and environmentally dynamic. Depth shows minimal correlation with other predictors, indicating that it captures a distinct aspect of pond capacity rather than microclimate or structure. Similarly, the temperature metric (average hours from minimum to maximum air temperature in July) appears largely independent, representing a separate dimension of thermal dynamics. Overall, the variable set is well-balanced, capturing multiple ecological mechanisms while maintaining sufficient independence for robust multivariate analysis.
-
-
-#################
-
-# PCA
-
-################
-
-Data preparation
-```{r}
-library(dplyr)
-
-# Select final variables
-pca_vars <- metrics_wide_2 %>%
-  dplyr::select(
-    canopy_50,
-    av_hrs_air_july_mintomax,
-    july_msf,
-    veg_percent_change,
-    depth_1
-  )
-
-# Remove missing values
-pca_vars_clean <- na.omit(pca_vars)
-```
-
-PCA Test (Scaled)
-```{r}
-pca_res <- prcomp(pca_vars_clean, scale. = TRUE)
-```
-
-Scree Plot
-```{r}
-# Variance explained
-var_explained <- pca_res$sdev^2 / sum(pca_res$sdev^2)
-
-plot(var_explained,
-     type = "b",
-     pch = 19,
-     xlab = "Principal Component",
-     ylab = "Proportion of Variance Explained",
-     main = "Scree Plot")
-
-abline(h = 0.2, col = "red", lty = 2)  # optional reference line
-```
-
-Summary
-```{r}
-summary(pca_res)
-```
-
-Loadings
-```{r}
-loadings <- pca_res$rotation
-loadings
-```
-
-Basic Biplot
-```{r}
-library(ggplot2)
-
-biplot(pca_res, scale = 0)
-```
-
-```{r}
-library(ggplot2)
-library(ggrepel)
-
-# Scores
-pca_scores <- as.data.frame(pca_res$x)
-
-# Loadings
-loadings_df <- as.data.frame(pca_res$rotation)
-loadings_df$var <- rownames(loadings_df)
-
-# Scale arrows
-arrow_scale <- 3
-
-ggplot(pca_scores, aes(x = PC1, y = PC2)) +
-  
-  geom_point(size = 3, color = "steelblue") +
-  
-  # Arrows
-  geom_segment(data = loadings_df,
-               aes(x = 0, y = 0,
-                   xend = PC1 * arrow_scale,
-                   yend = PC2 * arrow_scale),
-               arrow = arrow(length = unit(0.3, "cm")),
-               color = "black") +
-  
-  geom_text_repel(data = loadings_df,
-                  aes(x = PC1 * arrow_scale,
-                      y = PC2 * arrow_scale,
-                      label = var),
-                  size = 4) +
-  
-  theme_minimal() +
-  
-  labs(title = "PCA Biplot (Environmental Variables)",
-       x = paste0("PC1 (", round(summary(pca_res)$importance[2,1]*100, 1), "%)"),
-       y = paste0("PC2 (", round(summary(pca_res)$importance[2,2]*100, 1), "%)"))
-```
-
-With Pond Labels
-```{r}
-# Match metadata back to cleaned rows
-pca_scores$pond <- metrics_wide_2$pond[complete.cases(pca_vars)]
-pca_scores$drought_class <- metrics_wide_2$drought_class[complete.cases(pca_vars)]
-```
-
-Final Interpretive Biplot
-```{r}
-ggplot(pca_scores, aes(x = PC1, y = PC2, color = drought_class)) +
-  
-  geom_point(size = 4) +
-  
-  geom_text_repel(aes(label = pond),
-                  size = 4,
-                  max.overlaps = 20) +
-  
-  # Arrows
-  geom_segment(data = loadings_df,
-               aes(x = 0, y = 0,
-                   xend = PC1 * arrow_scale,
-                   yend = PC2 * arrow_scale),
-               arrow = arrow(length = unit(0.3, "cm")),
-               color = "black") +
-  
-  geom_text_repel(data = loadings_df,
-                  aes(x = PC1 * arrow_scale,
-                      y = PC2 * arrow_scale,
-                      label = var),
-                  size = 4,
-                      color = "black") +
-  
-  theme_minimal() +
-  
-  labs(title = "PCA Biplot with Drought Classification",
-       x = paste0("PC1 (", round(summary(pca_res)$importance[2,1]*100, 1), "%)"),
-       y = paste0("PC2 (", round(summary(pca_res)$importance[2,2]*100, 1), "%)"))
-```
-
-
-# Interpretation 
-
-PC1 controls: structural and realized shade buffering versus exposure
-PC2 controls: basin capacity and vegetation feedbacks versus thermal timing
-PC3 controls: thermal timing and depth relative to realized shade
-
-Alternatively,
-
-PC1 controls: how strongly ponds are protected from solar forcing
-PC2 controls: how storage capacity and ecological change interact with warming dynamics
-PC3 controls: how thermal timing and pond capacity are balanced against functional shade
-
-#Interpretation:
-
-*PCA Variance Structure and Component Retention*
-
-The PCA revealed a multi-dimensional structure underlying variation among ponds, with no single dominant axis overwhelming the others. PC1 explained 37.4% of the variance, followed by PC2 (25.5%) and PC3 (24.7%), with the first two components together accounting for 62.9% of total variation and the first three explaining 87.6%. This indicates that pond conditions are structured by one primary environmental gradient alongside at least two meaningful secondary gradients. Based on this distribution, PC1 and PC2 were retained for primary interpretation and visualization, while PC3 was also examined due to its substantial contribution to overall variance.
-
-*PC1: Structural and Realized Shading Versus Exposure and Vegetation Dynamics*
-
-PC1 represents a dominant gradient of environmental buffering versus exposure. It is characterized by strong positive loadings for canopy cover (0.646) and July mean shade fraction (0.546), and a strong negative loading for vegetation percent change (-0.486). Depth contributes weakly in the positive direction, while thermal timing plays a minimal role.
-
-This axis separates ponds with greater structural and realized shading from those that are more exposed and exhibit stronger seasonal vegetation change. Importantly, vegetation change does not behave as a buffering mechanism along this axis. Instead, it aligns with exposed conditions, suggesting that increased vegetation dynamics may reflect ecological responses to shallow, thermally stressed, or drying environments rather than resistance to them.
-
-Mechanistically, PC1 captures a combined shading gradient that integrates both canopy structure and realized radiation conditions. Ponds with high PC1 scores are more buffered from solar input, while those with low scores are more exposed and dynamically changing. This axis likely represents the primary environmental gradient influencing pond vulnerability and is a strong candidate for subsequent deficit analysis.
-
-*PC2: Basin Capacity and Vegetation Feedbacks Versus Thermal Timing*
-
-PC2 captures a secondary gradient contrasting basin capacity and ecological dynamics with thermal behavior. It is defined by strong positive loadings for depth (0.656) and vegetation percent change (0.546), and a negative loading for July air warming duration (-0.429). Contributions from canopy and shade are present but comparatively weak.
-
-This axis separates deeper ponds with greater seasonal vegetation change from ponds associated with longer daily warming trajectories in air temperature. Unlike PC1, this gradient does not primarily reflect shading conditions, but instead highlights the interaction between physical storage capacity, biological change, and atmospheric thermal dynamics.
-
-Ecologically, this suggests that pond depth and vegetation dynamics form a distinct dimension of system behavior, potentially influencing resilience, internal processes, or water retention independently of shading. This axis is particularly important for distinguishing ponds that may not differ strongly in shade but vary in their capacity to buffer or respond to thermal forcing.
-
-*PC3: Thermal Dynamics and Depth Versus Realized Shade*
-
-PC3 represents an additional, independent gradient linking thermal timing and basin capacity against realized shading. It loads strongly and positively on July air warming duration (0.699) and depth (0.514), and negatively on July mean shade fraction (-0.481), with minimal contribution from vegetation and only weak influence from canopy.
-
-This axis reveals that realized shading is not fully explained by canopy structure alone. While canopy and MSF align on PC1, they diverge here, indicating that functional shading conditions vary independently depending on pond configuration, solar exposure, and microclimate.
-
-PC3 therefore captures finer-scale differences in how ponds experience and respond to thermal forcing, particularly under midsummer conditions. If linked to drying rates in subsequent analyses, this axis may highlight the importance of thermal timing and functional shade interactions beyond simple structural shading metrics.
-
-*Minor Components (PC4 and PC5)*
-
-PC4 (7.7%) and PC5 (4.7%) explain relatively small proportions of variance and do not represent dominant ecological gradients. While they contain mathematically valid structure, their contributions are secondary and are not central to the interpretation of pond dynamics. These components were therefore not emphasized in further analysis.
-
-*Integrated Interpretation of Environmental Gradients*
-
-Together, the PCA results support the conceptual framework used in variable selection, demonstrating that pond variability is structured by multiple interacting ecological processes rather than a single dominant driver.
-
-PC1 captures a primary gradient of structural and realized shading versus exposure and ecological change, aligning closely with hypothesized mechanisms of solar buffering and environmental stress. PC2 introduces a distinct dimension related to basin capacity and vegetation dynamics, independent of shading effects. PC3 further refines this structure by separating thermal timing and depth from realized shading, highlighting the complexity of energy dynamics within urban pond systems.
-
-Importantly, canopy cover and realized shade, while moderately correlated, do not behave identically across components, supporting their inclusion as separate variables. Vegetation change emerges as a dynamic and context-dependent factor, aligning with exposure on PC1 but with capacity on PC2. Depth and thermal timing both contribute independent and meaningful variation, reinforcing the importance of considering multiple interacting gradients when assessing pond behavior.
-
-*Summary of PCA Results*
-
-The PCA identified three key environmental gradients structuring variation among ponds: (1) a dominant shading and exposure gradient integrating canopy structure and realized shade (PC1), (2) a secondary gradient contrasting basin capacity and vegetation dynamics with thermal timing (PC2), and (3) a tertiary gradient linking thermal dynamics and depth against realized shading (PC3). These results indicate that pond drying dynamics are shaped by interacting effects of structural shading, functional shading, thermal behavior, vegetation feedbacks, and basin constraint. This multivariate structure provides a robust foundation for subsequent analyses linking environmental gradients to variation in pond drying rates.
-
-
-
-
-##########
-
-#PCA Score Regressions 
-
-#########
-
-*Justification for Modeling Water Loss Rate (z_loss_rate)*
-
-To link environmental gradients identified in the PCA to an ecologically meaningful outcome, regression analyses were conducted using standardized water loss rate (z_loss_rate) as the response variable. This metric captures relative differences in drying intensity across ponds, allowing comparison independent of pond size and absolute depth change.
-
-Recent water management policies in Vancouver have reduced or eliminated artificial refilling of many urban ponds, effectively shifting these systems toward more natural hydrological regimes. Under regional climatic conditions, characterized by low summer precipitation and sustained evaporative demand, seasonal drying is expected in many of these systems. While intermittent or ephemeral conditions are not inherently detrimental and can support distinct ecological communities, the rate at which ponds lose water remains a key determinant of habitat persistence and ecological function.
-
-Rapid drying can compress hydroperiods beyond thresholds required for aquatic insects, amphibians, and other taxa, particularly in urban environments where elevated temperatures and altered microclimates may further accelerate water loss. In contrast, slower rates of decline may allow ponds to function as seasonal refugia, even in the absence of artificial inputs.
-
-By modeling z_loss_rate as a function of PCA-derived environmental gradients, this analysis evaluates how combinations of structural shading, realized shading, thermal dynamics, vegetation change, and basin capacity influence drying behaviour. This approach explicitly links multivariate environmental structure to variation in drying rates, allowing identification of the key gradients associated with accelerated water loss.
-
-Rather than aiming to prevent drying entirely, this framework focuses on understanding and managing hydroperiod dynamics under urban conditions, with particular emphasis on moderating the rate of decline. This distinction is critical, as it aligns management strategies with the ecological realities of urban pond systems operating under reduced water inputs.*Thus, managing hydroperiod length and rate of decline under urban stress underlines the purpose of this study.* 
-
-Extract PCA scores and align with response
-```{r}
-# PCA scores
-pca_scores <- as.data.frame(pca_res$x)
-
-# Match rows used in PCA
-complete_idx <- complete.cases(
-  metrics_wide_2[, c(
-    "canopy_50",
-    "av_hrs_air_july_mintomax",
-    "july_msf",
-    "veg_percent_change",
-    "depth_1"
-  )]
-)
-
-# Build modeling dataframe
-model_df <- pca_scores
-model_df$z_loss_rate <- metrics_wide_2$z_loss_rate[complete_idx]
-model_df$pond <- metrics_wide_2$pond[complete_idx]
-```
-
-Using only PC1 and PC2 score loadings, to prevent possible overfitting with n=15
-```{r}
-model_1 <- lm(z_loss_rate ~ PC1 + PC2, data = model_df)
-summary(model_1)
-```
-
-Using PC1, PC2, PC3 scores
-```{r}
-model_2 <- lm(z_loss_rate ~ PC1 + PC2 + PC3, data = model_df)
-summary(model_2)
-```
-
-Compare
-```{r}
-AIC(model_1, model_2)
-```
-
-Diagnostics
-```{r}
-par(mfrow = c(2,2))
-plot(model_1)
-```
-
-Visualize
-```{r}
-library(ggplot2)
-
-ggplot(model_df, aes(PC1, z_loss_rate)) +
-  geom_point(size = 3) +
-  geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
-
-ggplot(model_df, aes(PC2, z_loss_rate)) +
-  geom_point(size = 3) +
-  geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
-```
-
-# Interpretation:
-
-*Regression of Drying Rate on PCA-Derived Environmental Gradients*
-
-To evaluate how multivariate environmental gradients influence pond drying behaviour, linear models were fit using standardized water loss rate (z_loss_rate) as the response variable and PCA scores as predictors. Two models were compared: a reduced model including the first two principal components (PC1 and PC2), and an expanded model including PC3. Model performance was assessed using coefficient significance, explained variance, and AIC.
-
-*Model Results and Statistical Patterns*
-
-Across both models, PC1 emerged as the only statistically significant predictor of drying rate. In the PC1 + PC2 model, PC1 showed a significant negative relationship with z_loss_rate (β = -0.415, p = 0.026), while PC2 was not significant (p = 0.693). This model explained 35.5% of the variance in drying rate (adjusted R² = 0.248), with a marginal overall model significance (p = 0.072).
-
-Including PC3 increased the total explained variance (R² = 0.437; adjusted R² = 0.283), but neither PC2 nor PC3 were statistically significant predictors, and the overall model remained marginal (p = 0.087). The coefficient for PC3 was negative (β = -0.248) but not significant (p = 0.232). Model comparison using AIC showed negligible improvement with the inclusion of PC3 (ΔAIC ≈ 0.04), indicating that the added complexity does not meaningfully improve model performance.
-
-Diagnostic plots suggest that model assumptions are reasonably met, with no strong evidence of nonlinearity or extreme heteroscedasticity. However, the residuals versus leverage plot indicates the presence of at least one moderately influential observation, which may affect coefficient stability given the small sample size.
-
-*Mechanistic Interpretation of PCA Axes in Relation to Drying Rate*
-
-The negative relationship between PC1 and z_loss_rate indicates that ponds with higher PC1 scores experience slower drying rates, while those with lower PC1 scores dry more rapidly. Based on PCA loadings, PC1 represents a gradient of structural and realized shading opposed to exposure and vegetation dynamics. This suggests that ponds with greater canopy cover and higher midsummer shade persistence are more buffered against evaporative loss, while more exposed ponds with stronger vegetation change tend to experience faster water loss.
-
-This result provides strong support for the hypothesis that solar exposure and shading are primary drivers of drying rate in urban ponds. Importantly, this effect reflects the combined influence of both structural canopy and realized shading conditions, rather than either variable in isolation. Vegetation change, which loads negatively on PC1, appears to be associated with the exposed end of this gradient, suggesting that increased vegetation dynamics may co-occur with or respond to conditions that promote drying, rather than mitigating it.
-
-In contrast, PC2 does not significantly explain variation in drying rate, despite representing a meaningful environmental gradient involving depth and vegetation change opposed to thermal timing. This indicates that while basin capacity and ecological dynamics structure differences among ponds, they are not primary determinants of drying rate at the scale captured by this dataset.
-
-Similarly, PC3 does not significantly contribute to explaining drying rate, despite capturing variation in thermal timing and its relationship with depth and realized shade. Although this axis reflects important differences in how ponds experience midsummer energy input, these differences do not appear to translate directly into variation in overall drying rate, at least within the current sample.
-
-*Integrated Interpretation and Implications*
-
-Taken together, these results indicate that pond drying rates are primarily structured along a single dominant environmental gradient, corresponding to the balance between solar exposure and shading. While additional gradients related to basin capacity, vegetation dynamics, and thermal timing exist and contribute to overall environmental variation, they do not independently explain variation in drying rate once the primary shading gradient is accounted for.
-
-This finding reinforces the interpretation of PC1 as the key mechanistic axis linking environmental structure to drying behaviour. It also validates the use of PCA as a dimensionality reduction tool, as it isolates the dominant driver of drying within a multivariate system characterized by interacting processes.
-
-From a management perspective, this suggests that interventions targeting shade enhancement or reduction of solar exposure may be the most effective strategies for moderating drying rates in urban ponds. In contrast, modifications to depth or vegetation alone may have more limited or context-dependent effects on drying dynamics, unless they also influence the shading regime.
-
-At the same time, the moderate explanatory power of the models (R² ≈ 0.36–0.44) and the lack of significance for secondary components highlight that drying is not controlled by a single factor alone. Instead, it reflects the combined influence of multiple interacting processes, with shading acting as the dominant but not exclusive driver.
-
-
-############
-
-# MDA
-
-###########
-
-*Use of Discriminant Analysis as a Supplementary Approach*
-
-To further evaluate whether environmental gradients identified through PCA correspond to observed differences in pond drying outcomes, a multiple discriminant analysis (MDA) was conducted using drought class as the grouping variable. Whereas PCA preserves continuous variation in environmental conditions, MDA provides a constrained framework that maximizes separation among predefined groups, allowing assessment of whether these groups occupy distinct regions of environmental space.
-
-Given the small sample size and the expectation that pond drying reflects a continuum rather than discrete categories, MDA was used strictly as a supplementary analytical tool. The objective was not to define or validate discrete drought classes, but to examine whether the dominant environmental gradients associated with drying behaviour also contribute to partial separation among these classes.
-
-This distinction is important, as any observed separation is interpreted as evidence of underlying environmental structure rather than as confirmation of discrete ecological states. As such, MDA results are used to support and contextualize findings from PCA and regression analyses, rather than to establish independent conclusions.
-
-Performing the MDA using PCA scores
-```{r}
-library(MASS)
-
-# Use same model_df
-model_df$drought_class <- as.factor(metrics_wide_2$drought_class[complete_idx])
-
-mda_model <- lda(drought_class ~ PC1 + PC2, data = model_df)
-```
-
-MDA model
-```{r}
-mda_model
-```
-
-Predict + confusion matrix
-```{r}
-pred <- predict(mda_model)
-
-table(Predicted = pred$class, Actual = model_df$drought_class)
-```
-
-Plot discriminant space
-```{r}
-lda_scores <- as.data.frame(pred$x)
-lda_scores$class <- model_df$drought_class
-lda_scores$pond <- model_df$pond
-
-library(ggplot2)
-library(ggrepel)
-
-ggplot(lda_scores, aes(LD1, LD2, color = class)) +
-  geom_point(size = 4) +
-  geom_text_repel(aes(label = pond), size = 4) +
-  theme_minimal() +
-  labs(title = "MDA (LDA) of Drought Classes")
-```
-
-# Interpretation 
-
-Multiple discriminant analysis (MDA) was used to evaluate whether environmental gradients identified through PCA correspond to differences among drought classes. Using PC1 and PC2 as predictors, the analysis revealed partial but not complete separation among classes, with most of the discriminatory power concentrated along a single axis (LD1). Classification accuracy was moderate, with several misclassifications, reinforcing that drought response represents a continuum rather than discrete groupings.
-
-*Key Results*
-Group Means (in PCA space)
-- Dryout: PC1 = -0.025, PC2 = -0.643
-- Refill: PC1 = -0.216, PC2 = -0.086
-- Stable: PC1 = 0.242, PC2 = 0.729
-
-This shows a clear shift:
-
-- Stable ponds → higher PC1 and PC2
-- Dryout ponds → lower PC2 and near-neutral PC1
-- Refill ponds → intermediate
-
-*Discriminant Functions*
-
-LD1 (97.2% of separation):
-- PC2 loading = 0.945 (dominant)
-- PC1 loading = 0.149 (minor)
-
-LD2 (2.8% of separation):
-- PC1 loading = 0.669
-- PC2 loading = -0.155
-
-Interpretation:
-- LD1 is essentially a PC2-driven axis
-- LD2 is a weak PC1 refinement
-
-*Classification Performance*
-
-Confusion matrix:
-- Correct classifications: 9 / 15 (~60%)
-- Misclassifications: 6 / 15 (~40%)
-
-Patterns:
-- Dryout: 4 correct, 3 misclassified
-- Refill: 2 correct, 3 misclassified
-- Stable: 3 correct, 3 misclassified
-
-No class is cleanly separated.
-
-*Interpretation of Discriminant Axes*
-
-The first discriminant axis (LD1) captures the overwhelming majority of separation among drought classes (97.2%) and is strongly dominated by PC2. Given that PC2 represents a gradient of basin capacity and vegetation feedbacks opposed to thermal timing, this indicates that differences among drought classes are most strongly associated with depth, vegetation dynamics, and aspects of thermal structure, rather than with shading. Group means reinforce this pattern, with stable ponds exhibiting high PC2 values and dryout ponds characterized by lower PC2 values. This suggests that ponds with greater storage capacity and more pronounced vegetation dynamics tend to align with stable conditions, while those with lower capacity and differing thermal behavior are more likely to be associated with drying. Notably, this pattern contrasts with the regression results, where PC2 did not significantly explain variation in drying rate.
-
-The second discriminant axis (LD2) explains only a small proportion of variation (2.8%) and is primarily associated with PC1, which represents the gradient of structural and realized shading versus exposure. Because this axis contributes minimally to overall class separation, it should be interpreted cautiously. At most, it suggests a minor secondary role for shading in refining differences among drought classes, but not as a dominant mechanism driving group separation.
-
-*Integration with PCA and Regression Results*
-
-Taken together, the PCA, regression, and MDA results provide a consistent but nuanced picture of how environmental gradients influence pond drying dynamics. Both PCA and MDA confirm that ponds are structured along meaningful environmental gradients and that these gradients are related to drying outcomes. However, the two approaches highlight different aspects of this relationship.
-
-Regression results indicate that PC1, representing shading and exposure, is the primary driver of continuous variation in drying rate, with more shaded ponds drying more slowly. In contrast, MDA shows that separation among categorical drought classes is driven primarily by PC2, which reflects basin capacity, vegetation dynamics, and thermal structure. This distinction suggests that the factors controlling how fast ponds dry are not identical to those that differentiate broader drying outcomes.
-
-This apparent mismatch is not contradictory, but instead reveals a layered system. Shading-related processes captured by PC1 appear to regulate the rate of water loss, while capacity and system-level characteristics represented by PC2 influence how ponds are ultimately categorized as dryout, refill, or stable. In this sense, PC1 governs drying intensity, whereas PC2 contributes to broader system state tendencies.
-
-*Continuum of Drying Responses*
-
-The moderate classification accuracy (approximately 60%) and visible overlap among classes in discriminant space further indicate that drought classes do not form distinct environmental clusters. Instead, ponds occupy overlapping regions along continuous environmental gradients, where similar conditions can lead to different outcomes. This suggests that drying behavior is influenced by interacting factors, potential thresholds, or additional variables not fully captured in the current analysis.
-
-These findings support the use of PCA and regression as primary analytical tools, as they better capture the continuous and multivariate nature of pond drying processes, while MDA serves to illustrate how these gradients relate to categorical outcomes without imposing artificial boundaries.
-
-*Final Interpretation*
-
-Overall, the MDA results support the presence of structured environmental gradients but do not indicate strong separation among drought classes. Most of the discriminant power is driven by PC2, reflecting differences in basin capacity, vegetation dynamics, and thermal behavior, while the primary shading gradient represented by PC1 contributes less to categorical separation.
-
-When considered alongside regression results, this suggests that shading-related processes are the dominant drivers of drying rate, whereas capacity and system-level characteristics influence broader differences in drought outcomes without directly controlling drying intensity. Together, these results reinforce that pond drying dynamics are best understood as a continuous, multivariate process shaped by interacting environmental gradients, rather than as a set of discrete ecological states.
-
-
-
-##########
-
-# Total Synthesis Interpretation for Management 
-
-#########
-
-The results indicate that ponds do not fall into discrete functional categories, but instead occupy positions along continuous environmental gradients defined by interacting structural, hydrological, and climatic factors. This supports earlier analyses suggesting that multiple environmental configurations can contribute to drying dynamics. However, the present findings refine this interpretation by demonstrating that these gradients do not contribute equally to different aspects of pond behavior.
-
-Regression of PCA scores shows that variation in drying rate is primarily governed by a dominant gradient associated with structural and realized shading, as captured by PC1. Ponds with greater canopy cover and higher midsummer shade persistence consistently exhibit slower rates of water loss, indicating that solar exposure is the primary control on drying intensity. In contrast, other gradients related to basin capacity, vegetation dynamics, and thermal timing, while ecologically meaningful, do not independently explain variation in drying rate.
-
-At the same time, discriminant analysis suggests that these secondary gradients contribute to broader differences in drought outcomes. In particular, variation along PC2, representing basin capacity, vegetation feedbacks, and thermal structure, is more strongly associated with differences among dryout, refill, and stable ponds. This indicates that while shading governs how quickly ponds lose water, system-level characteristics influence how ponds respond to drying overall.
-
-Taken together, these results suggest that pond dynamics are structured by a shared underlying mechanism, with additional dimensions shaping system response. Ponds should therefore not be treated as entirely independent systems requiring fully individualized management strategies. Instead, they can be understood as variations along a common environmental continuum, where general controls apply broadly, but local conditions influence outcomes.
-
-From a management perspective, this supports a tiered approach. At the system level, efforts should focus on reducing solar exposure, as structural and realized shading emerge as the most consistent predictors of slower drying rates. Increasing canopy cover or enhancing shading around ponds is therefore likely to be the most effective strategy for moderating water loss under current climatic conditions.
-
-At the same time, pond-specific characteristics such as depth, vegetation dynamics, and thermal behavior influence how individual systems respond within this broader framework. Deeper ponds and those exhibiting different vegetation trajectories may be more likely to persist or transition between states, even if they experience similar exposure conditions. Vegetation, in particular, should not be assumed to be uniformly protective, as increased vegetation change appears to be associated with more exposed and dynamically drying systems rather than buffering against water loss.
-
-Accordingly, effective management should combine system-wide strategies targeting dominant controls on energy exposure with targeted, site-specific adjustments that account for basin capacity, vegetation behavior, and local thermal conditions. This approach recognizes that while the rate of drying is largely governed by a common mechanism, the ecological consequences and persistence of individual ponds depend on how these additional factors interact within each system.
-
-#########
+######## 
 
 CLUSTER ANALYSIS
 
-########
+######## 
 
 *Clustering Ponds Based on Environmental Conditions/Gradient*
 
-To further investigate the environmental gradients influencing pond drying, cluster analysis was conducted using the selected predictor variables. This analysis builds on the variable selection process, which identified a reduced set of key environmental factors representing shading, thermal conditions, and urbanization, while minimizing redundancy and ensuring interpretability.
+To further investigate the environmental gradients influencing pond
+drying, hierarchical cluster analysis using Ward’s method was conducted using the selected predictor
+variables. This analysis builds on the variable selection process, which
+identified a reduced set of key environmental factors representing
+shading, thermal conditions, and urbanization, while minimizing
+redundancy and ensuring interpretability.
 
-The cluster analysis was designed to directly address the leading research question: which environmental gradients differentiate ponds that dry out from those that remain stable or receive supplemental water? In addition, it responds to the secondary question of whether ponds form distinct environmental groupings or instead fall along a continuous gradient of conditions.
+The cluster analysis was designed to directly address the leading
+research question: which environmental gradients differentiate ponds
+that dry out from those that remain stable or receive supplemental
+water? In addition, it responds to the secondary question of whether
+ponds form distinct environmental groupings or instead fall along a
+continuous gradient of conditions.
 
-By grouping ponds based on similarities in the selected predictor variables, the analysis provides a way to identify whether discrete environmental “types” of ponds exist (e.g., highly urban and exposed vs. shaded and cooler), or whether variation in pond conditions and drying rates is more gradual. This approach complements earlier analyses (e.g., PCA and redundancy analysis) by translating continuous environmental gradients into potential group structures that can be more easily interpreted and compared.
+By grouping ponds based on similarities in the selected predictor
+variables, the analysis provides a way to identify whether discrete
+environmental “types” of ponds exist (e.g., highly urban and exposed vs.
+shaded and cooler), or whether variation in pond conditions and drying
+rates is more gradual. This approach complements earlier analyses (e.g.,
+PCA and redundancy analysis) by translating continuous environmental
+gradients into potential group structures that can be more easily
+interpreted and compared.
 
-Cluster analysis also allows for evaluation of the hypothesis that ponds with higher rates of water loss are characterized by warmer temperatures, reduced shading, and greater exposure to urban conditions. By comparing drying rates across clusters, it becomes possible to assess whether these conditions form distinct groups or whether drying behaviour varies continuously across environmental gradients.
-
+Cluster analysis also allows for evaluation of the hypothesis that ponds
+with higher rates of water loss are characterized by warmer
+temperatures, reduced shading, and greater exposure to urban conditions.
+By comparing drying rates across clusters, it becomes possible to assess
+whether these conditions form distinct groups or whether drying
+behaviour varies continuously across environmental gradients.
 
 Data preparation
+
 ```{r}
 # Selecting already chosen predictor variables
 selected_vars <- metrics_wide_2[, c(
@@ -617,17 +71,16 @@ selected_scaled <- scale(selected_vars)
 ```
 
 Running cluster analysis
+
 ```{r}
 # create distance matrix
 dist_matrix <- dist(selected_scaled , method = "euclidean")
 ```
 
-
 ```{r}
 # Hierarchical clustering (Ward’s method)
 hc <- hclust(dist_matrix, method = "ward.D2")
 ```
-
 
 ```{r}
 library(dendextend)
@@ -663,8 +116,11 @@ legend("topright",
 
 #Interpretation
 
+The hierarchical cluster analysis using Ward’s method revealed three primary clusters of ponds based on similarities in environmental conditions. At a cut height of approximately 5–6, the dendrogram separates the ponds into three main groups. The first cluster consists of a single pond (VAN), which joins the rest of the dendrogram at a high dissimilarity level, indicating that it is environmentally distinct from all other ponds. The second cluster includes BGL, RUP, AVL, SCT, BOO, CHS, GVI, and QED, and represents a group of ponds with moderate similarity across the selected environmental variables. The third cluster contains BGS, MCC, TRT, MSP, CSN, and JCO, which are more tightly grouped at lower heights, indicating greater similarity among these ponds.
 
+Across the dendrogram, drought classes (dryout, refill, stable) are distributed across all clusters rather than forming distinct groupings. Ponds with different drying outcomes are often grouped together, indicating that similar environmental conditions can correspond to different drying behaviours. 
 
+This lack of clear separation from the dendrogram support earlier findings from PCA, regression, and discriminant analysis, showing that ponds are structured along continuous environmental gradients rather than forming distinct types. While the cluster analysis identifies groupings in environmental space, these groupings represent positions along gradients of shading, thermal dynamics, vegetation feedbacks, and basin capacity, rather than fixed ecological states. Overall, while three clusters can be identified, the dendrogram does not show clear separation of ponds based on drought class, suggesting that environmental variation is gradual rather than divided into distinct categories.
 
 ```{r}
 # Compute WSS for different k
@@ -684,34 +140,22 @@ plot(1:10, wss,
      main = "Elbow Method for Optimal Clusters")
 ```
 
-*Interpretation
+#Interpretation
 
+The elbow method was used to evaluate the optimal number of clusters for grouping ponds based on environmental conditions, with the aim of assessing whether ponds form distinct patterns or fall along a continuous gradient of conditions. The total within-cluster sum of squares (WSS) was calculated for values of k ranging from 1 to 10. The results show a sharp decrease in WSS from k = 1 to k = 4, indicating that increasing the number of clusters substantially improves the grouping of ponds within this range. Beyond k = 4, the rate of decrease becomes more gradual, suggesting diminishing returns in reducing within-cluster variation. This pattern indicates that the elbow occurs around k = 4. However, the transition is relatively smooth rather than sharply defined, suggesting that there is no single, clearly optimal number of clusters based on WSS alone.
+
+
+*Justification for Selecting k = 3 Clusters*
+
+Although the elbow method suggests k = 4 as a potential optimal number of clusters, this solution did not produce groupings that were ecologically meaningful in the context of the study. Specifically, the four-cluster solution resulted in over-partitioning of ponds into smaller groups that did not clearly correspond to differences in environmental gradients or drying behaviour. In contrast, the dendrogram revealed a clear and interpretable separation into three primary clusters, capturing the dominant structure of environmental similarity among ponds. These three clusters align more closely with the study’s objective of identifying environmental gradients that differentiate drying behaviour, while maintaining interpretability in terms of shading, thermal dynamics, vegetation feedbacks, and basin capacity.
+
+Importantly, the three-cluster solution also supports the broader research question of whether ponds form distinct groups or fall along a continuum. The clusters identified at k = 3 show substantial overlap in drought classes, indicating that ponds with different rates of water loss are not cleanly separated into discrete categories. Instead, this pattern reinforces the interpretation that pond drying dynamics are structured along continuous environmental gradients. Therefore, k = 3 was selected as the most appropriate number of clusters, balancing statistical evidence with ecological relevance and consistency with the overall analytical framework.
 
 ```{r}
-# Cut dendrogram into 4 clusters
+# Cut dendrogram into 3 clusters
 metrics_wide_2$Cluster3 <- cutree(hc, k = 3)
-
-library(factoextra)
-
-# Clean scaled data
-scaled_clean <- selected_scaled[, apply(selected_scaled, 2, function(x) all(is.finite(x)))]
-
-# Add pond names
-rownames(scaled_clean) <- metrics_wide_2$pond_id
-
-# Use your existing clusters
-clusters_named <- factor(metrics_wide_2$Cluster3)
-
-# Plot
-fviz_cluster(
-  list(data = scaled_clean, cluster = clusters_named),
-  geom = "text",
-  repel = TRUE,
-  labelsize = 5,
-  ggtheme = theme_minimal(),
-  show.clust.cent = FALSE
-)
 ```
+
 *Comparing Clusters with Water loss (Z_loss_rate)*
 
 ```{r}
@@ -730,40 +174,56 @@ boxplot(z_loss_rate ~ factor(Cluster3,
                              labels = c("Cluster 1", "Cluster 2", "Cluster 3")),
         data = metrics_wide_2,
         col = c("#F8766D", "#00BA38", "#619CFF"),
-        main = "Water Loss (z_loss_rate) Across 4 Clusters",
+        main = "Water Loss (z_loss_rate) Across Clusters",
         xlab = "Cluster",
         ylab = "z_loss_rate")
 ```
-#Interpretation
 
+#Interpretation
 
 #Final intrepation for cluster analysis
 
-#How this fit with the PCA and MDA results - 
+#How this fit with the PCA and MDA results -
 
 #How this answers the research question and hypothesis.
 
-
-#########
+######### 
 
 Pond-based Risk Axes
 
-#########
+######### 
 
-To translate multivariate results into pond-specific management insights, PC1 was used as a composite index of exposure-related deficit. Because PC1 represents a gradient of increasing canopy cover and shading opposed by vegetation-driven exposure, lower PC1 scores indicate conditions associated with faster drying. Deficit scores were therefore calculated as the inverse of PC1, allowing ponds to be ranked according to their relative position along this gradient. To further diagnose the sources of deficit, variable-level contributions to PC1 were decomposed using PCA loadings and standardized values. This approach identifies which factors, such as low canopy cover or high vegetation change, contribute most strongly to each pond’s position along the exposure gradient. By linking these deficits directly to the primary axis controlling drying rate, this method provides a statistically grounded basis for prioritizing site-specific management interventions.
+To translate multivariate results into pond-specific management
+insights, PC1 was used as a composite index of exposure-related deficit.
+Because PC1 represents a gradient of increasing canopy cover and shading
+opposed by vegetation-driven exposure, lower PC1 scores indicate
+conditions associated with faster drying. Deficit scores were therefore
+calculated as the inverse of PC1, allowing ponds to be ranked according
+to their relative position along this gradient. To further diagnose the
+sources of deficit, variable-level contributions to PC1 were decomposed
+using PCA loadings and standardized values. This approach identifies
+which factors, such as low canopy cover or high vegetation change,
+contribute most strongly to each pond’s position along the exposure
+gradient. By linking these deficits directly to the primary axis
+controlling drying rate, this method provides a statistically grounded
+basis for prioritizing site-specific management interventions.
 
 Standardize PC1 scores into a “deficit” metric.
+
 ```{r}
 model_df$pc1_deficit_z <- scale(-model_df$PC1)
 ```
 
-- Larger values = greater “deficit” relative to optimal conditions
-- Directly tied to your regression result
-- Multivariate by construction
+-   Larger values = greater “deficit” relative to optimal conditions
+-   Directly tied to your regression result
+-   Multivariate by construction
 
-Each variable contributes to PC1 with a loading. So a deficit in a variable should be interpreted relative to its loading, and its standardized value.
+Each variable contributes to PC1 with a loading. So a deficit in a
+variable should be interpreted relative to its loading, and its
+standardized value.
 
 Method: Signed contribution to PC1 for each pond
+
 ```{r}
 pca_result <- prcomp(
   metrics_wide_2[, c("canopy_50",
@@ -785,18 +245,22 @@ loadings <- pca_result$rotation[, "PC1"]
 loadings
 
 ```
+
 Calculate contributions
+
 ```{r}
 contributions <- sweep(scaled_data, 2, loadings, "*")
 ```
 
 Calculate deficits
+
 ```{r}
 deficits <- ifelse(contributions < 0, abs(contributions), 0)
 deficits_df <- as.data.frame(deficits)
 ```
 
 Add pond names
+
 ```{r}
 deficits_df$pond <- metrics_wide_2$pond
 
@@ -805,6 +269,7 @@ model_df$pc1_deficit <- max(model_df$PC1) - model_df$PC1
 ```
 
 Visual
+
 ```{r}
 #install.packages("reshape2")
 library(reshape2)
@@ -817,59 +282,126 @@ ggplot(deficits_long, aes(x = variable, y = value, fill = pond)) +
   labs(y = "Deficit Contribution", x = "Variable") +
   theme_minimal()
 ```
+
 Each bar represents:
 
-How much that variable is pulling a pond toward the “high drying risk” side of PC1
+How much that variable is pulling a pond toward the “high drying risk”
+side of PC1
 
 Important points:
 
-Values are only shown when they contribute negatively to PC1
-Larger bars = stronger contribution to drying risk
-Zero means that variable is not contributing to risk for that pond
-
+Values are only shown when they contribute negatively to PC1 Larger bars
+= stronger contribution to drying risk Zero means that variable is not
+contributing to risk for that pond
 
 ## Interpretation of Pond-Based Risk Axes
+
 *Structure of the PC1 Deficit Metric*
 
-The PC1-based deficit metric provides a pond-specific measure of exposure-related risk, directly linked to the primary gradient controlling drying rate. Because PC1 is defined by positive contributions from canopy cover (0.646) and July mean shade fraction (0.546), and a negative contribution from vegetation percent change (-0.486), ponds with low PC1 scores are characterized by reduced shading and increased vegetation-driven exposure. Depth (0.139) and thermal timing (0.169) contribute only weakly to this axis.
+The PC1-based deficit metric provides a pond-specific measure of
+exposure-related risk, directly linked to the primary gradient
+controlling drying rate. Because PC1 is defined by positive
+contributions from canopy cover (0.646) and July mean shade fraction
+(0.546), and a negative contribution from vegetation percent change
+(-0.486), ponds with low PC1 scores are characterized by reduced shading
+and increased vegetation-driven exposure. Depth (0.139) and thermal
+timing (0.169) contribute only weakly to this axis.
 
-By inverting PC1, higher deficit scores therefore represent ponds that are more exposed, less shaded, and more dynamically changing, conditions associated with faster drying in the regression analysis. Decomposing PC1 into variable-level contributions allows identification of which specific factors are driving this exposure for each pond.
+By inverting PC1, higher deficit scores therefore represent ponds that
+are more exposed, less shaded, and more dynamically changing, conditions
+associated with faster drying in the regression analysis. Decomposing
+PC1 into variable-level contributions allows identification of which
+specific factors are driving this exposure for each pond.
 
 *Dominant Drivers of Risk Across Ponds*
 
-Across ponds, the largest deficit contributions are consistently associated with canopy cover, July mean shade fraction, and vegetation percent change, reflecting the dominant structure of PC1. In most cases, high risk is driven by a combination of low canopy cover and reduced realized shading, often accompanied by positive vegetation change, which reinforces exposure rather than mitigating it.
+Across ponds, the largest deficit contributions are consistently
+associated with canopy cover, July mean shade fraction, and vegetation
+percent change, reflecting the dominant structure of PC1. In most cases,
+high risk is driven by a combination of low canopy cover and reduced
+realized shading, often accompanied by positive vegetation change, which
+reinforces exposure rather than mitigating it.
 
-Canopy cover emerges as the most consistent contributor to deficit, with several ponds showing large negative contributions along this variable. July MSF shows a similar pattern, indicating that both structural and realized shading are aligned in driving exposure-related risk. This reinforces the earlier PCA result that these variables operate together as a shared shading gradient.
+Canopy cover emerges as the most consistent contributor to deficit, with
+several ponds showing large negative contributions along this variable.
+July MSF shows a similar pattern, indicating that both structural and
+realized shading are aligned in driving exposure-related risk. This
+reinforces the earlier PCA result that these variables operate together
+as a shared shading gradient.
 
-Vegetation percent change contributes strongly to deficit in a subset of ponds, particularly where large positive values coincide with low shading. Because this variable loads negatively on PC1, increases in vegetation are associated with movement toward the high-risk end of the gradient. This suggests that vegetation dynamics are not acting as a buffering mechanism, but instead are linked to exposed, rapidly changing conditions, potentially reflecting shallow water expansion or ecological responses to drying.
+Vegetation percent change contributes strongly to deficit in a subset of
+ponds, particularly where large positive values coincide with low
+shading. Because this variable loads negatively on PC1, increases in
+vegetation are associated with movement toward the high-risk end of the
+gradient. This suggests that vegetation dynamics are not acting as a
+buffering mechanism, but instead are linked to exposed, rapidly changing
+conditions, potentially reflecting shallow water expansion or ecological
+responses to drying.
 
 *Secondary and Minor Contributors*
 
-In contrast, depth and thermal timing contribute relatively little to PC1-based deficit across most ponds. While some ponds show moderate contributions from these variables, their overall influence is small compared to shading-related factors. This aligns with the regression results, which showed that these variables do not independently control drying rate.
+In contrast, depth and thermal timing contribute relatively little to
+PC1-based deficit across most ponds. While some ponds show moderate
+contributions from these variables, their overall influence is small
+compared to shading-related factors. This aligns with the regression
+results, which showed that these variables do not independently control
+drying rate.
 
-However, their presence in some ponds suggests that they may still influence system behavior in combination with other factors, particularly in shaping broader drought outcomes rather than directly controlling drying intensity.
+However, their presence in some ponds suggests that they may still
+influence system behavior in combination with other factors,
+particularly in shaping broader drought outcomes rather than directly
+controlling drying intensity.
 
 *Pond-Specific Risk Profiles*
 
-The deficit decomposition highlights that while ponds share a common exposure gradient, the sources of risk differ among ponds. Some ponds are primarily driven by low canopy cover, others by reduced realized shading, and others by strong vegetation change. In several cases, multiple factors act together, producing compounded exposure.
+The deficit decomposition highlights that while ponds share a common
+exposure gradient, the sources of risk differ among ponds. Some ponds
+are primarily driven by low canopy cover, others by reduced realized
+shading, and others by strong vegetation change. In several cases,
+multiple factors act together, producing compounded exposure.
 
-This reinforces the interpretation that ponds occupy different positions along a shared environmental continuum, but arrive there through different combinations of underlying conditions. As a result, two ponds with similar overall deficit scores may require different management interventions depending on which variables are driving their position along PC1.
+This reinforces the interpretation that ponds occupy different positions
+along a shared environmental continuum, but arrive there through
+different combinations of underlying conditions. As a result, two ponds
+with similar overall deficit scores may require different management
+interventions depending on which variables are driving their position
+along PC1.
 
 *Management-Relevant Interpretation*
 
-These results provide a direct link between the statistical analysis and actionable management priorities. Because PC1 is the dominant predictor of drying rate, variables contributing to PC1 deficit represent the most immediate targets for intervention.
+These results provide a direct link between the statistical analysis and
+actionable management priorities. Because PC1 is the dominant predictor
+of drying rate, variables contributing to PC1 deficit represent the most
+immediate targets for intervention.
 
-The consistent importance of canopy cover and realized shading indicates that increasing shading is the most effective system-wide strategy for reducing drying risk. This may involve enhancing surrounding canopy, modifying vegetation structure, or otherwise increasing shade persistence during peak summer conditions.
+The consistent importance of canopy cover and realized shading indicates
+that increasing shading is the most effective system-wide strategy for
+reducing drying risk. This may involve enhancing surrounding canopy,
+modifying vegetation structure, or otherwise increasing shade
+persistence during peak summer conditions.
 
-At the same time, the role of vegetation change suggests that vegetation should be managed strategically rather than assumed to provide passive protection. In some ponds, increasing vegetation may actually coincide with greater exposure and faster drying, indicating a need for more targeted management of plant dynamics.
+At the same time, the role of vegetation change suggests that vegetation
+should be managed strategically rather than assumed to provide passive
+protection. In some ponds, increasing vegetation may actually coincide
+with greater exposure and faster drying, indicating a need for more
+targeted management of plant dynamics.
 
-Although depth and thermal timing are not primary drivers of drying rate, they may still influence how ponds respond to exposure, particularly in terms of persistence and resilience. As such, they remain relevant for site-specific considerations, even if they are not the primary focus for reducing drying intensity.
+Although depth and thermal timing are not primary drivers of drying
+rate, they may still influence how ponds respond to exposure,
+particularly in terms of persistence and resilience. As such, they
+remain relevant for site-specific considerations, even if they are not
+the primary focus for reducing drying intensity.
 
-*Final Interpretation*
-The PC1-based deficit analysis confirms that drying risk is primarily driven by a shared exposure gradient, with shading as the dominant control. However, the variable-level breakdown reveals that different ponds reach high-risk conditions through different combinations of factors, highlighting the need for a management approach that combines system-wide shading strategies with pond-specific interventions targeting the dominant sources of exposure.
-
+*Final Interpretation* The PC1-based deficit analysis confirms that
+drying risk is primarily driven by a shared exposure gradient, with
+shading as the dominant control. However, the variable-level breakdown
+reveals that different ponds reach high-risk conditions through
+different combinations of factors, highlighting the need for a
+management approach that combines system-wide shading strategies with
+pond-specific interventions targeting the dominant sources of exposure.
 
 Filtering to only the dry-out ponds
+
 ```{r}
 dryout_ponds <- model_df$pond[model_df$drought_class == "dryout"]
 
@@ -877,6 +409,7 @@ deficits_dryout <- deficits_df[deficits_df$pond %in% dryout_ponds, ]
 ```
 
 Plot
+
 ```{r}
 library(reshape2)
 
@@ -898,64 +431,97 @@ ggplot(deficits_dryout_long, aes(x = variable, y = value)) +
 ```
 
 # Pond-Specific Deficit Interpretation (Dryout Ponds)
-These dryout ponds do not share a single pathway to high drying risk. Instead, they reach similar outcomes through different combinations of deficits along the same PC1 gradient. That is, dryout ponds are not uniformly driven by the same deficit. While reduced shading is the dominant system-wide mechanism, individual ponds exhibit distinct deficit profiles, including structural canopy limitations, reduced realized shading, compound exposure effects, and, in some cases, capacity constraints. This indicates that effective management should prioritize shading at the system level while tailoring interventions to the dominant deficit mechanisms within each pond.
 
+These dryout ponds do not share a single pathway to high drying risk.
+Instead, they reach similar outcomes through different combinations of
+deficits along the same PC1 gradient. That is, dryout ponds are not
+uniformly driven by the same deficit. While reduced shading is the
+dominant system-wide mechanism, individual ponds exhibit distinct
+deficit profiles, including structural canopy limitations, reduced
+realized shading, compound exposure effects, and, in some cases,
+capacity constraints. This indicates that effective management should
+prioritize shading at the system level while tailoring interventions to
+the dominant deficit mechanisms within each pond.
 
 *BOO*
 
-BOO shows low overall deficit, with small contributions from canopy and thermal timing, and a moderate contribution from depth.
+BOO shows low overall deficit, with small contributions from canopy and
+thermal timing, and a moderate contribution from depth.
 
-This is not a strongly exposed pond in the same way as others. Its position on the drying side of PC1 appears to be driven more by limited basin capacity than by extreme shading deficits. In other words, BOO may not be highly exposed, but it lacks sufficient storage to buffer water loss.
+This is not a strongly exposed pond in the same way as others. Its
+position on the drying side of PC1 appears to be driven more by limited
+basin capacity than by extreme shading deficits. In other words, BOO may
+not be highly exposed, but it lacks sufficient storage to buffer water
+loss.
 
-Interpretation:
-Drying here is likely capacity-limited rather than exposure-driven. Increasing shading may help, but depth constraints are likely a key factor.
+Interpretation: Drying here is likely capacity-limited rather than
+exposure-driven. Increasing shading may help, but depth constraints are
+likely a key factor.
 
 *CSN*
 
-CSN shows a dominant deficit from july_msf, with a secondary contribution from vegetation change.
+CSN shows a dominant deficit from july_msf, with a secondary
+contribution from vegetation change.
 
-This is a clear signal of low realized shading, even if structural canopy may not be extremely low. The vegetation contribution reinforces that this pond is dynamically responding under exposed conditions.
+This is a clear signal of low realized shading, even if structural
+canopy may not be extremely low. The vegetation contribution reinforces
+that this pond is dynamically responding under exposed conditions.
 
-Interpretation:
-CSN is primarily a realized shade deficit system. Management should focus on improving functional shading during peak summer, not just canopy presence.
+Interpretation: CSN is primarily a realized shade deficit system.
+Management should focus on improving functional shading during peak
+summer, not just canopy presence.
 
 *JCO*
 
-JCO shows moderate contributions from july_msf and depth, with minimal influence from other variables.
+JCO shows moderate contributions from july_msf and depth, with minimal
+influence from other variables.
 
-This suggests a mixed mechanism, where both reduced shading and limited storage contribute to drying. Neither factor is extreme on its own, but together they push the pond toward higher risk.
+This suggests a mixed mechanism, where both reduced shading and limited
+storage contribute to drying. Neither factor is extreme on its own, but
+together they push the pond toward higher risk.
 
-Interpretation:
-JCO represents a combined exposure and capacity limitation, requiring a balanced approach to both shading and storage considerations.
+Interpretation: JCO represents a combined exposure and capacity
+limitation, requiring a balanced approach to both shading and storage
+considerations.
 
 *MSP*
 
-MSP stands out with a very large canopy deficit, far exceeding other variables, along with smaller contributions from MSF, thermal timing, and depth.
+MSP stands out with a very large canopy deficit, far exceeding other
+variables, along with smaller contributions from MSF, thermal timing,
+and depth.
 
-This is the clearest example of a structural exposure-driven system. The dominant issue is lack of canopy cover, which likely drives increased solar input and downstream drying processes.
+This is the clearest example of a structural exposure-driven system. The
+dominant issue is lack of canopy cover, which likely drives increased
+solar input and downstream drying processes.
 
-Interpretation:
-MSP is strongly canopy-limited, making it highly responsive to interventions that increase structural shading. This is a high-priority candidate for canopy enhancement.
+Interpretation: MSP is strongly canopy-limited, making it highly
+responsive to interventions that increase structural shading. This is a
+high-priority candidate for canopy enhancement.
 
 *QED*
 
-QED shows distributed deficits across multiple variables, including MSF, vegetation change, thermal timing, and some canopy contribution.
+QED shows distributed deficits across multiple variables, including MSF,
+vegetation change, thermal timing, and some canopy contribution.
 
-No single variable dominates, but the combined effect is substantial. This indicates a compound exposure system, where multiple moderate deficits align rather than a single extreme driver.
+No single variable dominates, but the combined effect is substantial.
+This indicates a compound exposure system, where multiple moderate
+deficits align rather than a single extreme driver.
 
-Interpretation:
-QED is a multi-factor exposure system, requiring integrated management rather than a single targeted intervention. Shading improvements will help, but vegetation dynamics and thermal conditions also need to be considered.
-
-
+Interpretation: QED is a multi-factor exposure system, requiring
+integrated management rather than a single targeted intervention.
+Shading improvements will help, but vegetation dynamics and thermal
+conditions also need to be considered.
 
 #### *Total deficit by pond*
 
 Compare overall deficit between groups:
+
 ```{r}
 aggregate(pc1_deficit ~ drought_class, data = model_df, mean)
 ```
 
 And visualize:
+
 ```{r}
 library(ggplot2)
 
@@ -964,14 +530,44 @@ ggplot(model_df, aes(x = drought_class, y = pc1_deficit, fill = drought_class)) 
   geom_jitter(width = 0.1) +
   theme_minimal()
 ```
-Refill ponds are not stable because of their environment; they are stable because of intervention. Some refill ponds have deficit values as high or higher than dryout ponds. Refill ponds occupy a similar and in some cases more exposed position along the PC1-derived deficit gradient compared to dryout ponds, indicating that they share underlying environmental conditions associated with rapid water loss. This suggests that their current persistence is likely maintained by artificial refilling rather than inherent resistance to drying. In this context, refill ponds can be interpreted as systems with latent drying risk, where environmental drivers of exposure, particularly reduced shading, are comparable to those observed in dryout ponds. This highlights the extent to which management intervention may be compensating for otherwise unfavorable conditions and underscores the importance of distinguishing between environmentally stable systems and those that are maintained through external inputs.
+
+Refill ponds are not stable because of their environment; they are
+stable because of intervention. Some refill ponds have deficit values as
+high or higher than dryout ponds. Refill ponds occupy a similar and in
+some cases more exposed position along the PC1-derived deficit gradient
+compared to dryout ponds, indicating that they share underlying
+environmental conditions associated with rapid water loss. This suggests
+that their current persistence is likely maintained by artificial
+refilling rather than inherent resistance to drying. In this context,
+refill ponds can be interpreted as systems with latent drying risk,
+where environmental drivers of exposure, particularly reduced shading,
+are comparable to those observed in dryout ponds. This highlights the
+extent to which management intervention may be compensating for
+otherwise unfavorable conditions and underscores the importance of
+distinguishing between environmentally stable systems and those that are
+maintained through external inputs.
 
 Comparing refill vs. dryout directly
+
 ```{r}
 aggregate(pc1_deficit ~ drought_class, data = model_df, mean)
 ```
 
-*Refill ponds are, on average, more exposed than dryout ponds.* Group-level comparison of PC1-based deficit scores revealed that refill ponds exhibited the highest average deficit (2.84), followed by dryout ponds (2.65), with stable ponds showing the lowest values (2.39). This pattern indicates that refill ponds occupy the most exposed positions along the primary environmental gradient associated with drying rate, characterized by reduced canopy cover, lower realized shading, and greater vegetation-driven exposure. Despite this, refill ponds do not consistently exhibit complete drying, suggesting that their persistence is maintained through artificial water inputs rather than inherent environmental buffering. In contrast, stable ponds are associated with lower deficit values, reflecting greater shading and reduced exposure. These results highlight that PC1 captures underlying drying pressure, while observed pond outcomes reflect the interaction between environmental conditions and management intervention.
+*Refill ponds are, on average, more exposed than dryout ponds.*
+Group-level comparison of PC1-based deficit scores revealed that refill
+ponds exhibited the highest average deficit (2.84), followed by dryout
+ponds (2.65), with stable ponds showing the lowest values (2.39). This
+pattern indicates that refill ponds occupy the most exposed positions
+along the primary environmental gradient associated with drying rate,
+characterized by reduced canopy cover, lower realized shading, and
+greater vegetation-driven exposure. Despite this, refill ponds do not
+consistently exhibit complete drying, suggesting that their persistence
+is maintained through artificial water inputs rather than inherent
+environmental buffering. In contrast, stable ponds are associated with
+lower deficit values, reflecting greater shading and reduced exposure.
+These results highlight that PC1 captures underlying drying pressure,
+while observed pond outcomes reflect the interaction between
+environmental conditions and management intervention.
 
 *Approach 1: Predict “Expected Drying Pressure”*
 
@@ -979,7 +575,9 @@ aggregate(pc1_deficit ~ drought_class, data = model_df, mean)
 names(model_df)
 ```
 
-Use the earlier regression model to generate predicted z_loss_rate for refill ponds specifically.
+Use the earlier regression model to generate predicted z_loss_rate for
+refill ponds specifically.
+
 ```{r}
 model <- lm(z_loss_rate ~ PC1, data = model_df)
 
@@ -987,11 +585,13 @@ model_df$predicted_loss <- predict(model, newdata = model_df)
 ```
 
 Then look at refill ponds:
+
 ```{r}
 subset(model_df, drought_class == "refill")[, c("pond", "PC1", "pc1_deficit", "predicted_loss")]
 ```
 
 Rank refill ponds by vulnerability
+
 ```{r}
 refill_df <- subset(model_df, drought_class == "refill")
 
@@ -1004,12 +604,33 @@ refill_df[, c("pond", "PC1", "pc1_deficit", "predicted_loss")]
 cor(model_df$PC1, model_df$predicted_loss)
 ```
 
-Interpretation: Refill ponds span the full range of the exposure gradient, from conditions comparable to stable ponds (BGL) to conditions exceeding those of dryout ponds (BGS). Some refill ponds exhibit environmental conditions consistent with rapid drying, suggesting their persistence is dependent on continued water inputs.
+Interpretation: Refill ponds span the full range of the exposure
+gradient, from conditions comparable to stable ponds (BGL) to conditions
+exceeding those of dryout ponds (BGS). Some refill ponds exhibit
+environmental conditions consistent with rapid drying, suggesting their
+persistence is dependent on continued water inputs.
 
-Refill ponds exhibited substantial variation in predicted drying pressure, spanning a wide range of positions along the PC1 exposure gradient. Predicted drying values ranged from -0.59 in BGL (PC1 = 1.42; deficit = 1.21), indicating low exposure and relatively low drying pressure, to 0.67 in BGS (PC1 = -1.61; deficit = 4.24), representing the highest exposure and strongest predicted drying pressure among refill ponds. Intermediate systems such as RUP (predicted = -0.26; deficit = 2.00) and GVI (predicted = 0.17; deficit = 3.03) occupied transitional positions, while MCC (predicted = 0.46; deficit = 3.74) aligned closely with high-risk conditions. Notably, the group mean PC1 deficit for refill ponds (2.84) exceeded that of dryout ponds (2.65) and stable ponds (2.39), indicating that refill ponds, on average, occupy more exposed positions along the primary gradient controlling drying rate. Together, these results demonstrate that refill ponds are not environmentally uniform, but instead span a continuum from low-risk systems to highly exposed, intervention-dependent systems, with some ponds exhibiting predicted drying pressures comparable to or exceeding those observed in dryout ponds.
-
+Refill ponds exhibited substantial variation in predicted drying
+pressure, spanning a wide range of positions along the PC1 exposure
+gradient. Predicted drying values ranged from -0.59 in BGL (PC1 = 1.42;
+deficit = 1.21), indicating low exposure and relatively low drying
+pressure, to 0.67 in BGS (PC1 = -1.61; deficit = 4.24), representing the
+highest exposure and strongest predicted drying pressure among refill
+ponds. Intermediate systems such as RUP (predicted = -0.26; deficit =
+2.00) and GVI (predicted = 0.17; deficit = 3.03) occupied transitional
+positions, while MCC (predicted = 0.46; deficit = 3.74) aligned closely
+with high-risk conditions. Notably, the group mean PC1 deficit for
+refill ponds (2.84) exceeded that of dryout ponds (2.65) and stable
+ponds (2.39), indicating that refill ponds, on average, occupy more
+exposed positions along the primary gradient controlling drying rate.
+Together, these results demonstrate that refill ponds are not
+environmentally uniform, but instead span a continuum from low-risk
+systems to highly exposed, intervention-dependent systems, with some
+ponds exhibiting predicted drying pressures comparable to or exceeding
+those observed in dryout ponds.
 
 *Approach 2: Compare refill ponds to dryout range*
+
 ```{r}
 subset_df <- subset(model_df, drought_class %in% c("dryout", "refill"))
 
@@ -1020,12 +641,14 @@ ggplot(subset_df, aes(x = drought_class, y = pc1_deficit, fill = drought_class))
 ```
 
 Get dryout range:
+
 ```{r}
 dryout_range <- range(model_df$pc1_deficit[model_df$drought_class == "dryout"])
 dryout_range
 ```
 
 Plot
+
 ```{r}
 ggplot(model_df, aes(x = drought_class, y = pc1_deficit)) +
   geom_jitter(width = 0.1, size = 2) +
@@ -1035,6 +658,7 @@ ggplot(model_df, aes(x = drought_class, y = pc1_deficit)) +
 ```
 
 Identify refill ponds overlapping dryout range:
+
 ```{r}
 refill_df <- subset(model_df, drought_class == "refill")
 
@@ -1045,18 +669,35 @@ refill_df
 ```
 
 Density plot
+
 ```{r}
 ggplot(model_df, aes(x = pc1_deficit, fill = drought_class)) +
   geom_density(alpha = 0.4) +
   theme_minimal()
 ```
 
-Interpretation: 
-This anchors refill ponds directly against the observed environmental envelope of dryout ponds. Comparison of refill ponds to the observed dryout range of PC1-based deficit values (1.99 to 3.00) indicates substantial overlap in environmental conditions associated with drying. Two refill ponds, RUP (1.996) and GVI (3.031), fall directly within or at the boundary of the dryout range, while MCC (3.744) and BGS (4.240) exceed the upper bound, indicating exposure levels greater than those observed in any dryout pond. Only BGL (1.211) falls clearly below the dryout range, suggesting comparatively lower vulnerability. This pattern demonstrates that 4 out of 5 refill ponds (80%) occupy environmental conditions consistent with or more extreme than those associated with dryout, despite not exhibiting complete drying. These results reinforce that refill ponds are not environmentally distinct from dryout systems, but instead frequently experience comparable or elevated exposure along the primary gradient controlling drying rate. The persistence of these ponds therefore likely reflects the influence of artificial water inputs rather than inherent resistance to drying, with several refill ponds representing highly exposed, intervention-dependent systems.
-
-
+Interpretation: This anchors refill ponds directly against the observed
+environmental envelope of dryout ponds. Comparison of refill ponds to
+the observed dryout range of PC1-based deficit values (1.99 to 3.00)
+indicates substantial overlap in environmental conditions associated
+with drying. Two refill ponds, RUP (1.996) and GVI (3.031), fall
+directly within or at the boundary of the dryout range, while MCC
+(3.744) and BGS (4.240) exceed the upper bound, indicating exposure
+levels greater than those observed in any dryout pond. Only BGL (1.211)
+falls clearly below the dryout range, suggesting comparatively lower
+vulnerability. This pattern demonstrates that 4 out of 5 refill ponds
+(80%) occupy environmental conditions consistent with or more extreme
+than those associated with dryout, despite not exhibiting complete
+drying. These results reinforce that refill ponds are not
+environmentally distinct from dryout systems, but instead frequently
+experience comparable or elevated exposure along the primary gradient
+controlling drying rate. The persistence of these ponds therefore likely
+reflects the influence of artificial water inputs rather than inherent
+resistance to drying, with several refill ponds representing highly
+exposed, intervention-dependent systems.
 
 *Approach 3: Rank refill ponds by vulnerability*
+
 ```{r}
 refill_df <- subset(model_df, drought_class == "refill")
 
@@ -1065,7 +706,10 @@ refill_ranked <- refill_df[order(-refill_df$pc1_deficit),
 
 refill_ranked
 ```
-Since we already established dryout range = 1.99 to 3.00. Ties refill ponds to dryout range.
+
+Since we already established dryout range = 1.99 to 3.00. Ties refill
+ponds to dryout range.
+
 ```{r}
 dryout_range <- c(1.989573, 3.004020)
 
@@ -1076,33 +720,77 @@ refill_ranked$vulnerability <- ifelse(
 
 refill_ranked
 ```
-Interpretation: 
 
-Among refill ponds, there is a clear gradient in latent drying vulnerability once you remove artificial inputs. Three ponds fall well into the “would likely dry out” space: BGS (PC1 = –1.61, predicted loss = 0.67), MCC (–1.12, 0.46), and GVI (–0.40, 0.17). These are not marginal cases. Their predicted loss values are positive and relatively high, meaning their environmental conditions align closely with your observed dry-out ponds. BGS in particular sits at the extreme end, with the largest PC1 deficit (4.24), indicating a substantial mismatch between its current state and the stability threshold.
+Interpretation:
 
-RUP (PC1 = 0.63, predicted loss = –0.26) sits near the boundary. It falls within the dry-out envelope but does not strongly exceed it, suggesting it may be conditionally stable and sensitive to moderate shifts in inputs or climate.
+Among refill ponds, there is a clear gradient in latent drying
+vulnerability once you remove artificial inputs. Three ponds fall well
+into the “would likely dry out” space: BGS (PC1 = –1.61, predicted loss
+= 0.67), MCC (–1.12, 0.46), and GVI (–0.40, 0.17). These are not
+marginal cases. Their predicted loss values are positive and relatively
+high, meaning their environmental conditions align closely with your
+observed dry-out ponds. BGS in particular sits at the extreme end, with
+the largest PC1 deficit (4.24), indicating a substantial mismatch
+between its current state and the stability threshold.
 
-BGL (PC1 = 1.42, predicted loss = –0.59) is the only refill pond clearly positioned in a stable region. Its positive PC1 score and strongly negative predicted loss indicate environmental conditions that are inherently resistant to drying, even without supplementation.
+RUP (PC1 = 0.63, predicted loss = –0.26) sits near the boundary. It
+falls within the dry-out envelope but does not strongly exceed it,
+suggesting it may be conditionally stable and sensitive to moderate
+shifts in inputs or climate.
 
-The key point is this: refill ponds are not a homogeneous group. Your results show a hidden vulnerability structure, where some ponds are effectively being kept wet by management rather than environmental resilience. If inputs were removed, at least half of these systems would likely behave more like dry-out ponds, with BGS and MCC being the most at risk.
+BGL (PC1 = 1.42, predicted loss = –0.59) is the only refill pond clearly
+positioned in a stable region. Its positive PC1 score and strongly
+negative predicted loss indicate environmental conditions that are
+inherently resistant to drying, even without supplementation.
 
+The key point is this: refill ponds are not a homogeneous group. Your
+results show a hidden vulnerability structure, where some ponds are
+effectively being kept wet by management rather than environmental
+resilience. If inputs were removed, at least half of these systems would
+likely behave more like dry-out ponds, with BGS and MCC being the most
+at risk.
 
-*Interpretation of the 3 methods*
-Here, they align remarkably well, and that is what gives your result real weight.
+*Interpretation of the 3 methods* Here, they align remarkably well, and
+that is what gives your result real weight.
 
-Across all three approaches, refill ponds consistently separate into two distinct groups: those that are structurally vulnerable to drying and those that are inherently stable regardless of inputs. The regression-based predictions show that BGS (predicted loss = 0.67), MCC (0.46), and GVI (0.17) all fall within or exceed the dry-out range, indicating that their environmental conditions closely match those of observed dry-out ponds. The PC1 deficit analysis reinforces this, with these same ponds showing the largest deviations from the stability threshold (4.24, 3.74, and 3.03, respectively), confirming that they are not just statistically similar to dry-out ponds, but meaningfully displaced along the dominant environmental gradient driving water loss.
+Across all three approaches, refill ponds consistently separate into two
+distinct groups: those that are structurally vulnerable to drying and
+those that are inherently stable regardless of inputs. The
+regression-based predictions show that BGS (predicted loss = 0.67), MCC
+(0.46), and GVI (0.17) all fall within or exceed the dry-out range,
+indicating that their environmental conditions closely match those of
+observed dry-out ponds. The PC1 deficit analysis reinforces this, with
+these same ponds showing the largest deviations from the stability
+threshold (4.24, 3.74, and 3.03, respectively), confirming that they are
+not just statistically similar to dry-out ponds, but meaningfully
+displaced along the dominant environmental gradient driving water loss.
 
-The ranking approach makes this pattern unavoidable. When ordered by vulnerability, the same three ponds consistently occupy the highest-risk positions, followed by RUP, which sits near the threshold (predicted loss = –0.26; deficit = 2.00) and appears conditionally stable. Only BGL (predicted loss = –0.59; deficit = 1.21) remains clearly separated as a low-risk system, with environmental characteristics that place it firmly outside the dry-out space.
+The ranking approach makes this pattern unavoidable. When ordered by
+vulnerability, the same three ponds consistently occupy the highest-risk
+positions, followed by RUP, which sits near the threshold (predicted
+loss = –0.26; deficit = 2.00) and appears conditionally stable. Only BGL
+(predicted loss = –0.59; deficit = 1.21) remains clearly separated as a
+low-risk system, with environmental characteristics that place it firmly
+outside the dry-out space.
 
-What matters here is the convergence. These are not three independent answers producing noise. They are three different lenses on the same underlying gradient, and they all identify the same structure. That tells you the signal is strong.
+What matters here is the convergence. These are not three independent
+answers producing noise. They are three different lenses on the same
+underlying gradient, and they all identify the same structure. That
+tells you the signal is strong.
 
-The broader implication is hard to ignore. Refill ponds are not a coherent ecological category. Instead, they mask a continuum of drying vulnerability, where some ponds are only maintained through artificial inputs while others are fundamentally resilient. Your analysis shows that if those inputs were removed, a substantial portion of refill ponds would likely transition into the dry-out class, with BGS and MCC representing the most extreme cases of hidden vulnerability.
+The broader implication is hard to ignore. Refill ponds are not a
+coherent ecological category. Instead, they mask a continuum of drying
+vulnerability, where some ponds are only maintained through artificial
+inputs while others are fundamentally resilient. Your analysis shows
+that if those inputs were removed, a substantial portion of refill ponds
+would likely transition into the dry-out class, with BGS and MCC
+representing the most extreme cases of hidden vulnerability.
 
-#########
+######### 
 
 ALL PONDS RANKING
 
-########
+######## 
 
 ```{r}
 # Rank all ponds by predicted drying risk
@@ -1116,6 +804,7 @@ ranked_df[, c("dryout_rank", "pond", "drought_class", "PC1", "predicted_loss")]
 ```
 
 Add risk categories
+
 ```{r}
 ranked_df$risk_category <- cut(
   ranked_df$predicted_loss,
@@ -1127,78 +816,111 @@ ranked_df[, c("dryout_rank", "pond", "drought_class",
               "PC1", "pc1_deficit", "predicted_loss", "risk_category")]
 ```
 
-Importantly: This is a relative risk ranking based on environmental similarity, not a deterministic forecast.
+Importantly: This is a relative risk ranking based on environmental
+similarity, not a deterministic forecast.
 
 *Recap: How Risk Was Quantified*
 
-Dryout risk was quantified using the primary environmental gradient identified through PCA (PC1), which represents a continuum from high shading and lower exposure to low shading and increased exposure. Because regression analysis showed that PC1 significantly predicts drying rate, this axis was used as the foundation for all risk assessments.
+Dryout risk was quantified using the primary environmental gradient
+identified through PCA (PC1), which represents a continuum from high
+shading and lower exposure to low shading and increased exposure.
+Because regression analysis showed that PC1 significantly predicts
+drying rate, this axis was used as the foundation for all risk
+assessments.
 
-Risk was operationalized in two linked ways. First, PC1 deficit quantified how far each pond deviates from the most stable conditions along this gradient, with higher values indicating greater exposure and reduced shading. Second, predicted drying pressure was calculated using the regression relationship between PC1 and standardized water loss rate (z_loss_rate), allowing each pond to be assigned an expected drying intensity based on its environmental position.
+Risk was operationalized in two linked ways. First, PC1 deficit
+quantified how far each pond deviates from the most stable conditions
+along this gradient, with higher values indicating greater exposure and
+reduced shading. Second, predicted drying pressure was calculated using
+the regression relationship between PC1 and standardized water loss rate
+(z_loss_rate), allowing each pond to be assigned an expected drying
+intensity based on its environmental position.
 
-Dryout ponds provide a critical reference for interpreting this gradient. Their PC1 deficit values define the observed environmental range associated with actual drying, allowing other ponds to be evaluated relative to known outcomes. Ponds that fall within or exceed this range can therefore be interpreted as experiencing comparable or greater underlying drying pressure, regardless of their current classification.
+Dryout ponds provide a critical reference for interpreting this
+gradient. Their PC1 deficit values define the observed environmental
+range associated with actual drying, allowing other ponds to be
+evaluated relative to known outcomes. Ponds that fall within or exceed
+this range can therefore be interpreted as experiencing comparable or
+greater underlying drying pressure, regardless of their current
+classification.
 
 *Ordered Ranking of Ponds by Dryout Risk*
 
 From highest to lowest vulnerability:
 
-Extreme Risk
-VAN (stable) – highest deficit (5.86), highest predicted loss (1.34)
-BGS (refill) – deficit 4.24, predicted 0.67
-MCC (refill) – deficit 3.74, predicted 0.46
+Extreme Risk VAN (stable) – highest deficit (5.86), highest predicted
+loss (1.34) BGS (refill) – deficit 4.24, predicted 0.67 MCC (refill) –
+deficit 3.74, predicted 0.46
 
-High Risk
-GVI (refill) – deficit 3.03, predicted 0.17
-MSP (dryout) – deficit 3.00, predicted 0.16
-QED (dryout) – deficit 2.95, predicted 0.13
+High Risk GVI (refill) – deficit 3.03, predicted 0.17 MSP (dryout) –
+deficit 3.00, predicted 0.16 QED (dryout) – deficit 2.95, predicted 0.13
 CSN (dryout) – deficit 2.90, predicted 0.11
 
-Moderate Risk
-TRT (stable) – deficit 2.57
-JCO (dryout) – deficit 2.42
-RUP (refill) – deficit 2.00
-BOO (dryout) – deficit 1.99
-CHS (stable) – deficit 1.98
+Moderate Risk TRT (stable) – deficit 2.57 JCO (dryout) – deficit 2.42
+RUP (refill) – deficit 2.00 BOO (dryout) – deficit 1.99 CHS (stable) –
+deficit 1.98
 
-Low Risk
-SCT (stable) – deficit 1.53
-BGL (refill) – deficit 1.21
-AVL (stable) – lowest deficit (0.00), lowest predicted loss (-1.09)
+Low Risk SCT (stable) – deficit 1.53 BGL (refill) – deficit 1.21 AVL
+(stable) – lowest deficit (0.00), lowest predicted loss (-1.09)
 
 *Final Interpretation*
 
-The ranking reveals that dryout risk is not confined to ponds that currently dry, but instead spans all drought classes along a continuous environmental gradient. Notably, the highest-risk pond (VAN) is classified as stable, while two refill ponds (BGS and MCC) rank above all observed dryout systems. This indicates that current pond states do not always reflect underlying environmental vulnerability, and that management interventions or short-term conditions may mask latent drying risk.
+The ranking reveals that dryout risk is not confined to ponds that
+currently dry, but instead spans all drought classes along a continuous
+environmental gradient. Notably, the highest-risk pond (VAN) is
+classified as stable, while two refill ponds (BGS and MCC) rank above
+all observed dryout systems. This indicates that current pond states do
+not always reflect underlying environmental vulnerability, and that
+management interventions or short-term conditions may mask latent drying
+risk.
 
-Dryout ponds cluster within the high-risk portion of the gradient, reinforcing that PC1 captures the dominant environmental conditions associated with observed drying. However, the presence of refill and stable ponds within this same range demonstrates that similar environmental conditions can lead to different outcomes depending on external inputs or system-specific characteristics.
+Dryout ponds cluster within the high-risk portion of the gradient,
+reinforcing that PC1 captures the dominant environmental conditions
+associated with observed drying. However, the presence of refill and
+stable ponds within this same range demonstrates that similar
+environmental conditions can lead to different outcomes depending on
+external inputs or system-specific characteristics.
 
-Overall, these results confirm that pond drying operates along a shared exposure-driven gradient, where shading and energy balance control underlying drying pressure, while factors such as water inputs and system capacity influence whether that pressure results in complete drying. This highlights the importance of distinguishing between observed state and environmental vulnerability, as ponds that appear stable may still occupy high-risk positions and require proactive management to prevent future drying under changing conditions.
+Overall, these results confirm that pond drying operates along a shared
+exposure-driven gradient, where shading and energy balance control
+underlying drying pressure, while factors such as water inputs and
+system capacity influence whether that pressure results in complete
+drying. This highlights the importance of distinguishing between
+observed state and environmental vulnerability, as ponds that appear
+stable may still occupy high-risk positions and require proactive
+management to prevent future drying under changing conditions.
 
-
-
-
-
-
-
-##################
+################## 
 
 APPENDIX
 
-#################
+################# 
 
 *1. Removal of thermal response variables*
 
-Summary: july_water_air was excluded because it behaved as a downstream thermal response rather than an independent environmental driver. It reflects the outcome of shading, exposure, and pond structure, so including it in the PCA would risk collapsing the ordination into a generalized hot versus cool gradient rather than revealing the underlying mechanisms structuring ponds.
+Summary: july_water_air was excluded because it behaved as a downstream
+thermal response rather than an independent environmental driver. It
+reflects the outcome of shading, exposure, and pond structure, so
+including it in the PCA would risk collapsing the ordination into a
+generalized hot versus cool gradient rather than revealing the
+underlying mechanisms structuring ponds.
 
-- daily_loss_est
-- total_depth_loss_cm
-- total_volume_lost_m3
-- mean_daily_volume_lost_m3
-- z_loss_rate
-- z_total_loss
-
+-   daily_loss_est
+-   total_depth_loss_cm
+-   total_volume_lost_m3
+-   mean_daily_volume_lost_m3
+-   z_loss_rate
+-   z_total_loss
 
 *2. Selection of SEI over other shade metrics*
 
-Summary: alternative shade metrics such as MSD, SCP, and MSF were tested, but these were strongly correlated with temperature-related variables and behaved more like composite or response-like indices. july_sei was retained because it showed more moderate relationships and captured the spatial distribution of shade across pond surfaces rather than simply overall shade magnitude or persistence. This made it more interpretable and less redundant within the PCA.
+Summary: alternative shade metrics such as MSD, SCP, and MSF were
+tested, but these were strongly correlated with temperature-related
+variables and behaved more like composite or response-like indices.
+july_sei was retained because it showed more moderate relationships and
+captured the spatial distribution of shade across pond surfaces rather
+than simply overall shade magnitude or persistence. This made it more
+interpretable and less redundant within the PCA.
 
 ```{r, eval=FALSE}
 shade_compare <- metrics_wide_2 %>%
@@ -1217,7 +939,12 @@ round(cor(shade_compare, use = "pairwise.complete.obs"), 2)
 
 *3. Vegetation variable refinement*
 
-Summary: veg_percent_change was initially considered, but it showed instability and was less suitable for PCA because extreme values could disproportionately influence ordination structure. It was replaced with veg_mean_cover_july, which better represented vegetation state at peak summer conditions and provided a more stable, interpretable measure of biological structure.
+Summary: veg_percent_change was initially considered, but it showed
+instability and was less suitable for PCA because extreme values could
+disproportionately influence ordination structure. It was replaced with
+veg_mean_cover_july, which better represented vegetation state at peak
+summer conditions and provided a more stable, interpretable measure of
+biological structure.
 
 ```{r, eval=FALSE}
 veg_compare <- metrics_wide_2 %>%
@@ -1232,7 +959,11 @@ summary(veg_compare)
 
 *4. Transformation of growth dynamics*
 
-Summary: slope_per_day was retained as a measure of vegetation change through time, but it showed a right-skewed distribution. To reduce leverage from a few high values, it was transformed using log1p(), producing slope_per_day_log. This allowed the variable to remain in the PCA without overly dominating component structure.
+Summary: slope_per_day was retained as a measure of vegetation change
+through time, but it showed a right-skewed distribution. To reduce
+leverage from a few high values, it was transformed using log1p(),
+producing slope_per_day_log. This allowed the variable to remain in the
+PCA without overly dominating component structure.
 
 ```{r, eval=FALSE}
 metrics_wide_2 <- metrics_wide_2 %>%
@@ -1246,13 +977,19 @@ boxplot(metrics_wide_2$slope_per_day_log)
 
 *5. Final conceptual grouping of candidate variables*
 
-Summary: The final exploratory PCA candidate set was organized to represent distinct ecological dimensions rather than a cluster of statistically convenient variables. This grouping helped ensure that the PCA captured multiple complementary gradients in pond structure and function.
+Summary: The final exploratory PCA candidate set was organized to
+represent distinct ecological dimensions rather than a cluster of
+statistically convenient variables. This grouping helped ensure that the
+PCA captured multiple complementary gradients in pond structure and
+function.
 
-Landscape structure: canopy_50, imp_100
-Thermal mediation: july_sei, av_hrs_water_july_mintomax
-Biological and chemical state: veg_mean_cover_july, slope_per_day_log, mean_season_ph
+Landscape structure: canopy_50, imp_100 Thermal mediation: july_sei,
+av_hrs_water_july_mintomax Biological and chemical state:
+veg_mean_cover_july, slope_per_day_log, mean_season_ph
 
-This step is important because it shows that variable selection was driven by ecological interpretation as well as statistical screening.
+This step is important because it shows that variable selection was
+driven by ecological interpretation as well as statistical screening.
+
 ```{r, eval=FALSE}
 pca_df <- metrics_wide_2 %>%
   dplyr::select(
@@ -1269,17 +1006,31 @@ names(pca_df)
 summary(pca_df)
 ```
 
-Together, these steps show that variable selection was not based on simple trial and error, but on an iterative process balancing redundancy, ecological meaning, and interpretability. Downstream thermal response variables were removed to reduce circularity, SEI was selected as the most defensible realized shade metric, unstable vegetation change metrics were replaced with more robust summer state variables, and skewed growth measures were transformed before ordination. The resulting variable set was intentionally structured to represent landscape, thermal, and biological dimensions of pond systems rather than a single dominant process.
+Together, these steps show that variable selection was not based on
+simple trial and error, but on an iterative process balancing
+redundancy, ecological meaning, and interpretability. Downstream thermal
+response variables were removed to reduce circularity, SEI was selected
+as the most defensible realized shade metric, unstable vegetation change
+metrics were replaced with more robust summer state variables, and
+skewed growth measures were transformed before ordination. The resulting
+variable set was intentionally structured to represent landscape,
+thermal, and biological dimensions of pond systems rather than a single
+dominant process.
 
 *6. Motivation: Estimating Pond Storage Capacity*
 
-Summary: A derived variable was explored to approximate pond storage capacity, with the goal of capturing a pond’s ability to buffer against seasonal water loss. This was motivated by the idea that drying dynamics are not solely driven by environmental exposure, but also by inherent physical capacity. This is a proxy, not a direct measurement of volume or bathymetry, and assumes depth_1 is representative of basin structure.
+Summary: A derived variable was explored to approximate pond storage
+capacity, with the goal of capturing a pond’s ability to buffer against
+seasonal water loss. This was motivated by the idea that drying dynamics
+are not solely driven by environmental exposure, but also by inherent
+physical capacity. This is a proxy, not a direct measurement of volume
+or bathymetry, and assumes depth_1 is representative of basin structure.
 
-Key idea: 
-- Dry-out is a function of both inputs/outputs and storage
-- PCA variables so far mostly represent flux drivers, not capacity
+Key idea: - Dry-out is a function of both inputs/outputs and storage -
+PCA variables so far mostly represent flux drivers, not capacity
 
 Code (representative, not exhaustive)
+
 ```{r, eval=FALSE}
 metrics_wide_2 <- metrics_wide_2 %>%
   mutate(storage_proxy = depth_1 * area)
@@ -1287,26 +1038,32 @@ metrics_wide_2 <- metrics_wide_2 %>%
 
 *7. Evaluation and Rejection of Storage Proxy*
 
-Summary: The storage proxy was evaluated but ultimately excluded from PCA due to conceptual and statistical limitations.
+Summary: The storage proxy was evaluated but ultimately excluded from
+PCA due to conceptual and statistical limitations.
 
-Reasons:
-- Strongly correlated with pond size → risks dominating PCA as a “size axis”
-- Does not capture dynamic hydrology (inflow, seepage, evapotranspiration)
-- Based on a single depth measure, which may not represent basin morphology
+Reasons: - Strongly correlated with pond size → risks dominating PCA as
+a “size axis” - Does not capture dynamic hydrology (inflow, seepage,
+evapotranspiration) - Based on a single depth measure, which may not
+represent basin morphology
 
 *8. Evaluation and Exclusion of Impervious Surface Metrics*
 
-Impervious surface cover was initially considered as a proxy for surrounding urban intensity, with the expectation that higher imperviousness would amplify thermal exposure, alter runoff dynamics, and contribute to increased drying rates in urban ponds.
+Impervious surface cover was initially considered as a proxy for
+surrounding urban intensity, with the expectation that higher
+imperviousness would amplify thermal exposure, alter runoff dynamics,
+and contribute to increased drying rates in urban ponds.
 
-To evaluate its contribution, impervious cover was tested at two spatial scales:
+To evaluate its contribution, impervious cover was tested at two spatial
+scales:
 
-imp_50 (local influence)
-imp_100 (broader landscape context)
+imp_50 (local influence) imp_100 (broader landscape context)
 
-Two parallel PCA configurations were constructed to assess whether impervious surface variables contributed meaningful explanatory structure.
-
+Two parallel PCA configurations were constructed to assess whether
+impervious surface variables contributed meaningful explanatory
+structure.
 
 Code (representative)
+
 ```{r, eval=FALSE}
 # Define variable sets
 vars_no_imp <- c(
@@ -1338,22 +1095,30 @@ cor(scores_no_imp$PC1, scores_with_imp$PC1)
 cor(scores_no_imp$PC2, scores_with_imp$PC2)
 ```
 
-
 *Final Synthesis*
 
-All exploratory testing and iterative refinement converged on a final set of variables that balance ecological interpretability with statistical independence. Early stages of variable selection revealed that many candidate predictors were either redundant, overly correlated, or reflective of downstream responses rather than independent drivers. Through successive removal of thermal outcome variables, consolidation of shade metrics, and refinement of vegetation and growth indicators, the analysis shifted toward representing distinct ecological mechanisms rather than overlapping signals. Additional exploratory configurations, including the incorporation of storage proxies and alternative thermal and vegetation variables, further highlighted the importance of separating structural capacity, environmental forcing, and biological response.
+All exploratory testing and iterative refinement converged on a final
+set of variables that balance ecological interpretability with
+statistical independence. Early stages of variable selection revealed
+that many candidate predictors were either redundant, overly correlated,
+or reflective of downstream responses rather than independent drivers.
+Through successive removal of thermal outcome variables, consolidation
+of shade metrics, and refinement of vegetation and growth indicators,
+the analysis shifted toward representing distinct ecological mechanisms
+rather than overlapping signals. Additional exploratory configurations,
+including the incorporation of storage proxies and alternative thermal
+and vegetation variables, further highlighted the importance of
+separating structural capacity, environmental forcing, and biological
+response.
 
-The final selection of canopy_50, av_hrs_air_july_mintomax, july_msf, veg_percent_change, and depth_1 reflects this process, with each variable contributing uniquely to the representation of landscape structure, thermal dynamics, realized shading, seasonal biological change, and physical storage capacity. By emphasizing July-based metrics, the model isolates peak environmental forcing while avoiding late-season feedback effects, ensuring that the PCA captures underlying drivers of drying rather than cumulative outcomes. Together, this variable set provides a parsimonious yet mechanistically grounded framework for interpreting variation in pond drying dynamics across sites, with minimal redundancy and clear ecological meaning.
-
-
-
-
-
-
-
-
-
-
-
-
-
+The final selection of canopy_50, av_hrs_air_july_mintomax, july_msf,
+veg_percent_change, and depth_1 reflects this process, with each
+variable contributing uniquely to the representation of landscape
+structure, thermal dynamics, realized shading, seasonal biological
+change, and physical storage capacity. By emphasizing July-based
+metrics, the model isolates peak environmental forcing while avoiding
+late-season feedback effects, ensuring that the PCA captures underlying
+drivers of drying rather than cumulative outcomes. Together, this
+variable set provides a parsimonious yet mechanistically grounded
+framework for interpreting variation in pond drying dynamics across
+sites, with minimal redundancy and clear ecological meaning.
