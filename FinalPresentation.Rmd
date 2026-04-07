@@ -2264,16 +2264,16 @@ At the same time, secondary factors such as basin capacity, vegetation dynamics,
 ## TEAM CONTRIBUTION
 
 *Final Project Workflow Development*
-Sandra - 
-Brandon - Wrote the base outline for the workflow 
+Sandra - Refined the base outline for the workflow.
+Brandon - Drafted and refined the base outline for the workflow.
 
 *Data Preparation & Analysis*
-Sandra -	Conducted cluster analysis, and created figures. 
-Brandon -	Cleaned dataset; conducted PCA, MDA, regression, risk axis and management analysis; created figure.
+Sandra – Conducted cluster analysis, created figures, and contributed to method refinement.
+Brandon – Cleaned dataset; conducted PCA, MDA, regression, and risk axis/management analysis; created figures.
 
 *Results Interpretation & Writing*
-Sandra -	 Interpreted and discussed results from cluster analysis,  refined and merge discussion for each method, drafted limitations and conclusion sections.
-Brandon -	Interpreted results and discussed results from PCA, MDA, regression, and risk axis and management analysis,  refined next steps and references. 
+Sandra – Interpreted cluster analysis results; refined and merged discussion across methods; drafted limitations and conclusion sections.
+Brandon – Interpreted and discussed PCA, MDA, regression, and risk analysis results; drafted next steps and compiled references and appendix.
 
 Overall Contributions: a. Sandra: 50% b. Brandon: 50%
 ------------------------------------------------------------------------
